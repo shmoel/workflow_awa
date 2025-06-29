@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+
+<html lang="fr" class="material-style layout-fixed">
+
+<head>
+    <title></title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="" />
+    <meta name="keywords" content="">
+    <meta name="author" content="" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="images/sib_logo.PNG">
+
+    <!-- Google fonts -->
+    <link href="" rel="stylesheet">
+
+
+    <!-- Icon fonts -->
+    <link rel="stylesheet" href= "assets/assets_user/fonts/fontawesome.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/ionicons.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/linearicons.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/open-iconic.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/pe-icon-7-stroke.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/feather.css">
+  
+    <!-- Core stylesheets -->
+    <link rel="stylesheet" href= "assets/assets_user/css/bootstrap-material.css">
+    <link rel="stylesheet" href= "assets/assets_user/css/shreerang-material.css">
+    <link rel="stylesheet" href= "assets/assets_user/css/uikit.css">
+  
+    <!-- Libs -->
+    <link rel="stylesheet" href= "assets/assets_user/libs/perfect-scrollbar/perfect-scrollbar.css">
+    <link rel="stylesheet" href= "assets/assets_user/libs/flot/flot.css">
+    <link rel="stylesheet" href="css/design.css">
+
+</head>
+
+<body>
+    <!-- [ Preloader ] Start -->
+    <div class="page-loader">
+        <div class="bg-primary"></div>
+    </div>
+    <!-- [ Preloader ] End -->
+
+    <!-- [ Layout wrapper ] Start -->
+    <div class="layout-wrapper layout-2">
+        <div class="layout-inner">
+            <!-- [ Layout sidenav ] Start -->
+            <div id="layout-sidenav" class="layout-sidenav sidenav sidenav-vertical bg-white logo-dark">
+                <!-- Brand demo (see assets/css/demo/demo.css) -->
+                <div class="app-brand demo">
+                    <span class="app-brand-logo demo">
+                      <img src="images/sib_logo.png" alt="Brand Logo" class="img-fluid">
+                    </span>
+                    <a href="acceuil.html" class="app-brand-text demo sidenav-text font-weight-normal ml-2">WORKFLOW - AWA</a>
+                    <a href="javascript:" class="layout-sidenav-toggle sidenav-link text-large ml-auto">
+                        <i class="ion ion-md-menu align-middle"></i>
+                    </a>
+                </div>
+                <div class="sidenav-divider mt-0"></div>
+
+                <!-- Links -->
+                <ul class="sidenav-inner py-1">
+
+                    <!-- Dashboards -->
+                    <li class="sidenav-item active">
+                        <a href="index.php?action=user_compte&niv=1" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-home"></i>
+                            <div>Suivi des demandes</div>
+                            <div class="pl-1 ml-auto">
+                                <div class="badge badge-danger"></div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <!-- Layouts -->
+
+
+                    <!-- Forms & Tables -->
+                    <li class="sidenav-divider mb-1"></li>
+
+                    <li class="sidenav-item">
+                      <a href="javascript:" class="sidenav-link sidenav-toggle font-weight-semibold">
+                          <i class=""></i>
+                          <div>Actions</div>
+                      </a>
+                                            <ul class="sidenav-menu">
+                        <li id="intro_dmd" class="sidenav-item">
+                          <a href="introduire_demandes.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-clipboard"></i>
+                            <div>Introduire demande</div>
+                          </a>
+                        </li>
+                        <li id="consult_dmd" class="sidenav-item">
+                          <a href="consulter_demandes.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-grid"></i>
+                            <div>Consulter mes demandes</div>
+                          </a>
+                        </li>
+                        <li id="valid_dmd" class="sidenav-item">
+                            <a href="demandes_validation.html" class="sidenav-link">
+                              <i class="sidenav-icon feather icon-lock"></i>
+                              <div>Valider des demandes</div>
+                            </a>
+                        </li>
+                        <li id="stats_dmd" class="sidenav-item">
+                            <a href="statistiques.html" class="sidenav-link">
+                              <i class="sidenav-icon feather icon-lock"></i>
+                              <div>Statistiques</div>
+                            </a>
+                          </li>
+                      </ul>
+                    </li>
+
+                    <!--  Icons -->
+
+
+                    <!-- Pages -->
+                    <li class="sidenav-divider mb-1"></li>
+
+                    <li class="sidenav-item">
+                        <a href="pages_authentication_login-v1.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-lock"></i>
+                            <div>Login</div>
+                        </a>
+                    </li>
+                    <li class="sidenav-item">
+                        <a href="pages_authentication_register-v1.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-user"></i>
+                            <div>Signup</div>
+                        </a>
+                    </li>
+                    <li class="sidenav-item">
+                        <a href="pages_faq.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-anchor"></i>
+                            <div>FAQ</div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- [ Layout sidenav ] End -->
+
+
+            <!-- [ Layout container ] Start -->
+            <div class="layout-container">
+                <!-- [ Layout navbar ( Header ) ] Start -->
+                <nav class="layout-navbar navbar navbar-expand-lg align-items-lg-center bg-dark container-p-x" id="layout-navbar">
+
+                    <div class="navbar-collapse collapse" id="layout-navbar-collapse">
+                        <!-- Divider -->
+                        <div class="navbar-nav align-items-lg-center ml-auto">
+
+                            <!-- Divider -->
+                            <div class="nav-item d-none d-lg-block text-big font-weight-light line-height-1 opacity-25 mr-3 ml-1">|</div>
+                            <div class="demo-navbar-user nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                                    <span class="d-inline-flex flex-lg-row-reverse align-items-center align-middle">
+                                        <img src="images/avatar.png" alt class="d-block ui-w-30 rounded-circle">
+                                        <span id="user_id" class="px-1 mr-lg-2 ml-2 ml-lg-0"></span>
+                                    </span>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="javascript:" class="dropdown-item">
+                                        <i class="feather icon-user text-muted"></i> &nbsp; My profile</a>
+                                    <a href="javascript:" class="dropdown-item">
+                                        <i class="feather icon-mail text-muted"></i> &nbsp; Messages</a>
+                                    <a href="javascript:" class="dropdown-item">
+                                        <i class="feather icon-settings text-muted"></i> &nbsp; Account settings</a>
+                                    <div class="dropdown-divider"></div>
+                                    
+                                      <a href="" class="dropdown-item">
+                                        <i class="feather icon-power text-danger"></i> &nbsp;
+                                        <input type="button" onclick="logout()" name="" value="Déconnexion">
+                                      </a>
+                                   
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                <!-- [ Layout navbar ( Header ) ] End -->
+
+                <!-- [ Layout content ] Start -->
+                <div class="layout-content">
+
+                    <!-- [ content ] Start -->
+                    <div class="container-fluid flex-grow-1 container-p-y">
+                                              
+                            <!--<div id="confiramation_msg" class="alert alert-dark-success alert-dismissible fade show">
+                                
+                                <button onclick="window.location.href = ''" type="" class="close" data-dismiss="alert">×</button> 
+                               
+                            </div> -->
+
+                        <div class="container">
+                          <div class="row">
+                        <div class ="col-lg-2"></div>
+                        <div class="card mb-4 col-md-8">
+                            <h4 class="card-header" style="font-weight: bold;"> MODIFIER LA DEMANDE</h4>
+                            <div class="card-body">
+                                <form action="" id="intro_demande" method="" enctype="multipart/form-data" onsubmit="">
+                                    <div class="form-group">
+                                        <label style="font-weight: bold;" class="form-label">Banque </label>
+                                        <select class="form-control" id="banque" name="banque" placeholder="Le nom de la banque svp" required>
+
+                                        </select>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="font-weight: bold;" class="form-label">Type</label>
+                                        <select class="form-control" id="type" name="type" placeholder="Le type de demande" required>
+
+                                        </select>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="font-weight: bold;" for="client">Client</label>
+                                        <input class='form-control' type='text' id='client' name='client' placeholder='Le nom du client svp' required>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        
+
+                                        <label style="font-weight: bold;" for="montant">Montant :</label>
+                                            <div class="input-group">    
+                                                <div class="input-group-prepend"></div>
+                                                <span class="input-group-text">XOF</span>    
+                                                    <input class='form-control' type='number' id='montant' name='montant' placeholder='Spécifiez le montant svp' required>    
+                                            </div>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <p>
+                                        <a id="ma_note" target="_blank" href="">Consulter la note préalablement enregistrée</a>
+                                    </p>
+                                    <div class="form-group">
+                                        <label style="font-weight: bold;" class="form-label w-100">Note d'analyse</label>
+
+                                            <input class='form-control' type='file' id='note_analyse' name='note_analyse'>    
+                                        
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="font-weight: bold;" for="comm">Commentaire</label>
+                                        
+                                        <textarea class='form-control' id='comm' name='comm'></textarea>
+                                       
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div style="text-align: center;"> <button type="submit" class="btn btn-primary" onclick="showConfirmation()">Modifier</button></div>
+                                </form>
+                            </div>
+                            <div id="overlay" class="overlay"></div>
+                      
+                            <script>
+                               
+
+                            </script>                        
+                        </div>
+                        <div class ="col-lg-2"></div>
+                        </div>
+                        </div>
+                        </div>
+
+
+                    <!-- [ content ] End -->
+
+                    <!-- [ Layout footer ] Start -->
+                    <nav class="layout-footer footer bg-white">
+                        <div class="container-fluid d-flex flex-wrap justify-content-between text-center container-p-x pb-3">
+                            <div class="pt-3">
+                                <span class="footer-text font-weight-semibold">&copy; <a href="" class="footer-link" target="_blank">Attijariwestafrica</a></span>
+                            </div>
+                            <div>
+                                <a href="javascript:" class="footer-link pt-3">About Us</a>
+                                <a href="javascript:" class="footer-link pt-3 ml-4">Help</a>
+                                <a href="javascript:" class="footer-link pt-3 ml-4">Contact</a>
+                                <a href="javascript:" class="footer-link pt-3 ml-4">Terms &amp; Conditions</a>
+                            </div>
+                        </div>
+                    </nav>
+                    <!-- [ Layout footer ] End -->
+
+                </div>
+                <!-- [ Layout content ] Start -->
+            </div>
+            <!-- [ Layout container ] End -->
+        </div>
+        <!-- Overlay -->
+        <div class="layout-overlay layout-sidenav-toggle"></div>
+    </div>
+    <!-- [ Layout wrapper] End -->
+
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+                </div>
+                <div class="modal-body">
+                    Voulez-vous vraiment modifier cette demande ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelSubmission()">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="modifier_demande()">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Modale de confirmation pour le DG -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Validation</h5>
+                </div>
+                <div class="modal-body">
+                    Demande  modifiée avec succès
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="cancelSuccess()">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+ <!-- Core scripts -->
+<script src= "assets/assets_user/js/pace.js"></script>
+<script src= "assets/assets_user/js/jquery-3.3.1.min.js"></script>
+<script src= "assets/assets_user/libs/popper/popper.js"></script>
+<script src= "assets/assets_user/js/bootstrap.js"></script>
+<script src= "assets/assets_user/js/sidenav.js"></script>
+<script src= "assets/assets_user/js/layout-helpers.js"></script>
+<script src= "assets/assets_user/js/material-ripple.js"></script>
+
+<!-- Libs -->
+<script src= "assets/assets_user/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+<script src= "assets/assets_user/libs/eve/eve.js"></script>
+<!-- <script src= "assets/assets_user/libs/flot/flot.js"></script> -->
+<!--<script src= "assets/assets_user/libs/flot/curvedLines.js"></script> -->
+<script src= "assets/assets_user/libs/chart-am4/core.js"></script>
+<script src= "assets/assets_user/libs/chart-am4/charts.js"></script>
+<!--<script src= "assets/assets_user/libs/chart-am4/animated.js"></script>-->
+
+<!-- Demo -->
+<script src= "assets/assets_user/js/demo.js"></script><script src="assets/assets_user/js/analytics.js"></script>
+<!--<script src= "assets/assets_user/js/pages/dashboards_index.js"></script>-->
+<script src="js/design.js"></script>
+
+<script>
+
+    const API_URL = "http://127.0.0.1:8000/api";
+
+    async function logout() {
+    await fetch(`${API_URL}/logout/`, {
+        method: 'POST',
+        credentials: 'include',
+    });
+        window.location.href = 'index.html';
+    }
+
+    async function infos_user() {
+        
+        const response = await fetch(`${API_URL}/users-joined/`);
+        
+        // Vérifier si la requête a réussi
+        if (!response.ok) {
+                throw new Error(`Erreur HTTP : ${response.status}`);
+        }
+            
+        const donnees = await response.json();
+        
+        const infos_user = donnees.results;
+
+        document.getElementById("user_id").innerText = infos_user[0].prenom + " " + infos_user[0].nom;
+        
+        
+        if (infos_user[0].niveau_hab==="Niveau 1") {
+            
+            document.getElementById('intro_dmd').style.display = 'none';
+            document.getElementById('consult_dmd').style.display = 'none';
+            document.getElementById('valid_dmd').style.display = 'none';
+
+        } else if (infos_user[0].niveau_hab==="Niveau 2") {
+            document.getElementById('valid_dmd').style.display = 'none';
+            
+        } else if (infos_user[0].niveau_hab==="Niveau 3") {
+            document.getElementById('intro_dmd').style.display = 'none';
+            document.getElementById('consult_dmd').style.display = 'none';
+            
+        } 
+        
+    }
+
+    async function isConnected() {
+        
+        console.log("Vérification du rôle avec token");
+        const response = await fetch(`${API_URL}/current-user/`);
+        if (!response.ok) {
+            console.error("Erreur lors de la vérification du rôle :", response.statusText);
+            window.location.href = 'index.html';
+        }
+        
+    }
+
+    async function load_data_formulaire_demande() {
+
+        // CETTE FONCTION CONSISTE A CHARGER LES DONNEES DU FORMULAIRE D'insertion des demandes 
+
+        const params = new URLSearchParams(window.location.search);
+
+        const id_demande = params.get("id_dmd");
+
+
+        const response = await fetch(`${API_URL}/users-joined/`);
+        
+        // Vérifier si la requête a réussi
+        if (!response.ok) {
+                throw new Error(`Erreur HTTP : ${response.status}`);
+        }
+            
+        const donnees = await response.json();
+        
+        const entite_user = donnees.results[0].entite;  
+
+        try {
+
+            // Récupération des données pour les menus déroulants depuis l'API
+            const banquesResponse = await fetch(`${API_URL}/banques/`);
+            const typedemande_Response = await fetch(`${API_URL}/types_demandes/${entite_user}`);  
+            
+            const demande_Response = await fetch(`${API_URL}/demandes/${id_demande}`);
+
+
+            const banques = await banquesResponse.json();
+            const type_demandes = await typedemande_Response.json();
+            const demandes = await demande_Response.json();
+
+            
+            const list_type_demande = type_demandes.results;
+            
+
+            // Remplissage du menu déroulant des banques
+            const banqueSelect = document.getElementById('banque');
+            banques.forEach(banque => {
+                
+                const option = document.createElement('option');
+                option.value = banque.id
+                option.textContent = banque.sigle.concat(" - ", banque.nom);
+                banqueSelect.appendChild(option);
+            });
+
+            // Sélectionner la première option valide si elle existe
+            if (banques.length > 0) {
+                banqueSelect.selectedIndex = demandes.banque - 1;
+            }
+
+
+            // Remplissage du menu déroulant des niveaux_hab
+            const type_dmd = document.getElementById('type');
+            list_type_demande.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.demande_id;
+                option.textContent = type.nom_demande;
+                type_dmd.appendChild(option);
+            });
+
+            // Sélectionner la première option valide si elle existe
+            if (list_type_demande.length > 0) {
+                type_dmd.selectedIndex = demandes.id_typedemande - 1;  
+            }
+            
+            document.getElementById('client').value = demandes.nom_client;
+            document.getElementById('montant').value = demandes.montant;
+            if (demandes.note_analyse) {
+                document.getElementById('ma_note').href = "Demandes\\" + demandes.note_analyse.split('\\').pop();
+            } 
+
+            document.getElementById('comm').value = demandes.commentaire_intro;
+
+        } catch(error) {
+            console.error('Erreur lors du chargement des données:', error);
+            alert('Impossible de charger les données du formulaire. Veuillez réessayer.');
+        }
+    }
+
+    const form = document.getElementById("intro_demande");
+
+    function showConfirmation() {
+
+        $('#confirmationModal').modal('show');
+
+    }
+
+    function showConfirmation_validation() {
+
+        $('#successModal').modal('show');
+
+    }
+
+    function cancelSubmission() {
+
+        $('#confirmationModal').modal('hide');
+    }
+
+    function cancelSuccess()  {
+
+        $('#successModal').modal('hide');
+        window.location.replace("consulter_demandes.html");
+    }
+
+    async function modifier_demande() {
+
+        $('#confirmationModal').modal('hide');
+
+        // Récupérer l'user_id
+        const res = await fetch(`${API_URL}/users-joined/`);
+        if (!res.ok) {
+            throw new Error(`Erreur lors de la récupération de l'utilisateur : ${res.status}`);
+        }
+        const donnees = await res.json();
+        if (!donnees.results || !donnees.results[0] || !donnees.results[0].user_id) {
+            throw new Error("Utilisateur non trouvé");
+        }
+        const id_user = donnees.results[0].user_id;
+        
+        const params = new URLSearchParams(window.location.search);
+
+        const demande_id = params.get("id_dmd");
+
+
+        const now = new Date();
+        
+
+        // Créer FormData pour les champs et le fichier
+        const formData = new FormData();
+        formData.append("id_user", id_user);
+        formData.append("banque", document.getElementById("banque").value);
+        formData.append("nom_client", document.getElementById("client").value);
+        formData.append("montant", document.getElementById("montant").value);
+        formData.append("commentaire_intro", document.getElementById("comm").value || "");
+        formData.append("id_typedemande", document.getElementById("type").value);
+
+        console.log("FormData avant fichier:", {
+        id_user: formData.get("id_user"),
+        banque: formData.get("banque"),
+        nom_client: formData.get("nom_client"),
+        montant: formData.get("montant"),
+        commentaire_intro: formData.get("commentaire_intro"),
+        id_typedemande: formData.get("id_typedemande")
+        });
+                    
+
+        // Ajouter le fichier s'il existe
+        
+        const fileInput = document.querySelector("input[name='note_analyse']");
+
+
+        console.log("FileInput:", fileInput);
+        console.log("Fichier sélectionné:", fileInput?.files[0]);
+
+
+        const file = fileInput.files[0];
+        if (file) {
+            formData.append("note_analyse", file || ""); // Aligner avec Swagger
+            console.log("Fichier ajouté à FormData:", file.name);
+        }
+
+        
+        const response = await fetch(`${API_URL}/update_demandes/${demande_id}`, {
+            method: "POST",
+            body: formData,
+        });
+        
+        const data = await response.json();
+
+
+        if (response.ok) {
+
+            //alert("Demande bien modifiée !"); 
+            //window.location.reload();  // recharger la page 
+            $('#successModal').modal('show');        
+
+        } else {
+            alert(data.detail || "Erreur lors de la modification");
+        }  
+        
+        
+    }
+
+    form.addEventListener('submit',  async (event) => {
+        
+            event.preventDefault();
+
+ 
+                    
+    } );
+
+
+
+    window.addEventListener('load', () => isConnected());
+    window.addEventListener('load', () => infos_user());
+    window.addEventListener('load', () => infos_user());
+    window.addEventListener('load', () => load_data_formulaire_demande());
+
+    
+</script>
+
+</html>

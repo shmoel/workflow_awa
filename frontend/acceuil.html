@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+
+<html lang="fr" class="material-style layout-fixed">
+
+<head>
+    <title>Accueil</title>
+
+
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="" />
+    <meta name="keywords" content="">
+    <meta name="author" content="" />
+    <link rel="icon" type="image/x-icon" href="">
+
+    <!-- Google fonts -->
+    <link href="" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="images/sib_logo.PNG">
+
+    <!-- Icon fonts -->
+    <link rel="stylesheet" href= "assets/assets_user/fonts/fontawesome.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/ionicons.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/linearicons.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/open-iconic.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/pe-icon-7-stroke.css">
+    <link rel="stylesheet" href= "assets/assets_user/fonts/feather.css">
+  
+    <!-- Core stylesheets -->
+    <link rel="stylesheet" href= "assets/assets_user/css/bootstrap-material.css">
+    <link rel="stylesheet" href= "assets/assets_user/css/shreerang-material.css">
+    <link rel="stylesheet" href= "assets/assets_user/css/uikit.css">
+  
+    <!-- Libs -->
+    <link rel="stylesheet" href= "assets/assets_user/libs/perfect-scrollbar/perfect-scrollbar.css">
+     <!--<link rel="stylesheet" href= "assets/assets_user/libs/flot/flot.css"> -->
+    <link rel="stylesheet" href="css/design.css">
+
+</head>
+
+<body>
+    <!-- [ Preloader ] Start -->
+    <div class="page-loader">
+        <div class="bg-primary"></div>
+    </div>
+    <!-- [ Preloader ] End -->
+
+    <!-- [ Layout wrapper ] Start -->
+    <div class="layout-wrapper layout-2">
+        <div class="layout-inner">
+            <!-- [ Layout sidenav ] Start -->
+            <div id="layout-sidenav" class="layout-sidenav sidenav sidenav-vertical bg-white logo-dark">
+                <!-- Brand demo (see assets/css/demo/demo.css) -->
+                <div class="app-brand demo">
+                    <span class="app-brand-logo demo">
+                      <img src="images/sib_logo.png" alt="Brand Logo" class="img-fluid">
+                    </span>
+                    <a href="acceuil.html" class="app-brand-text demo sidenav-text font-weight-normal ml-2">WORKFLOW - AWA</a>
+                    <a href="javascript:" class="layout-sidenav-toggle sidenav-link text-large ml-auto">
+                        <i class="ion ion-md-menu align-middle"></i>
+                    </a>
+                </div>
+                <div class="sidenav-divider mt-0"></div>
+
+                <!-- Links -->
+                <ul class="sidenav-inner py-1">
+
+                    <!-- Dashboards -->
+                    <li class="sidenav-item active">
+                        <a href="acceuil.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-home"></i>
+                            <div>Acceuil</div>
+                            <div class="pl-1 ml-auto">
+                                <div class="badge badge-danger"></div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <!-- Layouts -->
+
+
+                                      <!-- Forms & Tables -->
+                    <li class="sidenav-divider mb-1"></li>
+
+                    <li class="sidenav-item">
+                      <a href="javascript:" class="sidenav-link sidenav-toggle font-weight-semibold">
+                          <i class=""></i>
+                          <div>Actions</div>
+                      </a>
+                      <ul class="sidenav-menu">
+                        <li id="intro_dmd" class="sidenav-item">
+                          <a href="introduire_demandes.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-clipboard"></i>
+                            <div>Introduire demande</div>
+                          </a>
+                        </li>
+                        <li id="consult_dmd" class="sidenav-item">
+                          <a href="consulter_demandes.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-grid"></i>
+                            <div>Consulter mes demandes</div>
+                          </a>
+                        </li>
+                        <li id="valid_dmd" class="sidenav-item">
+                            <a href="demandes_validation.html" class="sidenav-link">
+                              <i class="sidenav-icon feather icon-lock"></i>
+                              <div>Valider des demandes</div>
+                            </a>
+                        </li>
+                        <li id="valid_dmd_ggrg" class="sidenav-item">
+                            <a href="ggrg_demandes_validation.html" class="sidenav-link">
+                              <i class="sidenav-icon feather icon-lock"></i>
+                              <div>Valider des demandes</div>
+                            </a>
+                        </li>
+                        <li id="stats_dmd" class="sidenav-item">
+                            <a href="statistiques.html" class="sidenav-link">
+                              <i class="sidenav-icon feather icon-lock"></i>
+                              <div>Statistiques</div>
+                            </a>
+                          </li>
+                      </ul>
+                    </li>
+
+                    <!--  Icons -->
+
+
+                    <!-- Pages -->
+                    <li class="sidenav-divider mb-1"></li>
+
+                    <li class="sidenav-item">
+                        <a href="pages_authentication_login-v1.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-lock"></i>
+                            <div>Login</div>
+                        </a>
+                    </li>
+                    <li class="sidenav-item">
+                        <a href="pages_authentication_register-v1.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-user"></i>
+                            <div>Signup</div>
+                        </a>
+                    </li>
+                    <li class="sidenav-item">
+                        <a href="pages_faq.html" class="sidenav-link">
+                            <i class="sidenav-icon feather icon-anchor"></i>
+                            <div>FAQ</div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- [ Layout sidenav ] End -->
+
+
+            <!-- [ Layout container ] Start -->
+            <div class="layout-container">
+                <!-- [ Layout navbar ( Header ) ] Start -->
+                <nav class="layout-navbar navbar navbar-expand-lg align-items-lg-center bg-dark container-p-x" id="layout-navbar">
+
+                    <div class="navbar-collapse collapse" id="layout-navbar-collapse">
+                        <!-- Divider -->
+                        <div class="navbar-nav align-items-lg-center ml-auto">
+
+                            <!-- Divider -->
+                            <div class="nav-item d-none d-lg-block text-big font-weight-light line-height-1 opacity-25 mr-3 ml-1">|</div>
+                            <div class="demo-navbar-user nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                                    <span class="d-inline-flex flex-lg-row-reverse align-items-center align-middle">
+                                        <img src="images/avatar.png" alt class="d-block ui-w-30 rounded-circle">
+                                        <span id="user_id" class="px-1 mr-lg-2 ml-2 ml-lg-0"></span>
+                                    </span>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="javascript:" class="dropdown-item">
+                                        <i class="feather icon-user text-muted"></i> &nbsp; My profile</a>
+                                    <a href="javascript:" class="dropdown-item">
+                                        <i class="feather icon-mail text-muted"></i> &nbsp; Messages</a>
+                                    <a href="javascript:" class="dropdown-item">
+                                        <i class="feather icon-settings text-muted"></i> &nbsp; Account settings</a>
+                                    <div class="dropdown-divider"></div>
+                                    
+                                      <a href="" class="dropdown-item">
+                                        <i class="feather icon-power text-danger"></i> &nbsp;
+                                        <input type="button" onclick="logout()" name="" value="Déconnexion">
+                                      </a>
+                                   
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                <!-- [ Layout navbar ( Header ) ] End -->
+
+                <!-- [ Layout content ] Start -->
+                <div class="layout-content">
+
+                    <!-- [ content ] Start -->
+                    <div class="container-fluid flex-grow-1 container-p-y">
+                        <h4 class="font-weight-bold py-3 mb-0">Demandes</h4>
+                        <div class="text-muted small mt-0 mb-4 d-block breadcrumb">
+                            
+                        </div>
+                        <div class="row">
+                            <!-- 1st row Start -->
+                            <div class="">
+                                <div class="row">
+                                    <div class="col-md-4 col-lg-4 mb-4">
+                                        <div class="card card-hover">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Demandes introduites</h5>
+                                                <h2 class="card-text" id="userCount"><?php echo count($demands_insert) ; ?></h2>
+                                                <p class="text-success">+5% ce mois</p>
+                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-lg-4 mb-4">
+                                        <div class="card card-hover">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Demandes en cloturées</h5>
+                                                <h2 class="card-text" id="userCount"><?php echo count($demands_closed); ?></h2>
+                                                <p class="text-success">+0.00% ce mois</p>
+                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 col-lg-4 mb-4">
+                                        <div class="card card-hover">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Demandes en supprimées</h5>
+                                                <h2 class="card-text" id="userCount"><?php echo count($demands_delete); ?></h2>
+                                                <p class="text-success">+0.00% ce mois</p>
+                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 col-lg-4 mb-4">
+                                        <div class="card card-hover">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Demande en Validation GGR Local</h5>
+                                                <h2 class="card-text" id="userCount"><?php echo count($demands_validate1); ?></h2>
+                                                <p class="text-success">+4% ce mois</p>
+                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 col-lg-4 mb-4">
+                                        <div class="card card-hover">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Demande en Validation AWA</h5>
+                                                <h2 class="card-text" id="userCount"><?php echo count($demands_validate2); ?></h2>
+                                                <p class="text-success">+4% ce mois</p>
+                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 col-lg-4 mb-4">
+                                        <div class="card card-hover">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Demande en Validation GGR Group</h5>
+                                                <h2 class="card-text" id="userCount"><?php echo count($demands_validate3); ?></h2>
+                                                <p class="text-success">+4% ce mois</p>
+                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                  
+                                </div>
+                            </div>
+
+                            <!-- 1st row Start -->
+                        </div>
+
+                        <div class="row">
+                            <!-- 3rd row Start -->
+
+                            <div style="height: 310px" id="tasks-inner"></div>
+
+                            <div class="col-xl-12">
+                                <div class="card mb-4">
+
+                                    <div class="card-header with-elements pb-0">
+                                        <div class="navbar-nav align-items-lg-center ">    
+                                            <div class=row>     
+                                                <label class="nav-item navbar-text navbar-search-box p-0 active">
+                                                    <i class="feather icon-search navbar-icon align-middle"></i>
+                                                    <span class="navbar-search-input pl-2">
+                                                    <input type="text" class="form-control navbar-text mx-2" id="filterEntity" placeholder="Filtrer par Entité">
+                                                    </span>
+                                                </label>
+                                                <label class="nav-item navbar-text navbar-search-box p-0 active">
+                                                    <i class="feather icon-search navbar-icon align-middle"></i>
+                                                    <span class="navbar-search-input pl-2">
+                                                    <input type="text" class="form-control navbar-text mx-2" id="filterType" placeholder="Filtrer par Type">
+                                                    </span>
+                                                </label>
+                                                <label class="nav-item navbar-text navbar-search-box p-0 active">
+                                                    <i class="feather icon-search navbar-icon align-middle"></i>
+                                                    <span class="navbar-search-input pl-2">
+                                                    <input type="text" class="form-control navbar-text mx-2" id="filterConterpart" placeholder="Filtrer par Contrepartie">
+                                                    </span>
+                                                </label>
+                                                <label class="nav-item navbar-text navbar-search-box p-0 active">
+                                                    <i class="feather icon-search navbar-icon align-middle"></i>
+                                                    <span class="navbar-search-input pl-2">
+                                                    <input type="text" class="form-control navbar-text mx-2" id="filterdate" placeholder="Filtrer par date ">
+                                                    </span>
+                                                </label>
+                                               
+                                            </div>
+                                        </div>    
+                                        <div class="card-header-elements ml-auto p-0">
+                                            <ul class="nav nav-tabs">
+                                                <li class="nav-item" id="dmd-intro">
+                                                    <a class="nav-link active" data-toggle="tab" href="#demande-intro">Demandes Introduites</a>
+                                                </li>
+                                               
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="nav-tabs-top">
+                                        <div class="tab-content">
+                                            <div class="tab-pane fade show active" id="demande-intro">
+                                                <div style="height: 330px" id="tab-table-1">
+                                                    <table class="table table-hover card-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="font-weight: bold;">Banque</th>
+                                                                <th style="font-weight: bold;">Entité</th>
+                                                                <th style="font-weight: bold;">Type de demande</th>
+                                                                <th style="font-weight: bold;">Contrepartie</th>
+                                                                <th style="font-weight: bold;">Date / Heure</th>
+                                                                <th style="font-weight: bold;">Niveau validation</th>
+                                                                <th style="font-weight: bold;"></th>
+
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="demandes_inserer">
+
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <a href="javascript:" class="card-footer d-block text-center text-dark small font-weight-semibold"></a>
+                                            </div>
+
+                                            
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 3rd row Start -->
+                        </div>
+
+					</div>
+                    <!-- [ content ] End -->
+
+                    <!-- [ Layout footer ] Start -->
+                    <nav class="layout-footer footer bg-white">
+                        <div class="container-fluid d-flex flex-wrap justify-content-between text-center container-p-x pb-3">
+                            <div class="pt-3">
+                                <span class="footer-text font-weight-semibold">&copy; <a href="" class="footer-link" target="_blank">Attijariwestafrica</a></span>
+                            </div>
+                            <div>
+                                <a href="javascript:" class="footer-link pt-3">About Us</a>
+                                <a href="javascript:" class="footer-link pt-3 ml-4">Help</a>
+                                <a href="javascript:" class="footer-link pt-3 ml-4">Contact</a>
+                                <a href="javascript:" class="footer-link pt-3 ml-4">Terms &amp; Conditions</a>
+                            </div>
+                        </div>
+                    </nav>
+                    <!-- [ Layout footer ] End -->
+                </div>
+                <!-- [ Layout content ] Start -->
+            </div>
+            <!-- [ Layout container ] End -->
+        </div>
+        <!-- Overlay -->
+        <div class="layout-overlay layout-sidenav-toggle"></div>
+    </div>
+    <!-- [ Layout wrapper] End -->
+
+    
+</body>
+
+<!-- Core scripts -->
+    <script src= "assets/assets_user/js/pace.js"></script>
+    <script src= "assets/assets_user/js/jquery-3.3.1.min.js"></script>
+    <script src= "assets/assets_user/libs/popper/popper.js"></script>
+    <script src= "assets/assets_user/js/bootstrap.js"></script>
+    <script src= "assets/assets_user/js/sidenav.js"></script>
+    <script src= "assets/assets_user/js/layout-helpers.js"></script>
+    <script src= "assets/assets_user/js/material-ripple.js"></script>
+
+    <!-- Libs -->
+    <script src= "assets/assets_user/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src= "assets/assets_user/libs/eve/eve.js"></script>
+    <!-- <script src= "assets/assets_user/libs/flot/flot.js"></script> -->
+    <script src= "assets/assets_user/libs/flot/curvedLines.js"></script>
+    <script src= "assets/assets_user/libs/chart-am4/core.js"></script>
+    <script src= "assets/assets_user/libs/chart-am4/charts.js"></script>
+    <script src= "assets/assets_user/libs/chart-am4/animated.js"></script>
+
+    <!-- Demo -->
+    <script src= "assets/assets_user/js/demo.js"></script><script src="assets/assets_user/js/analytics.js"></script>
+    <script src= "assets/assets_user/js/pages/dashboards_index.js"></script>
+    <script src="js/design.js"></script>
+    
+    <script>
+
+        const API_URL = "http://127.0.0.1:8000/api";
+
+       
+
+        async function infos_demandes_for_users() {
+
+                const resp1 = await fetch(`${API_URL}/users-joined/`);
+
+                
+                
+                if (!resp1.ok) {
+                        throw new Error(`Erreur HTTP : ${resp1.status}`);
+                }
+                
+                const data1 = await resp1.json();
+
+                const infos_user = data1.results;
+
+
+                const response = await fetch(`${API_URL}/demandes_a_consulter/${infos_user[0].domaine}`);
+                          
+                //Vérifier si la requête a réussi
+                if (!response.ok) {
+                        throw new Error(`Erreur HTTP : ${response.status}`);
+                }
+                                
+
+                const data = await response.json();
+
+                return data.results;
+        }
+        
+        async function logout() {
+        await fetch(`${API_URL}/logout/`, {
+            method: 'POST',
+            credentials: 'include',
+        });
+            window.location.href = 'index.html';
+        }
+
+        async function infos_user() {
+            
+            const response = await fetch(`${API_URL}/users-joined/`);
+            
+            // Vérifier si la requête a réussi
+            if (!response.ok) {
+                    throw new Error(`Erreur HTTP : ${response.status}`);
+            }
+                
+            const donnees = await response.json();
+            
+            const infos_user = donnees.results;
+
+            document.getElementById("user_id").innerText = infos_user[0].prenom + " " + infos_user[0].nom;
+            
+            
+            if (infos_user[0].niveau_hab==="Niveau 1") {
+                
+                document.getElementById('intro_dmd').style.display = 'none';
+                document.getElementById('consult_dmd').style.display = 'none';
+                document.getElementById('valid_dmd').style.display = 'none';
+                document.getElementById('valid_dmd_ggrg').style.display = 'none';
+
+            } else if (infos_user[0].niveau_hab==="Niveau 2") {
+                document.getElementById('valid_dmd').style.display = 'none';
+                document.getElementById('valid_dmd_ggrg').style.display = 'none';
+                
+            } else if (infos_user[0].niveau_hab==="Niveau 3") {
+
+                if(infos_user[0].banque==="AIG" && (infos_user[0].entite==="GGR")){
+                    document.getElementById('intro_dmd').style.display = 'none';
+                    document.getElementById('consult_dmd').style.display = 'none';
+                    document.getElementById('valid_dmd').style.display = 'none';
+                }else{
+                    document.getElementById('intro_dmd').style.display = 'none';
+                    document.getElementById('consult_dmd').style.display = 'none';
+                    document.getElementById('valid_dmd_ggrg').style.display = 'none';
+                }
+                
+                
+                
+            } 
+
+            
+        }
+
+        async function isConnected() {
+            
+            console.log("Vérification du rôle avec token");
+            const response = await fetch(`${API_URL}/current-user/`);
+            if (!response.ok) {
+                console.error("Erreur lors de la vérification du rôle :", response.statusText);
+                window.location.href = 'index.html';
+            }
+          
+        }
+        
+        // Remplissage du tableau
+        async function fillTable_dmd_insert() {
+            
+            const  demandes = await infos_demandes_for_users();
+
+            
+
+            const tbody = document.getElementById('demandes_inserer');
+            tbody.innerHTML = '';
+            demandes.forEach(t => {
+                
+                const row = `
+                    <tr>
+                        <td class='align-middle'>
+                            <label class='custom-control custom-checkbox mb-0'>
+                                ${escapeHtml(t.banque || 'N/A')} <br>
+                            </label>
+                        </td>
+                        <td class='align-middle'>
+                            <label class='custom-control custom-checkbox mb-0'>
+                                ${escapeHtml(t.categorie_demande || 'N/A')}<br>
+                            </label>
+                        </td>
+                        <td class='align-middle'>
+                            <div class=''>
+                                <div class='custom-control custom-checkbox mb-0'>
+                                ${escapeHtml(t.type_demande || 'N/A')}
+                            </div>
+                        </td>
+                        <td class='align-middle'>
+                            <div class=''>
+                                <div class='custom-control custom-checkbox mb-0'>
+                                ${escapeHtml(t.nom_client || 'N/A')}
+                            </div>
+                        </td>
+                        <td class='align-middle'>
+                            <div class=''>
+                                    <div class='custom-control custom-checkbox mb-0'>
+                                    ${escapeHtml(t.date_avis || 'N/A')} | ${escapeHtml(t.heure_avis || 'N/A')}
+                            </div>
+                        </td>
+                         <td class='align-middle'>
+                            <div class=''>
+                                <div class='custom-control custom-checkbox mb-0'>
+                                ${escapeHtml(t.description || 'N/A')}
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <div>
+                                <div class="d-inline-block align-middle">
+                                    <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${t.id_demande}'" class="btn btn-glow-info btn-info">Détails</button>
+                                </div>
+                            </div>
+                        </td>
+                         <td class="align-middle">
+                            <div>
+                                <div class="d-inline-block align-middle">
+                                    <button type="button" onclick="window.location.href='chat.html?id_dmd=${t.id_demande}'" class="btn btn-glow-info btn-info">CHAT </button>
+                                </div>
+                            </div>
+                        </td>
+
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+        
+
+        //const demandes_valider  = <?php echo $demandes_valider; ?>;
+                                                                      
+        //insertion des données lorsque la page se charge
+        window.addEventListener('load', () => fillTable_dmd_insert());
+        //window.addEventListener('load', () => fillTable_dmd_valider(demandes_valider));
+        
+        window.addEventListener('load', () => isConnected());
+        window.addEventListener('load', () => infos_user());
+        
+       /* window.addEventListener('load', function () {
+            // Attendre un court délai pour que Bootstrap mette à jour la classe active
+
+                document.getElementById('filterEntity').addEventListener('input', () => filterTable_dmd_insert(demandes));
+                document.getElementById('filterType').addEventListener('input', () => filterTable_dmd_insert(demandes));
+                document.getElementById('filterConterpart').addEventListener('input',() => filterTable_dmd_insert(demandes));
+                document.getElementById('filterdate').addEventListener('input',() => filterTable_dmd_insert(demandes));
+         
+            });*/
+
+        const tabLinks = document.querySelectorAll('.nav-tabs .nav-link');
+
+      /*  tabLinks.forEach(link => {
+        link.addEventListener('click', function () {
+            // Attendre un court délai pour que Bootstrap mette à jour la classe active
+            setTimeout(() => {
+            const parentLi = this.closest('.nav-item');
+            const tabId = parentLi.id;
+
+              if (this.classList.contains('active')) {
+                
+                if (tabId === "dmd-intro") {
+
+                    document.getElementById('filterEntity').addEventListener('input', () => filterTable_dmd_insert(demandes));
+                    document.getElementById('filterType').addEventListener('input', () => filterTable_dmd_insert(demandes));
+                    document.getElementById('filterConterpart').addEventListener('input',() => filterTable_dmd_insert(demandes));
+                    document.getElementById('filterdate').addEventListener('input',() => filterTable_dmd_insert(demandes));
+
+                }else{
+
+                    document.getElementById('filterEntity').addEventListener('input', () => filterTable_dmd_valider(demandes_valider));
+                    document.getElementById('filterType').addEventListener('input', () => filterTable_dmd_valider(demandes_valider));
+                    document.getElementById('filterConterpart').addEventListener('input',() => filterTable_dmd_valider(demandes_valider));
+                    document.getElementById('filterdate').addEventListener('input',() => filterTable_dmd_valider(demandes_valider));
+
+                    }
+                }
+            }, 50); // Délai de 50ms pour laisser Bootstrap finir
+        });
+    });*/
+
+      
+    </script>
+
+</html>

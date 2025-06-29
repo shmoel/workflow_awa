@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire Utilisateur</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h2>Formulaire de Création d'Utilisateur</h2>
+    <div>
+        <div class="form-group">
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" name="nom" required>
+        </div>
+        <div class="form-group">
+            <label for="prenom">Prénom</label>
+            <input type="text" id="prenom" name="prenom" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="id_banque">Banque</label>
+            <select id="id_banque" name="id_banque" required>
+                <option value=""></option>
+                <!-- Options à remplir dynamiquement via API ou backend -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_niv_hab">Niveau d'habilitation</label>
+            <select id="id_niv_hab" name="id_niv_hab" required>
+                <option value=""></option>
+                <!-- Options à remplir dynamiquement via API ou backend -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_entite">Entité</label>
+            <select id="id_entite" name="id_entite" required>
+                <option value=""></option>
+                <!-- Options à remplir dynamiquement via API ou backend -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_poste">Poste</label>
+            <select id="id_poste" name="id_poste" required>
+                <option value=""></option>
+                <!-- Options à remplir dynamiquement via API ou backend -->
+            </select>
+        </div>
+        <button onclick="register()" type="submit">Créer Utilisateur</button>
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000/api";
+
+        async function load_data_form() {
+            
+            try {
+
+                // Récupération des données pour les menus déroulants depuis l'API
+                const [banquesResponse, niveaux_habResponse, entitesResponse, postesResponse] = await Promise.all([
+                    fetch(`${API_URL}/banques`),
+                    fetch(`${API_URL}/niveaux_hab`),
+                    fetch(`${API_URL}/entites`),
+                    fetch(`${API_URL}/postes`)
+                ]);  
+                
+                const banques = await banquesResponse.json();
+                const niveaux_hab = await niveaux_habResponse.json();
+                const entites = await entitesResponse.json();
+                const postes = await postesResponse.json();
+
+                // Remplissage du menu déroulant des banques
+                const banqueSelect = document.getElementById('id_banque');
+                banques.forEach(banque => {
+                   
+                    const option = document.createElement('option');
+                    option.value = banque.id
+                    option.textContent = banque.sigle.concat(" - ", banque.nom);
+                    banqueSelect.appendChild(option);
+                });
+
+                // Sélectionner la première option valide si elle existe
+                if (banques.length > 0) {
+                    banqueSelect.selectedIndex = 1;
+                }
+
+                // Remplissage du menu déroulant des niveaux_hab
+                const niv_HabSelect = document.getElementById('id_niv_hab');
+                niveaux_hab.forEach(niv_hab => {
+                    const option = document.createElement('option');
+                    option.value = niv_hab.id;
+                    option.textContent = niv_hab.code.concat(" - ", niv_hab.description); 
+                    niv_HabSelect.appendChild(option);
+                });
+
+                // Sélectionner la première option valide si elle existe
+                if (niveaux_hab.length > 0) {
+                    niv_HabSelect.selectedIndex = 1;  
+                }
+
+                // Remplissage du menu déroulant des entite
+                const entiteSelect = document.getElementById('id_entite');
+                entites.forEach(entite => {
+                    const option = document.createElement('option');
+                    option.value = entite.id;
+                    option.textContent = entite.libelle.concat(" - ", entite.description); 
+                    entiteSelect.appendChild(option);
+                });
+
+                // Sélectionner la première option valide si elle existe
+                if (entites.length > 0) {
+                    entiteSelect.selectedIndex = 1;
+                }
+
+
+                // Remplissage du menu déroulant des postes
+                const posteSelect = document.getElementById('id_poste');
+                postes.forEach(poste => {
+                    const option = document.createElement('option');
+                    option.value = poste.id;
+                    option.textContent = poste.libelle; 
+                    posteSelect.appendChild(option);
+                });
+
+                // Sélectionner la première option valide si elle existe
+                if (postes.length > 0) {
+                    posteSelect.selectedIndex = 1;
+                }
+
+
+
+            } catch(error) {
+                console.error('Erreur lors du chargement des données:', error);
+                alert('Impossible de charger les données du formulaire. Veuillez réessayer.');
+            }
+        }
+
+
+        async function register() {
+            
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const nom = document.getElementById("nom").value;
+            const prenom = document.getElementById("prenom").value;
+            const email = document.getElementById("email").value;
+            const id_banque = document.getElementById("id_banque").value;
+            const id_niv_hab = document.getElementById("id_niv_hab").value;
+            const id_entite = document.getElementById("id_entite").value;
+            const id_poste = document.getElementById("id_poste").value;
+            
+            const response = await fetch(`${API_URL}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({username, nom, prenom, password, email, id_banque, id_niv_hab, id_entite, id_poste})
+            });
+            const data = await response.json();
+            if (response.ok) {
+                alert("Inscription réussie ! Connectez-vous.");
+            } else {
+                alert(data.detail || "Erreur lors de l'inscription");
+            }            
+        }
+
+        window.onload = load_data_form;
+    </script>
+
+</body>
+</html>
