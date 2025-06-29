@@ -800,7 +800,7 @@
             const result = await response.json();
             // Afficher une modale de succès après la soumission
             $('#successModal').modal('show');
-
+            
 
         } catch (error) {
             console.error('Erreur lors de la soumission :', error);
@@ -905,6 +905,7 @@
 
     function DG_cancelBox() {
         $('#confirmationModal_DG').modal('hide');
+        window.location.href = 'demandes_validation.html';
     }
 
     async function cancelSuccess()  {
@@ -925,13 +926,11 @@
         if(infos_user[0].entite === "GGR" && infos_user[0].banque === "AIG"){
             window.location.replace("ggrg_demandes_validation.html");
         }else{
-            ///window.location.replace("demandes_validation.html");
+            window.location.replace("demandes_validation.html");
         }
 
-
     }
-        
-                    
+                        
     window.addEventListener('load', () => isConnected());
     window.addEventListener('load', () => infos_user());
     window.addEventListener('load', () => charger_demande());

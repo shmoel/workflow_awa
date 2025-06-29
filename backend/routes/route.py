@@ -1286,7 +1286,7 @@ async def valider_avis(demande_id: int,
                 id_event = 3
             else:
                 id_event = 9
-        elif infos_entite[0]['libelle'] == "GGR Local":
+        elif infos_entite[0]['libelle'] == "GGR":
             id_event = 2
 
     # Créer un objet avis
