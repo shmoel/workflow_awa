@@ -72,6 +72,13 @@
                 <!-- Options à remplir dynamiquement via API ou backend -->
             </select>
         </div>
+            <div class="form-group">
+            <label for="domaine">Domaine</label>
+            <select id="domaine" name="domaine" required>
+                <option value=""></option>
+                <!-- Options à remplir dynamiquement via API ou backend -->
+            </select>
+        </div>
         <div class="form-group">
             <label for="id_entite">Entité</label>
             <select id="id_entite" name="id_entite" required>
@@ -97,17 +104,35 @@
             try {
 
                 // Récupération des données pour les menus déroulants depuis l'API
-                const [banquesResponse, niveaux_habResponse, entitesResponse, postesResponse] = await Promise.all([
+                const [banquesResponse, niveaux_habResponse, entitesResponse, postesResponse, domaineResponse] = await Promise.all([
                     fetch(`${API_URL}/banques`),
                     fetch(`${API_URL}/niveaux_hab`),
                     fetch(`${API_URL}/entites`),
-                    fetch(`${API_URL}/postes`)
+                    fetch(`${API_URL}/postes`),
+                    fetch(`${API_URL}/domaine`),
                 ]);  
                 
                 const banques = await banquesResponse.json();
                 const niveaux_hab = await niveaux_habResponse.json();
                 const entites = await entitesResponse.json();
                 const postes = await postesResponse.json();
+                const domaines = await domaineResponse.json();
+
+                // Remplissage du menu déroulant des banques
+                const domaineSelect = document.getElementById('domaine');
+                domaines.forEach(domaine => {
+                   
+                    const option = document.createElement('option');
+                    option.value = domaine.id
+                    option.textContent = domaine.libelle;
+                    domaineSelect.appendChild(option);
+                });
+
+                // Sélectionner la première option valide si elle existe
+                if (domaines.length > 0) {
+                    domaineSelect.selectedIndex = 1;
+                }
+
 
                 // Remplissage du menu déroulant des banques
                 const banqueSelect = document.getElementById('id_banque');
@@ -193,11 +218,33 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({username, nom, prenom, password, email, id_banque, id_niv_hab, id_entite, id_poste})
             });
+
             const data = await response.json();
+
             if (response.ok) {
-                alert("Inscription réussie ! Connectez-vous.");
+               
+                const user_id = data.id;
+                const domaine_id = document.getElementById("domaine").value;
+                
+                const resp = await fetch(`${API_URL}/user_domaine`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json" },
+                    body: JSON.stringify({user_id, domaine_id})
+                });
+
+                const donnee = await resp.json();
+
+                if (resp.ok) {
+                    
+                     alert("Inscription réussie ! Connectez-vous.");
+                    
+                } else {
+                    alert("Erreur lors du setting du domaine");
+                }
+
+
             } else {
-                alert(data.detail || "Erreur lors de l'inscription");
+                alert("Erreur lors de l'inscription");
             }            
         }
 

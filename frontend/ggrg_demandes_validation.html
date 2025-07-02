@@ -206,7 +206,7 @@
                                                     <a class="nav-link active" data-toggle="tab" href="#demande-intro">Demandes Introduites</a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link" data-toggle="tab" href="#demande-val">Demandes en fin de processus</a>
+                                                    <a class="nav-link" data-toggle="tab" href="#demande-val">Demandes fin de processus</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -241,12 +241,14 @@
                                                     <table class="table table-hover card-table">
                                                         <thead>
                                                             <tr>
-                                                                <th style="font-weight: bold;">Entité</th>
+                                                                
                                                                 <th style="font-weight: bold;">Type de demande</th>
+                                                                <th style="font-weight: bold;">Filiale</th>
                                                                 <th style="font-weight: bold;">Contrepartie</th>
+                                                                <th style="font-weight: bold;">Entité</th>
                                                                 <th style="font-weight: bold;">Montant (Xof)</th>
-                                                                <th style="font-weight: bold;">Date / Heure</th>
-                                                                <th style="font-weight: bold;">Status</th>
+                                                                
+                                                                
                                                             </tr>
                                                         </thead>
                                                         <tbody id="dmd_valid">
@@ -466,14 +468,14 @@
                         <td class="align-middle">
                             <div>
                                 <div class="d-inline-block align-middle">
-                                    <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-glow-info btn-info">Détails</button>
+                                    <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-dark">Détails</button>
                                 </div>
                             </div>
                         </td>
                         <td class="align-middle">
                             <div>
                                 <div class="d-inline-block align-middle">
-                                    <button type="button" onclick="showConfirmation(${row.id_demande})" class="btn btn-glow-warning btn-warning">Cloturer</button>
+                                    <button type="button" onclick="showConfirmation(${row.id_demande})" class="btn btn-outline-primary">Cloturer</button>
                                 </div>
                             </div>
                         </td>

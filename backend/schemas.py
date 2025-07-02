@@ -257,8 +257,8 @@ class UserDomaineBase(BaseModel):
     class Config:
         from_attributes = True
   
-class UserDomaineCreate(DomaineBase):
+class UserDomaineCreate(UserDomaineBase):
     pass
 
-class UserDomaine(DomaineBase):
+class UserDomaine(UserDomaineBase):
     pass

@@ -138,8 +138,8 @@ class Domaine(Base):
 class UserDomaine(Base):
     __tablename__ = "user_domaine"
 
-    user_id = Column(Integer, nullable=False)
-    domaine_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, index = True, nullable=False)
+    domaine_id = Column(Integer, index=True, nullable=False)
     __table_args__ = (
         PrimaryKeyConstraint('user_id', 'domaine_id', name='pk_user_domaine'),)
    

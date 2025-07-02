@@ -738,7 +738,7 @@ async def get_demandes_user_valider(
             JOIN categoriedemande c ON c.id = t.id_categoriedemande
             JOIN demandes d ON d.id_typedemande = t.id
             WHERE d.id_user = :u_id) dmd
-        JOIN (SELECT id_demande, MAX(id_event) AS max_event, (MAX(date) || '  ' || MAX(heure))::timestamp AS date_val FROM avis GROUP BY id_demande HAVING MAX(id_event) NOT IN(1,7,8,9)) a ON a.id_demande = dmd.id_demande 
+        JOIN (SELECT id_demande, MAX(id_event) AS max_event, (MAX(date) || '  ' || MAX(heure))::timestamp AS date_val FROM avis GROUP BY id_demande HAVING MAX(id_event) NOT IN(1,6,7,8,9)) a ON a.id_demande = dmd.id_demande 
         ) req1
         JOIN eventstatut ON eventstatut.id = req1.max_event ORDER BY req1.date_val DESC
     """
@@ -1426,8 +1426,8 @@ def read_domaine(domaine_id: int, db: Session = Depends(get_db)):
     return db_domaine
 
 @router.get("/domaine/", response_model=List[schemas.Domaine])
-def read_domaine_list(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    domaine = crud.get_domaine_list(db, skip=skip, limit=limit)
+def get_all_domaine(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    domaine = crud.get_all_domaine(db, skip=skip, limit=limit)
     return domaine
 
 @router.put("/domaine/{domaine_id}", response_model=schemas.Domaine)
@@ -1437,3 +1437,9 @@ def update_domaine(domaine_id: int, domaine: schemas.DomaineCreate, db: Session 
 @router.delete("/domaine/{domaine_id}", response_model=schemas.Domaine)
 def delete_domaine(domaine_id: int, db: Session = Depends(get_db)):
     return crud.delete_domaine(db=db, domaine_id=domaine_id)
+
+
+# User-domaine
+@router.post("/user_domaine/", response_model=schemas.UserDomaine)
+def create_userdomaine(userdomaine: schemas.UserDomaineCreate, db: Session = Depends(get_db)):
+    return crud.create_userdomaine(db, userdomaine)

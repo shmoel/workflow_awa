@@ -35,6 +35,26 @@
     <!-- Libs -->
     <link rel="stylesheet" href= "assets/assets_user/libs/perfect-scrollbar/perfect-scrollbar.css">
     <link rel="stylesheet" href= "assets/assets_user/libs/flot/flot.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f4f4f4 0%, #f4f4f4 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 800px;
+            margin: 20px auto;
+            border: 2px solid #ffffff;
+        }
+
+     
+    </style>
    
 
 </head>
@@ -502,7 +522,7 @@
                         <td class="align-middle">
                             <div>
                                 <div class="d-inline-block align-middle">
-                                    <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-glow-info btn-info">Détails</button>
+                                    <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-glow-secondary btn-secondary">Détails</button>
                                 </div>
                             </div>
                         </td>
@@ -562,14 +582,14 @@
                         <td class="align-middle">
                             <div>
                                 <div class="d-inline-block align-middle">
-                                    <button type="button" onclick="window.location.href=" class="btn btn-glow-danger btn-danger">Arrêté</button>
+                                    <button type="button" onclick="window.location.href=" class="btn btn-danger">Arrêté</button>
                                 </div>
                             </div>
                         </td>
                         <td class="align-middle">
                             <div>
                                 <div class="d-inline-block align-middle">
-                                    <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-glow-info btn-info">Détails</button>
+                                    <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-glow-secondary btn-secondary">Détails</button>
                                 </div>
                             </div>
                         </td>
@@ -612,14 +632,14 @@
                         <td class="align-middle">
                             <div>
                                 <div class="d-inline-block align-middle">
-                                    <button type="button" onclick="window.location.href=" class="btn btn-glow-success btn-success">A terme</button>
+                                    <button type="button" onclick="window.location.href=" class="btn btn-default">Terme</button>
                                 </div>
                             </div>
                         </td>
                         <td class="align-middle">
                             <div>
                                 <div class="d-inline-block align-middle">
-                                    <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-glow-info btn-info">Détails</button>
+                                    <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-glow-secondary btn-secondary">Détails</button>
                                 </div>
                             </div>
                         </td>

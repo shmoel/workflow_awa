@@ -582,8 +582,8 @@ def delete_avis(db: Session, avis_id: int):
     return db_avis
 
 # CRUD for commentaires
-def create_commentaires(db: Session, avis: schemas.Commentaires):
-    db_commentaires = models.Commentaires(**avis.model_dump())
+def create_commentaires(db: Session, commentaires: schemas.Commentaires):
+    db_commentaires = models.Commentaires(**commentaires.model_dump())
     db.add(db_commentaires)
     db.commit()
     db.refresh(db_commentaires)
@@ -624,7 +624,7 @@ def create_domaine(db: Session, domaine: schemas.Domaine):
 def get_domaine(db: Session, domaine_id: int):
     return db.query(models.Domaine).filter(models.Domaine.id == domaine_id).first()
 
-def get_domaine(db: Session, skip: int = 0, limit: int = 100):
+def get_all_domaine(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Domaine).offset(skip).limit(limit).all()
 
 def update_domaine(db: Session, domaine_id: int, domaine: schemas.DomaineCreate):
@@ -637,8 +637,17 @@ def update_domaine(db: Session, domaine_id: int, domaine: schemas.DomaineCreate)
     db.refresh(db_domaine)
     return db_domaine
 
+def delete_domaine(db: Session, domaine_id: int):
+    db_domaine = db.query(models.Domaine).filter(models.Domaine.id == domaine_id).first()
+    if db_domaine is None:
+        raise HTTPException(status_code=404, detail="comm not found")
+    db.delete(db_domaine)
+    db.commit()
+    return db_domaine
+
 # CRUD for user_domaine
-def create_userdomaine(db: Session, userdomaine: schemas.UserDomaine):
+
+def create_userdomaine(db: Session, userdomaine: schemas.UserDomaineCreate):
     db_userdomaine = models.UserDomaine(**userdomaine.model_dump())
     db.add(db_userdomaine)
     db.commit()
