@@ -128,7 +128,7 @@ class Banque(BanqueBase):
 
 class TypeDemandeBase(BaseModel):
     libelle: str
-    id_categorieDemande: int
+    id_categoriedemande: int
 
 class TypeDemandeCreate(TypeDemandeBase):
     pass
@@ -140,7 +140,7 @@ class TypeDemande(TypeDemandeBase):
 
 class CategorieDemandeBase(BaseModel):
     libelle: str
-    id_departementGroup: int
+    id_departementgroup: int
 
 class CategorieDemandeCreate(CategorieDemandeBase):
     pass
