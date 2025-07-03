@@ -308,7 +308,13 @@
 
                                     <div class="card-header with-elements pb-0">
                                         <div class="navbar-nav align-items-lg-center ">    
-                                            <div class=row>     
+                                            <div class=row>
+                                                <label class="nav-item navbar-text navbar-search-box p-0 active">
+                                                    <i class="feather icon-search navbar-icon align-middle"></i>
+                                                    <span class="navbar-search-input pl-2">
+                                                    <input type="text" class="form-control navbar-text mx-2" id="filterbanque" placeholder="Filtrer par Banque">
+                                                    </span>
+                                                </label>     
                                                 <label class="nav-item navbar-text navbar-search-box p-0 active">
                                                     <i class="feather icon-search navbar-icon align-middle"></i>
                                                     <span class="navbar-search-input pl-2">
@@ -533,12 +539,40 @@
             }
           
         }
-        
-        // Remplissage du tableau
-        async function fillTable_dmd_insert() {
+
+        async function filterTable_dmd_insert() {
+
             
             const  demandes = await infos_demandes_for_users();
+            const filterbanque = document.getElementById('filterbanque').value.toLowerCase();
+            const filterEntity = document.getElementById('filterEntity').value.toLowerCase();
+            const filterType = document.getElementById('filterType').value.toLowerCase();
+            const filterConterpart = document.getElementById('filterConterpart').value.toLowerCase();
+            const filterdate = document.getElementById('filterdate').value.toLowerCase();
+            
 
+            const demandes_inserer = demandes.filter(t => {
+                return (
+                    t.banque.toLowerCase().includes(filterbanque) &&
+                    t.categorie_demande.toLowerCase().includes(filterEntity) &&
+                    t.type_demande.toLowerCase().includes(filterType) &&
+                    t.nom_client.toLowerCase().includes(filterConterpart) &&
+                    t.date.toLowerCase().includes(filterdate)
+                );
+            });
+
+            //alert("ok");
+           
+
+            fillTable_dmd_insert(demandes_inserer);
+        }
+        
+        // Remplissage du tableau
+        async function fillTable_dmd_insert(demandes = null) {
+            
+            if (demandes === null) {
+                demandes = await infos_demandes_for_users();
+            }
             
 
             const tbody = document.getElementById('demandes_inserer');
@@ -602,29 +636,33 @@
             });
         }
         
+        window.addEventListener('load', () => isConnected());
+        window.addEventListener('load', () => infos_user());
 
         //const demandes_valider  = <?php echo $demandes_valider; ?>;
-                                                                      
+                                  
+        
+        //const  demandes = await infos_demandes_for_users();
+
         //insertion des données lorsque la page se charge
         window.addEventListener('load', () => fillTable_dmd_insert());
         //window.addEventListener('load', () => fillTable_dmd_valider(demandes_valider));
         
-        window.addEventListener('load', () => isConnected());
-        window.addEventListener('load', () => infos_user());
-        
-       /* window.addEventListener('load', function () {
-            // Attendre un court délai pour que Bootstrap mette à jour la classe active
 
-                document.getElementById('filterEntity').addEventListener('input', () => filterTable_dmd_insert(demandes));
-                document.getElementById('filterType').addEventListener('input', () => filterTable_dmd_insert(demandes));
-                document.getElementById('filterConterpart').addEventListener('input',() => filterTable_dmd_insert(demandes));
-                document.getElementById('filterdate').addEventListener('input',() => filterTable_dmd_insert(demandes));
+        
+       window.addEventListener('load', function () {
+            // Attendre un court délai pour que Bootstrap mette à jour la classe active
+                document.getElementById('filterbanque').addEventListener('input', () => filterTable_dmd_insert());
+                document.getElementById('filterEntity').addEventListener('input', () => filterTable_dmd_insert());
+                document.getElementById('filterType').addEventListener('input', () => filterTable_dmd_insert());
+                document.getElementById('filterConterpart').addEventListener('input',() => filterTable_dmd_insert());
+                document.getElementById('filterdate').addEventListener('input',() => filterTable_dmd_insert());
          
-            });*/
+            });
 
         const tabLinks = document.querySelectorAll('.nav-tabs .nav-link');
 
-      /*  tabLinks.forEach(link => {
+        tabLinks.forEach(link => {
         link.addEventListener('click', function () {
             // Attendre un court délai pour que Bootstrap mette à jour la classe active
             setTimeout(() => {
@@ -634,11 +672,11 @@
               if (this.classList.contains('active')) {
                 
                 if (tabId === "dmd-intro") {
-
-                    document.getElementById('filterEntity').addEventListener('input', () => filterTable_dmd_insert(demandes));
-                    document.getElementById('filterType').addEventListener('input', () => filterTable_dmd_insert(demandes));
-                    document.getElementById('filterConterpart').addEventListener('input',() => filterTable_dmd_insert(demandes));
-                    document.getElementById('filterdate').addEventListener('input',() => filterTable_dmd_insert(demandes));
+                    document.getElementById('filterbanque').addEventListener('input', () => filterTable_dmd_insert());
+                    document.getElementById('filterEntity').addEventListener('input', () => filterTable_dmd_insert());
+                    document.getElementById('filterType').addEventListener('input', () => filterTable_dmd_insert());
+                    document.getElementById('filterConterpart').addEventListener('input',() => filterTable_dmd_insert());
+                    document.getElementById('filterdate').addEventListener('input',() => filterTable_dmd_insert());
 
                 }else{
 
@@ -651,7 +689,7 @@
                 }
             }, 50); // Délai de 50ms pour laisser Bootstrap finir
         });
-    });*/
+    });
 
       
     </script>
