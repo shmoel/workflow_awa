@@ -22,7 +22,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["API"])
 
 # Dossier où sauvegarder les fichiers
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+#BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+BASE_DIR = Path("/app")  # Chemin de base sur Render
 UPLOAD_DIR = BASE_DIR / "frontend/Demandes"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
