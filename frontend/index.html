@@ -338,21 +338,27 @@
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
 
+      
+
       if (username && password) {
                 const response = await fetch(`${API_URL}/login/`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({username,password}),
                     credentials: 'include', // Envoie le cookie
             });
           
           const data = await response.json();
+
+          //alert(data.access_token);
+
           if (data.access_token) {
-                //localStorage.setItem("token", data.access_token);
+
+                localStorage.setItem("token", data.access_token);
                 //document.getElementById("login-form").style.display = "none";
-                const role = checkUserRole(data.access_token);
+                const role = await checkUserRole(token);
                     
-                if (role) {
+                if (role ==="user") {
                     window.location.href = 'acceuil.html';
                   } else {
                     window.location.href = 'admin_acceuil.html';
@@ -368,20 +374,24 @@
         
 
       async function checkUserRole(token) {
-        console.log("Vérification du rôle avec token :", token);
-        const response = await fetch(`${API_URL}/users/me/`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+
+       
+        console.log("Vérification du rôle avec token ::::::");
+        const response = await fetch(`${API_URL}/users/me/${token}`);
+
         if (!response.ok) {
               console.error("Erreur lors de la vérification du rôle :", response.statusText);
               return;
         }
+
         const user = await response.json();
+      
+
         console.log("Utilisateur récupéré :", user);
         if (user.id_niv_hab === 4 ) {
-              return True;
+              return "admin";
         }else {
-          return False;
+          return "user";
         }
 
       }

@@ -5,7 +5,8 @@ psycopg2-binary
 python-dotenv
 jinja2
 python-multipart
-passlib[bcrypt]
+bcrypt==3.2.0
+passlib==1.7.4
 pyjwt
 starlette
 gunicorn

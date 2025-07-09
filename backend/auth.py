@@ -26,8 +26,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(request : Request, db: Session = Depends(get_db)):
-    token = request.cookies.get("access_token")
+async def get_current_user(token : str, db: Session):
+    token = token
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -37,7 +37,6 @@ async def get_current_user(request : Request, db: Session = Depends(get_db)):
     if not token:
         raise credentials_exception
     try:
-        token = token.replace("Bearer ", "")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
@@ -49,13 +48,6 @@ async def get_current_user(request : Request, db: Session = Depends(get_db)):
         raise credentials_exception
     return user
 
-async def get_current_admin(user: models.Users = Depends(get_current_user)):
-    if user.id_niv_hab != 4:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized: Admin access required"
-        )
-    return user
 
 def authenticate_user(db: Session, username: str, password: str):
     user = crud.get_user_by_username(db, username)

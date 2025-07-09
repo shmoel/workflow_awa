@@ -262,3 +262,12 @@ class UserDomaineCreate(UserDomaineBase):
 
 class UserDomaine(UserDomaineBase):
     pass
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class UserAuth(BaseModel):
+    id: int
+    username: str
+    id_niv_hab: int
