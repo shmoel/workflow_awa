@@ -479,16 +479,22 @@
     }
 
     async function logout() {
-    await fetch(`${API_URL}/logout/`, {
-        method: 'POST',
-        credentials: 'include',
-    });
-        window.location.href = 'index.html';
+             
+            localStorage.removeItem("token");
+            //window.location.href = 'index.html';
     }
 
     async function infos_user() {
         
-        const response = await fetch(`${API_URL}/users-joined/`);
+        const token = localStorage.getItem("token");
+            
+        const response = await fetch(`${API_URL}/users-joined/`, {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+        });
         
         // Vérifier si la requête a réussi
         if (!response.ok) {
@@ -521,11 +527,13 @@
     }
 
     async function isConnected() {
-        
-        console.log("Vérification du rôle avec token");
-        const response = await fetch(`${API_URL}/current-user/`);
-        if (!response.ok) {
-            console.error("Erreur lors de la vérification du rôle :", response.statusText);
+
+        const token = localStorage.getItem("token");
+
+        if (token) {
+            console.log("Token présent :", token);
+        } else {
+            console.log("Aucun token trouvé");
             window.location.href = 'index.html';
         }
         
@@ -537,12 +545,19 @@
 
     async function charger_demande() {
         
+        const token = localStorage.getItem("token");
 
         const params = new URLSearchParams(window.location.search);
 
         const demande_id = params.get("id_dmd");
 
-        const reponse = await fetch(`${API_URL}/demande_particulier/${demande_id}`);
+        const reponse = await fetch(`${API_URL}/demande_particulier/${demande_id}`, {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
 
         const donnees = await reponse.json();
 
@@ -599,7 +614,15 @@
 
         const demande_id = params.get("id_dmd");
 
-        const reponse = await fetch(`${API_URL}/commentaires_demande/${demande_id}`);
+        const token = localStorage.getItem("token");
+
+        const reponse = await fetch(`${API_URL}/commentaires_demande/${demande_id}`,{
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
 
         const donnees = await reponse.json();
 
@@ -614,7 +637,7 @@
             return `
                 <div class="bg-white ui-bordered mb-2">
                     <a href="#${escapeHtml(row.event_d)}" class="d-flex justify-content-between text-dark py-3 px-4" data-toggle="collapse">
-                        ${escapeHtml(row.statut_d)}<span class="collapse-icon"></span>
+                        ${escapeHtml(row.statut_d)} : ${escapeHtml(row.decision)} <span class="collapse-icon"></span>
                     </a>
                     <div id="${escapeHtml(row.event_d)}" class="collapse text-muted">
                         <div class="px-4 pb-3">
@@ -745,8 +768,16 @@
    async function showConfirmation(event) {
         
         event.preventDefault();
+
+        const token = localStorage.getItem("token");
         
-        const response = await fetch(`${API_URL}/users-joined/`);
+        const response = await fetch(`${API_URL}/users-joined/`,{
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
         
         // Vérifier si la requête a réussi
         if (!response.ok) {
@@ -807,10 +838,14 @@
         const process_ongoing = 0;
 
         try {
-            
+            const token = localStorage.getItem("token");
+
             const response = await fetch(`${API_URL}/valider_avis/${demande_id}/process_ongoing/${process_ongoing}`, {
                 method: 'POST',
                 body: formData,
+                headers: {
+                "Authorization": "Bearer " + token,
+                }
             });
 
             if (!response.ok) {
@@ -851,10 +886,13 @@
         const process_ongoing = 1;
 
         try {
-            
+            const token = localStorage.getItem("token");
             const response = await fetch(`${API_URL}/valider_avis/${demande_id}/process_ongoing/${process_ongoing}`, {
                 method: 'POST',
                 body: formData,
+                headers: {
+                "Authorization": "Bearer " + token,
+                }
             });
 
             if (!response.ok) {
@@ -893,12 +931,16 @@
         });
 
         const process_ongoing = 1;
+        const token = localStorage.getItem("token");
 
         try {
             
             const response = await fetch(`${API_URL}/valider_avis/${demande_id}/process_ongoing/${process_ongoing}`, {
                 method: 'POST',
                 body: formData,
+                headers: {
+                "Authorization": "Bearer " + token,
+                }
             });
 
             if (!response.ok) {
@@ -932,8 +974,15 @@
     async function cancelSuccess()  {
 
         $('#successModal').modal('hide');
+        const token = localStorage.getItem("token");
 
-         const response = await fetch(`${API_URL}/users-joined/`);
+         const response = await fetch(`${API_URL}/users-joined/`,{
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
         
         // Vérifier si la requête a réussi
         if (!response.ok) {

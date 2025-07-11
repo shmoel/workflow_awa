@@ -9,7 +9,7 @@ import os
 app = FastAPI(docs_url="/docs", redoc_url="/redoc")
 
 app.add_middleware(
-     CORSMiddleware,
+    CORSMiddleware,
     allow_origins=["http://127.0.0.1:8000", "https://workflow-awa.onrender.com", "*"],  # Ajoute d'autres origines si nécessaire
     allow_credentials=True,
     allow_methods=["*"],  # Autorise toutes les méthodes (GET, POST, etc.)

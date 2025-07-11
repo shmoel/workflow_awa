@@ -295,16 +295,22 @@
     }
 
     async function logout() {
-    await fetch(`${API_URL}/logout/`, {
-        method: 'POST',
-        credentials: 'include',
-    });
-        window.location.href = 'index.html';
+            
+        localStorage.removeItem("token");
+        //window.location.href = 'index.html';
     }
 
     async function infos_user() {
         
-        const response = await fetch(`${API_URL}/users-joined/`);
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`${API_URL}/users-joined/`,{
+            method: "GET",
+            headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json",
+            },
+        });
         
         // Vérifier si la requête a réussi
         if (!response.ok) {
@@ -337,11 +343,13 @@
     }
 
     async function isConnected() {
-        
-        console.log("Vérification du rôle avec token");
-        const response = await fetch(`${API_URL}/current-user/`);
-        if (!response.ok) {
-            console.error("Erreur lors de la vérification du rôle :", response.statusText);
+
+        const token = localStorage.getItem("token");
+
+        if (token) {
+            console.log("Token présent :", token);
+        } else {
+            console.log("Aucun token trouvé");
             window.location.href = 'index.html';
         }
         
@@ -353,12 +361,19 @@
 
     async function charger_demande() {
         
+        const token = localStorage.getItem("token");
 
         const params = new URLSearchParams(window.location.search);
 
         const demande_id = params.get("id_dmd");
 
-        const reponse = await fetch(`${API_URL}/demande_particulier/${demande_id}`);
+        const reponse = await fetch(`${API_URL}/demande_particulier/${demande_id}`,{
+            method: "GET",
+            headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json",
+            },
+        });
 
         const donnees = await reponse.json();
 
@@ -403,6 +418,7 @@
         const targetElementId = 'detail_commentaire';
 
         
+        const token = localStorage.getItem("token");
 
         // Escape HTML characters to prevent XSS
         const escapeHtml = (str) => {
@@ -415,7 +431,13 @@
 
         const demande_id = params.get("id_dmd");
 
-        const reponse = await fetch(`${API_URL}/commentaires_demande/${demande_id}`);
+        const reponse = await fetch(`${API_URL}/commentaires_demande/${demande_id}`,{
+            method: "GET",
+            headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json",
+            },
+        });
 
         const donnees = await reponse.json();
 
@@ -562,7 +584,15 @@
         
         event.preventDefault();
         
-        const response = await fetch(`${API_URL}/users-joined/`);
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`${API_URL}/users-joined/`,{
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
         
         // Vérifier si la requête a réussi
         if (!response.ok) {
@@ -660,12 +690,6 @@
     window.addEventListener('load', () => infos_user());
     window.addEventListener('load', () => charger_demande());
     window.addEventListener('load', () => charger_details_commentaire());
-
-    form.addEventListener('submit',  async (event) => {
-
-     
-       
-    })
 
 
 </script>

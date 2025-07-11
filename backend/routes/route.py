@@ -36,13 +36,13 @@ async def ignore_devtools(path: str):
 def test_route():
     return {"message": "Test réussi"}
 
-@router.get("/types_demandes/{categorie}/{token}")
+@router.get("/types_demandes/{categorie}/")
 async def get_types_demandes_categories(
     categorie: str,
-    token: str,
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = get_current_user(token,db)
+    
 
     if isinstance(user, RedirectResponse):
         return user
@@ -65,13 +65,12 @@ async def get_types_demandes_categories(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/users-joined/{token}")
+@router.get("/users-joined/")
 async def get_users_joined(
-    token: str,
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = Depends(token, db)
-
+    
     if isinstance(user, RedirectResponse):
         return user
     
@@ -106,9 +105,10 @@ async def get_users_joined(
         raise HTTPException(status_code=500, detail=str(e))
 
 # Endpoint pour login
-@router.post("/login", response_model=schemas.Token)
+@router.post("/login/", response_model=schemas.Token)
 async def login(form_data: schemas.LoginRequest, db: Session = Depends(get_db)):
 
+    print("tentative de connexion")
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -121,10 +121,12 @@ async def login(form_data: schemas.LoginRequest, db: Session = Depends(get_db)):
         data={"sub": user.username},
         expires_delta=access_token_expires,
     )
+
+    print(access_token)
     
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/logout")
+@router.post("/logout/")
 async def logout(response: Response):
     # Supprimer le cookie
     response.delete_cookie(
@@ -138,14 +140,12 @@ async def logout(response: Response):
     #return RedirectResponse(url="workflow/index.html", status_code=303)
 
 # Endpoint /users/me/
-@router.get("/users/me/{token}", response_model=schemas.UserAuth)
-async def read_users_me(token: int, db: Session = Depends(get_db)):
-    current_user = get_current_user(token, db)
-    return {
-        "id": current_user.id,
-        "username": current_user.username,
-        "id_niv_hab": current_user.id_niv_hab
-    }
+@router.get("/users/me/")
+async def read_users_me(current_user: schemas.Users = Depends(get_current_user)):
+    print(current_user.username)
+    print(current_user.id_niv_hab)
+    return {"result": current_user}
+
 
 
 # Endpoint pour l'inscription
@@ -596,14 +596,13 @@ def read_demande(demande_id: int, db: Session = Depends(get_db)):
     return db_demande
 
 #charger le détails des commentaires d'une demande à partir de son identifiant
-@router.get("/commentaires_demande/{demande_id}/{token}")
+@router.get("/commentaires_demande/{demande_id}")
 async def get_commentaire_demande(
     demande_id :int,
-    token: str, 
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     
-    user = get_current_user(token, db)
     if isinstance(user, RedirectResponse):
         return user
     # Requête SQL avec jointures
@@ -633,13 +632,12 @@ async def get_commentaire_demande(
         raise HTTPException(status_code=500, detail=str(e))
 
 #charger la demande à partir de l'identifiant de la demande
-@router.get("/demande_particulier/{demande_id}/token")
+@router.get("/demande_particulier/{demande_id}")
 async def get_demande_particulier(
     demande_id :int,
-    token: str, 
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = get_current_user(token,db)
 
     if isinstance(user, RedirectResponse):
         return user
@@ -672,12 +670,12 @@ async def get_demande_particulier(
     
 
 # chemin pour les demandes que l'utilisateur qui vient enregistrer et qui ne sont pas encore validées
-@router.get("/demandes_user/{token}")
+@router.get("/demandes_user/")
 async def get_demandes_user(
-    token: str,
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = get_current_user(token, db)
+
 
     if isinstance(user, RedirectResponse):
         return user
@@ -709,13 +707,12 @@ async def get_demandes_user(
         raise HTTPException(status_code=500, detail=str(e))
 
 # chemin pour les demandes que l'utilisateur ayant déjà été vilidées par un tiers
-@router.get("/demandes_user_valider/{token}")
+@router.get("/demandes_user_valider/")
 async def get_demandes_user_valider(
-    token: str,
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     
-    user = get_current_user(token, db)
 
     if isinstance(user, RedirectResponse):
         return user
@@ -749,12 +746,12 @@ async def get_demandes_user_valider(
         raise HTTPException(status_code=500, detail=str(e))
 
 # chemin pour les demandes que l'utilisateur ayant été au bout du process soit pas arrêtées par le DG local
-@router.get("/demandes_fin_process/{token}")
+@router.get("/demandes_fin_process/")
 async def get_demandes_fin_process(
-    token: str,
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = get_current_user(token, db)
+    
     if isinstance(user, RedirectResponse):
         return user
     # Requête SQL avec jointures
@@ -867,14 +864,13 @@ async def get_demandes_chater(
         raise HTTPException(status_code=500, detail=str(e))
 
 # demandes a charger dans la page accueil poour des users en fonction de leurs positions(FILIALES, REGIONAL, GROUP CENTRAL et du domaine de couverture)
-@router.get("/demandes_a_consulter/{domaine_user}/{token}")
+@router.get("/demandes_a_consulter/{domaine_user}")
 async def get_demandes_user(
     domaine_user : str,
-    token: str,
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = get_current_user(token, db)
-
+    
     if isinstance(user, RedirectResponse):
         return user
     # Requête SQL avec jointures
@@ -980,12 +976,12 @@ async def get_demandes_user(
         raise HTTPException(status_code=500, detail=str(e))
 
 # chargement des demandes à valider pour les profils valideurs
-@router.get("/demandes_a_cloturer/{token}")
+@router.get("/demandes_a_cloturer/")
 async def get_demandes_fin_process(
-    token: str,
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = get_current_user(token, db)
+
 
     if isinstance(user, RedirectResponse):
         return user
@@ -1024,10 +1020,9 @@ async def get_demandes_fin_process(
 # chargement des demandes à valider pour les profils valideurs
 @router.get("/demandes_a_valider/")
 async def get_demandes_a_valider(
-    token: str,
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = get_current_user(token, db)
 
     if isinstance(user, RedirectResponse):
         return user
@@ -1166,12 +1161,11 @@ async def get_demandes_a_valider(
 # chargement des demandes à valider pour les profils valideurs
 @router.get("/demandes_deja_valider/")
 async def get_demandes_deja_valider(
-    token: str,
+    user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     
-    user = get_current_user(token, user)
-
+    
     if isinstance(user, RedirectResponse):
         return user
     
@@ -1221,14 +1215,14 @@ def delete_demande(demande_id: int, db: Session = Depends(get_db)):
 
 
 # avis Endpoints
-@router.post("/cloturer_demande/{demande_id}/{token}", response_model=schemas.AvisValidation)
+@router.post("/cloturer_demande/{demande_id}/", response_model=schemas.AvisValidation)
 async def cloturer_demande(demande_id: int,
-                         token: str,
                          id_decision: int = Form(...),
                          commentaire: str = Form(None),
+                         user: schemas.Users = Depends(get_current_user),
                          db: Session = Depends(get_db)):
     
-    user = get_current_user(token, db)
+
     current_date = datetime.now().strftime("%Y-%m-%d")  # Format YYYY-MM-DD
     current_heure = datetime.now().strftime("%H:%M:%S")    # Format HH:MM:SS
 
@@ -1260,12 +1254,11 @@ async def cloturer_demande(demande_id: int,
 @router.post("/valider_avis/{demande_id}/process_ongoing/{process_ongoing}", response_model=schemas.AvisValidation)
 async def valider_avis(demande_id: int,
                          process_ongoing: int,
-                         token: str,
+                         user: schemas.Users = Depends(get_current_user),
                          id_decision: int = Form(...),
                          commentaire: str = Form(None),
                          db: Session = Depends(get_db)):
     
-    user = get_current_user(token, db)
     
     current_date = datetime.now().strftime("%Y-%m-%d")  # Format YYYY-MM-DD
     current_heure = datetime.now().strftime("%H:%M:%S")    # Format HH:MM:SS

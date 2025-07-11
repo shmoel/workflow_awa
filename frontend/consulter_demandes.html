@@ -412,17 +412,23 @@
         const API_URL = "http://127.0.0.1:8000/api";
         //const API_URL = "https://workflow-awa.onrender.com/api";
 
-        async function logout() {
-        await fetch(`${API_URL}/logout/`, {
-            method: 'POST',
-            credentials: 'include',
-        });
-            window.location.href = 'index.html';
+           async function logout() {
+             
+            localStorage.removeItem("token");
+            //window.location.href = 'index.html';
         }
 
         async function infos_user() {
             
-            const response = await fetch(`${API_URL}/users-joined/`);
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(`${API_URL}/users-joined/`,{
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
             
             // Vérifier si la requête a réussi
             if (!response.ok) {
@@ -453,16 +459,20 @@
             
         }
 
-        async function isConnected() {
-            
-            console.log("Vérification du rôle avec token");
-            const response = await fetch(`${API_URL}/current-user/`);
-            if (!response.ok) {
-                console.error("Erreur lors de la vérification du rôle :", response.statusText);
+       async function isConnected() {
+
+            const token = localStorage.getItem("token");
+
+            if (token) {
+                console.log("Token présent :", token);
+            } else {
+                console.log("Aucun token trouvé");
                 window.location.href = 'index.html';
             }
           
         }
+
+
 
         function formatNumber(number) {
             return Number(number).toLocaleString('fr-FR', { minimumFractionDigits: 0 });
@@ -724,8 +734,15 @@
         async function load_data_demandes() {
 
             // CETTE FONCTION CONSISTE A CHARGER LES DONNEES DES DEMANDES INSERER PAS ENCORE VALIDEES 
+            const token = localStorage.getItem("token");
 
-            const response = await fetch(`${API_URL}/demandes_user/`);
+            const response = await fetch(`${API_URL}/demandes_user/`,{
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                }
+            });
             
 
             // Vérifier si la requête a réussi
@@ -751,8 +768,15 @@
         async function load_data_demandes_valider() {
 
             // CETTE FONCTION CONSISTE A CHARGER DEMANDES DANS LE PROCESSUS DE VALIDATION 
+            const token = localStorage.getItem("token");
 
-            const response = await fetch(`${API_URL}/demandes_user_valider/`);
+            const response = await fetch(`${API_URL}/demandes_user_valider/`,{
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
             
 
             // Vérifier si la requête a réussi
@@ -778,8 +802,15 @@
         async function load_data_demandes_fin_process() {
 
             // CETTE FONCTION CONSISTE A CHARGER DEMANDES DANS LE PROCESSUS DE VALIDATION 
-
-            const response = await fetch(`${API_URL}/demandes_fin_process/`);
+            const token = localStorage.getItem("token");
+            
+            const response = await fetch(`${API_URL}/demandes_fin_process/`,{
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                }
+            });
             
             // Vérifier si la requête a réussi
             if (!response.ok) {
@@ -840,9 +871,18 @@
 
         async function supprimer_demande() {
            
+            
             $('#confirmationModal').modal('hide');
+
+            const token = localStorage.getItem("token");
             // Récupérer l'user_id
-            const res = await fetch(`${API_URL}/users-joined/`);
+            const res = await fetch(`${API_URL}/users-joined/`,{
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
             
             if (!res.ok) {
                 throw new Error(`Erreur lors de la récupération de l'utilisateur : ${res.status}`);
@@ -887,7 +927,7 @@
             const id_decision = 1;
             
 
-            const reponse = await fetch(`${API_URL}/avis`, {
+            const reponse = await fetch(`${API_URL}/avis/`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json" },
                 body: JSON.stringify({commentaire, date, heure, id_demande, id_event, id_valideur, id_decision, id_niveauValidation})
@@ -907,7 +947,6 @@
 
 
         window.addEventListener('load', () => isConnected());
-        window.addEventListener('load', () => infos_user());
         window.addEventListener('load', () => infos_user());
         window.addEventListener('load', () => load_data_demandes());
         window.addEventListener('load', () => load_data_demandes_valider());

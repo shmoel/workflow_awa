@@ -372,17 +372,23 @@
     const API_URL = "http://127.0.0.1:8000/api";
     //const API_URL = "https://workflow-awa.onrender.com/api";
 
-    async function logout() {
-    await fetch(`${API_URL}/logout/`, {
-        method: 'POST',
-        credentials: 'include',
-    });
-        window.location.href = 'index.html';
+        async function logout() {
+            
+        localStorage.removeItem("token");
+        //window.location.href = 'index.html';
     }
 
     async function infos_user() {
         
-        const response = await fetch(`${API_URL}/users-joined/`);
+        const token = localStorage.getItem("token");
+            
+        const response = await fetch(`${API_URL}/users-joined/`, {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+        });
         
         // Vérifier si la requête a réussi
         if (!response.ok) {
@@ -413,12 +419,15 @@
         
     }
 
+
     async function isConnected() {
-        
-        console.log("Vérification du rôle avec token");
-        const response = await fetch(`${API_URL}/current-user/`);
-        if (!response.ok) {
-            console.error("Erreur lors de la vérification du rôle :", response.statusText);
+
+        const token = localStorage.getItem("token");
+
+        if (token) {
+            console.log("Token présent :", token);
+        } else {
+            console.log("Aucun token trouvé");
             window.location.href = 'index.html';
         }
         
@@ -427,8 +436,15 @@
     async function load_data_formulaire_demande() {
 
         // CETTE FONCTION CONSISTE A CHARGER LES DONNEES DU FORMULAIRE D'insertion des demandes 
+        const token = localStorage.getItem("token");
 
-        const response = await fetch(`${API_URL}/users-joined/`);
+        const response = await fetch(`${API_URL}/users-joined/`,{
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
         
         // Vérifier si la requête a réussi
         if (!response.ok) {
@@ -441,9 +457,17 @@
 
         try {
 
+            const token = localStorage.getItem("token");
+
             // Récupération des données pour les menus déroulants depuis l'API
             const banquesResponse = await fetch(`${API_URL}/banques/`);
-            const typedemande_Response = await fetch(`${API_URL}/types_demandes/${entite_user}`);  
+            const typedemande_Response = await fetch(`${API_URL}/types_demandes/${entite_user}`,{
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                }
+            });  
             
             const banques = await banquesResponse.json();
             const type_demandes = await typedemande_Response.json();
@@ -533,8 +557,16 @@
         //modal.hide();
         $('#confirmationModal').modal('hide');
         
+        const token = localStorage.getItem("token");
+
         // Récupérer l'user_id
-        const res = await fetch(`${API_URL}/users-joined/`);
+        const res = await fetch(`${API_URL}/users-joined/`,{
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                }
+            });
         if (!res.ok) {
             throw new Error(`Erreur lors de la récupération de l'utilisateur : ${res.status}`);
         }
@@ -639,14 +671,8 @@
 
     window.addEventListener('load', () => isConnected());
     window.addEventListener('load', () => infos_user());
-    window.addEventListener('load', () => infos_user());
     window.addEventListener('load', () => load_data_formulaire_demande());
 
-    form.addEventListener('submit',  async (event) => {
-
-     
-       
-    })
 
     
 </script>

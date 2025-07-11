@@ -1,402 +1,1072 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-  <meta charset="utf-8">
-  <title>Index - WORK FLOW - AWA</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
+    <meta charset="utf-8">
+    <title>Index - WORK FLOW - AWA</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏦</text></svg>">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-orange: #ff6b35;
+            --secondary-orange: #ff8c42;
+            --dark-black: #1a1a1a;
+            --light-gray: #f8f9fa;
+            --medium-gray: #6c757d;
+            --white: #ffffff;
+            --border-color: #e9ecef;
+            --header-height: 70px;
+        }
 
-  <!-- Favicons -->
-  <link rel="icon" type="image/x-icon" href="images/sib_logo.PNG">
-  <link href="assets/assets_index/img/apple-touch-icon.png" rel="apple-touch-icon">
- 
-  
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: var(--header-height);
+        }
 
-  <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> -->
-   
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--dark-black);
+            background-color: var(--white);
+            overflow-x: hidden;
+        }
 
-  <!-- Vendor CSS Files -->
-  <link href= "assets/assets_index/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href= "assets/assets_index/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href= "assets/assets_index/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href= "assets/assets_index/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
 
-  <!-- Main CSS File -->
-  <link href= "assets/assets_index/css/main.css"  rel="stylesheet">
+        .header.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
 
-  <!-- STYLE POUR LE FORMULAIRE -->  
+        .logo h1 {
+            color: var(--dark-black);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
 
+        .navmenu ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
 
-  <!-- Icon fonts -->
-  <link rel="stylesheet" href= "assets/assets_user/fonts/fontawesome.css">
-  <link rel="stylesheet" href= "assets/assets_user/fonts/ionicons.css">
-  <link rel="stylesheet" href= "assets/assets_user/fonts/linearicons.css">
-  <link rel="stylesheet" href= "assets/assets_user/fonts/open-iconic.css">
-  <link rel="stylesheet" href= "assets/assets_user/fonts/pe-icon-7-stroke.css">
-  <link rel="stylesheet" href= "assets/assets_user/fonts/feather.css">
+        .navmenu a {
+            color: var(--medium-gray);
+            text-decoration: none;
+            font-weight: 400;
+            font-size: 0.9rem;
+            position: relative;
+            transition: all 0.3s ease;
+            padding: 0.3rem 0;
+        }
 
-  <!-- Core stylesheets -->
-  <link rel="stylesheet" href= "assets/assets_user/css/bootstrap-material.css">
-  <link rel="stylesheet" href= "assets/assets_user/css/shreerang-material.css">
-  <link rel="stylesheet" href= "assets/assets_user/css/uikit.css">
+        .navmenu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-orange);
+            transition: width 0.3s ease;
+        }
 
-  <!-- Libs -->
-  <!--<link rel="stylesheet" href= "assets/assets_user/libs/perfect-scrollbar/perfect-scrollbar.css"> -->
-  <!--<link rel="stylesheet" href= "assets/assets_user/libs/flot/flot.css"> -->
+        .navmenu a:hover,
+        .navmenu a.active {
+            color: var(--dark-black);
+        }
 
-<style>
-    body {
-        background: linear-gradient(135deg, #f4f4f4 0%, #f4f4f4 100%);
-        min-height: 100vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+        .navmenu a:hover::after,
+        .navmenu a.active::after {
+            width: 100%;
+        }
 
-    .chat-container {
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        overflow: hidden;
-        max-width: 800px;
-        margin: 20px auto;
-        border: 2px solid #ffffff;
-    }
+        .cta-btn {
+            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+            color: var(--white) !important;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+            margin-left: 1rem;
+        }
 
-  
-</style>
+        .cta-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
 
+        /* Hero Section */
+        .hero {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+            position: relative;
+            overflow: hidden;
+            padding-top: var(--header-height);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            right: -15%;
+            width: 60%;
+            height: 150%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 107, 53, 0.04) 50%, transparent 70%);
+            transform: rotate(15deg);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--dark-black);
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--medium-gray);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .btn-get-started {
+            background: var(--dark-black);
+            color: var(--white);
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-get-started::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-get-started:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 26, 26, 0.2);
+            color: var(--white);
+        }
+
+        .btn-get-started:hover::before {
+            left: 100%;
+        }
+
+        .hero-visual {
+            position: relative;
+            height: 400px;
+        }
+
+        .hero-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 15px;
+            opacity: 0.08;
+        }
+
+        .shape-1 {
+            width: 150px;
+            height: 150px;
+            background: var(--primary-orange);
+            top: 15%;
+            right: 25%;
+            transform: rotate(45deg);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape-2 {
+            width: 100px;
+            height: 100px;
+            background: var(--dark-black);
+            bottom: 25%;
+            right: 15%;
+            transform: rotate(-30deg);
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(45deg); }
+            50% { transform: translateY(-15px) rotate(45deg); }
+        }
+
+        /* About Section */
+        .about {
+            padding: 4rem 0;
+            background: var(--white);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-black);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: var(--primary-orange);
+            margin: 1rem auto;
+            border-radius: 2px;
+        }
+
+        .about-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .about-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+        }
+
+        .about-card h3 {
+            color: var(--dark-black);
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .about-card p {
+            color: var(--medium-gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-visual {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, var(--light-gray), var(--border-color));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 107, 53, 0.08) 50%, transparent 70%);
+        }
+
+        .about-visual i {
+            font-size: 3rem;
+            color: var(--primary-orange);
+            z-index: 2;
+            position: relative;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.8rem 0;
+            color: var(--dark-black);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li i {
+            color: var(--primary-orange);
+            margin-right: 0.8rem;
+            font-size: 1rem;
+            width: 16px;
+        }
+
+        /* Contact/Login Section */
+        .contact {
+            padding: 4rem 0;
+            background: var(--light-gray);
+            position: relative;
+        }
+
+        .login-container {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .login-form {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .login-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--secondary-orange));
+            border-radius: 20px 20px 0 0;
+        }
+
+        .login-form h2 {
+            color: var(--dark-black);
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1.6rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            color: var(--dark-black);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+            border: none;
+            color: var(--white);
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-login:hover::before {
+            left: 100%;
+        }
+
+        .forgot-password {
+            color: var(--medium-gray);
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-align: center;
+            display: block;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--primary-orange);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark-black);
+            color: var(--white);
+            padding: 3rem 0 1.5rem;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--secondary-orange));
+        }
+
+        .footer-content {
+            margin-bottom: 2rem;
+        }
+
+        .footer .sitename {
+            color: var(--white);
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer h4 {
+            color: var(--primary-orange);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .footer p, .footer li {
+            color: #ccc;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .social-links a:hover {
+            background: var(--primary-orange);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .copyright {
+            border-top: 1px solid #333;
+            padding-top: 1.5rem;
+            text-align: center;
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav-toggle {
+            display: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--dark-black);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navmenu ul {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--white);
+                box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+                padding: 1rem;
+                gap: 0.8rem;
+            }
+
+            .navmenu ul.show {
+                display: flex;
+            }
+
+            .mobile-nav-toggle {
+                display: block;
+            }
+
+            .cta-btn {
+                margin-left: 0;
+                margin-top: 0.8rem;
+                text-align: center;
+                display: block;
+            }
+
+            .hero {
+                min-height: 80vh;
+                padding: var(--header-height) 0 2rem;
+            }
+
+            .hero h2 {
+                font-size: 2.2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-visual {
+                height: 300px;
+                margin-top: 2rem;
+            }
+
+            .login-form {
+                padding: 2rem;
+                margin: 0 1rem;
+            }
+
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+
+            .about-card {
+                padding: 1.5rem;
+            }
+
+            .about, .contact {
+                padding: 3rem 0;
+            }
+        }
+
+        /* Loading and Alert Styles */
+        .loading {
+            display: none;
+        }
+
+        .alert-custom {
+            border-radius: 10px;
+            border: none;
+            padding: 0.8rem 1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+            color: #28a745;
+            border-left: 3px solid #28a745;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+            color: #dc3545;
+            border-left: 3px solid #dc3545;
+        }
+
+        .spinner-border {
+            color: var(--white);
+        }
+    </style>
 </head>
 
-
-
 <body class="index-page">
-
-  <header id="header" class="header d-flex align-items-center fixed-top">
-    <div class="container-fluid container-xl position-relative d-flex align-items-center">
-
-      <a href="#hero" class="logo d-flex align-items-center me-auto">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.png" alt=""> -->
-        <h1 class="sitename">Attijari West Africa</h1>
-      </a>
-
-      <nav id="navmenu" class="navmenu">
-        <ul>
-          <li><a href="#hero" class="active">Accueil</a></li>
-          <li><a href="#about">A propos</a></li>
-          <li><a href="#footer">Infos</a></li>
-        </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-      </nav>
-
-      <a class="cta-btn" href="#connexion">Se Connecter</a>
-
-    </div>
-  </header>
-
-  <main class="main">
-
-    <!-- Hero Section -->
-    <section id="hero" class="hero section dark-background">
-
-      <img src="images/image_impulsion.PNG" alt="" data-aos="fade-in">
-
-      <div class="container d-flex flex-column align-items-center">
-        <h2 data-aos="fade-up" data-aos-delay="100">WORK FLOW - AWA.</h2>
-        <p data-aos="fade-up" data-aos-delay="200">Un Outil permettant d'Optimiser les processus métiers</p>
-        <div class="d-flex mt-4" data-aos="fade-up" data-aos-delay="300">
-          <a href="" id="redirectRegisterUser" class="btn-get-started">Croire en Vous</a>
+    <!-- Header -->
+    <header id="header" class="header">
+        <div class="container-fluid container-xl position-relative d-flex align-items-center">
+            <a href="#hero" class="logo d-flex align-items-center me-auto">
+                <h1 class="">Attijari West Africa</h1>
+            </a>
+            
+            <nav id="navmenu" class="navmenu">
+                <ul>
+                    <li><a href="#hero" class="active">Accueil</a></li>
+                    <li><a href="#about">À propos</a></li>
+                    <li><a href="#footer">Infos</a></li>
+                </ul>
+                <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+            </nav>
+            
+            <a class="cta-btn" href="#connexion">Se Connecter</a>
         </div>
-      </div>
+    </header>
 
-    </section><!-- /Hero Section -->
-
-    <!--  Section A propos -->
-    <section id="about" class="about section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>WorkFlow</h2>
-      </div><!-- End Section Title -->
-
-      <div class="container">
-
-       <div class="container">
-
-        <div class="row gy-4">
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-            <h3>Plateforme de WorkFlow Bancaire</h3>
-            <img src="" class="img-fluid rounded-4 mb-4" alt="">
-            <p>
-              Systeme sécurisé d'approbation multi-niveaux pour les <br>
-              opérations bancaires. Optimisez votre workflow avec <br>
-              des mises à jour en temps réel et un suivi complet.  
-            </p>
-           <!--  <p>Il permet une gestion intégrer, rapide et fiable des demandes au sein du réseau AttijariWafa en Afrique de l'ouest ainsi qu'avec le siège au Maroc.</p>
-            <p>Il permet un gain de temps, et une tracabilité des informations échangées entre filiales.</p> -->
-          </div>
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="250">
-            <div class="content ps-0 ps-lg-5">
-              <p class="fst-italic">
-                <br>
-                <br>
-                <br>
-                <br>
-              </p>
-              <ul>
-                <li><i class="bi bi-check-circle-fill"></i> <span>Processus d'approbation multi-niveaux</span></li>
-                <li><i class="bi bi-check-circle-fill"></i> <span>Mises àjour en temps réel</span></li>
-                <li><i class="bi bi-check-circle-fill"></i> <span>Gestion sécurisée des documents</span></li>
-                <li><i class="bi bi-check-circle-fill"></i> <span>Historique complet des opérations</span></li>
-              </ul>
-              <p>
-
-              </p>
-
+    <main class="main">
+        <!-- Hero Section -->
+        <section id="hero" class="hero">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <div class="hero-content">
+                            <h2>WORK FLOW<br><span style="color: var(--primary-orange);">AWA</span></h2>
+                            <p>Un Outil permettant d'Optimiser les processus métiers</p>
+                            <a href="#about" class="btn-get-started">
+                                Découvrir Plus
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="hero-visual">
+                            <div class="hero-shapes">
+                                <div class="shape shape-1"></div>
+                                <div class="shape shape-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
+        </section>
 
-      </div>
+        <!-- About Section -->
+        <section id="about" class="about">
+            <div class="container">
+                <div class="section-title">
+                    <h2>WorkFlow</h2>
+                </div>
 
-      </div>
-
-    </section><!-- /About Section -->
-
-
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="testimonials section dark-background">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-      </div>
-
-    </section><!-- /Testimonials Section -->
-
-    <!-- Portfolio Section -->
-    <section id="connexion" class="contact section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>WorkFlow</h2>
-      </div><!-- End Section Title -->
-
-      <div class="container">
-        <div class="row">
-        <div class ="col-lg-4"></div>
-        <div class="col-lg-4" >
-          <h2 class="text-center mb-3">Connexion</h2>
-        </div>
-        <div class ="col-lg-4"></div>
-        <div class="row">
-
-        <div class="row">
-        <div class ="col-lg-4"></div>
-        <div class="col-lg-5">
-
-          <form action="" method="" class="shadow-lg p-3 mb-5 bg-body rounded">
-
-            <div class="mb-3">
-              <label for="username" class="form-label">Identifiant :</label>
-              <input type="text" class="form-control" id="username" name="username" placeholder="Votre identifiant" required>
+                <div class="row gy-4">
+                    <div class="col-lg-6">
+                        <div class="about-card">
+                            <h3>Plateforme de WorkFlow Bancaire</h3>
+                            <div class="about-visual">
+                                <i class="bi bi-diagram-3"></i>
+                            </div>
+                            <p>
+                                Système sécurisé d'approbation multi-niveaux pour les 
+                                opérations bancaires. Optimisez votre workflow avec 
+                                des mises à jour en temps réel et un suivi complet.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="about-card">
+                            <h3>Fonctionnalités Avancées</h3>
+                            <ul class="feature-list">
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Processus d'approbation multi-niveaux</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Mises à jour en temps réel</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Gestion sécurisée des documents</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Historique complet des opérations</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </section>
 
-            <div class="mb-3">
-              <label for="password" class="form-label">Mot de passe :</label>
-              <input type="password" class="form-control" id="password" name="password" placeholder="Votre mot de passe" required>
+        <!-- Contact/Login Section -->
+        <section id="connexion" class="contact">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Connexion</h2>
+                </div>
+
+                <div class="login-container">
+                    <div id="alert-container"></div>
+                    
+                    <form id="loginForm" class="login-form">
+                        <h2>Accès Sécurisé</h2>
+                        
+                        <div class="form-group">
+                            <label for="username" class="form-label">Identifiant</label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   placeholder="Votre identifiant" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="Votre mot de passe" required>
+                        </div>
+                        
+                        <button type="submit" class="btn-login">
+                            <span class="btn-text">Se Connecter</span>
+                            <div class="loading">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+                    </form>
+                </div>
             </div>
-            <div class="text-center mb-3">
-              <button type="submit" onclick="login()" class="btn btn-outline-secondary">Connexion</button>
-              <a href="#" class="nav-link">Mot de passe oublié ?</a>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="row gy-4">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="sitename">Attijari West Africa</div>
+                        <div class="social-links">
+                            <a href="#"><i class="bi bi-twitter-x"></i></a>
+                            <a href="#"><i class="bi bi-facebook"></i></a>
+                            <a href="#"><i class="bi bi-instagram"></i></a>
+                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-3">
+                        <h4>Localisation</h4>
+                        <ul>
+                            <li><p>128 Avenue Chardy</p></li>
+                            <li><p>Abidjan, BP 225</p></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-3">
+                        <h4>Contacts</h4>
+                        <ul>
+                            <li><p><strong>Phone:</strong> +225 27 09 22 43 29</p></li>
+                            <li><p><strong>Email:</strong> infos@attijariwestafrica.com</p></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-
-          </form>
-
-        </div><!-- End Contact Form -->
-        <div class ="col-lg-4"></div>
+            
+            <div class="copyright">
+                <p>© <span>attijariwestafrica</span> <strong>2024</strong> <span>All Rights Reserved</span></p>
+            </div>
         </div>
+    </footer>
 
-      </div>
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-
-      </div><!-- End Section Title -->
-
-    </section><!-- /Portfolio Section -->
-
-
-  </main>
-
-  <footer id="footer" class="footer dark-background">
-
-    <div class="container footer-top">
-      <div class="row gy-4">
-        <div class="col-lg-4 col-md-6 footer-about">
-          <a href="index.html" class="logo d-flex align-items-center">
-            <span class="sitename">Attijari West Africa</span>
-          </a>
-
-          <div class="social-links d-flex mt-4">
-            <a href=""><i class="bi bi-twitter-x"></i></a>
-            <a href=""><i class="bi bi-facebook"></i></a>
-            <a href=""><i class="bi bi-instagram"></i></a>
-            <a href=""><i class="bi bi-linkedin"></i></a>
-          </div>
-        </div>
-
-        <div class="col-lg-4 col-md-3 footer-links">
-          <h4>Localisation</h4>
-          <ul>
-            <li><p>128 Avenue Chardy</p></li>
-            <li><p>Abidjan, BP 225</p></li>
-          </ul>
-        </div>
-
-        <div class="col-lg-3 col-md-3 footer-links">
-          <h4>Contacts</h4>
-          <ul>
-            <li><p><strong>Phone:</strong> <span>+225 27 09 22 43 29</span></p></li>
-            <li><p><strong>Email:</strong> <span>Infos@attijariwestafrica.com</span></p></li>
-          </ul>
-        </div>
-
-
-      </div>
-    </div>
-
-    <div class="container copyright text-center mt-4">
-      <p>© <span>attijariwestafrica</span> <strong class="px-1 sitename"></strong> <span>All Rights Reserved</span></p>
-      <div class="credits">
-        <!-- All the links in the footer should remain intact. -->
-        <!-- You can delete the links only if you've purchased the pro version. -->
-        <!-- Licensing information: https://bootstrapmade.com/license/ -->
-        <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-      </div>
-    </div>
-
-  </footer>
-
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Preloader -->
-  <div id="preloader"></div>
-
-  <!-- Vendor JS Files -->
-  <script src= "assets/assets_index/vendor/bootstrap/js/bootstrap.bundle.min.js" ></script>
-  <script src= "assets/assets_index/vendor/php-email-form/validate.js" ></script>
-  <script src= "assets/assets_index/vendor/aos/aos.js" ></script>
-  <script src= "assets/assets_index/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src= "assets/assets_index/vendor/purecounter/purecounter_vanilla.js"></script>
-  <script src= "assets/assets_index/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src= "assets/assets_index/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
-  <script src= "assets/assets_index/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-
-  <!-- Main JS File -->
-  <script src= "assets/assets_index/js/main.js"></script>a
-  
-  <!-- STYLE POUR FORMULAIRE -->
-    <script src= "assets/assets_user/js/pace.js"></script>
-    <script src= "assets/assets_user/js/jquery-3.3.1.min.js"></script>
-    <script src= "assets/assets_user/libs/popper/popper.js"></script>
-   <!-- <script src= "assets/assets_user/js/bootstrap.js"></script> -->
-    <script src= "assets/assets_user/js/sidenav.js"></script>
-    <script src= "assets/assets_user/js/layout-helpers.js"></script>
-    <script src= "assets/assets_user/js/material-ripple.js"></script>
-
-    <!-- Libs -->
-    <script src= "assets/assets_user/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src= "assets/assets_user/libs/eve/eve.js"></script>
-    <!-- <script src= "assets/assets_user/libs/flot/flot.js" ></script> -->
-    <!--<script src= "assets/assets_user/libs/flot/curvedLines.js"></script> -->
-    <script src= "assets/assets_user/libs/chart-am4/core.js"></script>
-    <script src= "assets/assets_user/libs/chart-am4/charts.js"></script>
-    <!-- <script src= "assets/assets_user/libs/chart-am4/animated.js"></script> -->
-
-    <!-- Demo -->
-    <script src="assets/assets_user/js/analytics.js"></script>
-    <!-- <script src= "assets/assets_user/js/pages/dashboards_index.js"></script> --> 
-
-    <script>
-
-    const API_URL = "http://127.0.0.1:8000/api";
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    //const API_URL = "https://workflow-awa.onrender.com/api";
+    <script>
+        const API_URL = "http://127.0.0.1:8000/api";
+        
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
 
-    $('#redirectRegisterUser').on('click', function(event) {
-          event.preventDefault(); // Empêche le comportement par défaut du lien
-          window.location.href = 'formulaire_inscription.html';
-    });
+        // Mobile navigation toggle
+        document.querySelector('.mobile-nav-toggle').addEventListener('click', function() {
+            const navmenu = document.querySelector('.navmenu ul');
+            navmenu.classList.toggle('show');
+        });
 
-    async function login() {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
+        // Smooth scrolling with offset for fixed header
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    const headerHeight = document.querySelector('.header').offsetHeight;
+                    const targetPosition = targetElement.offsetTop - headerHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
 
-      
+        // Active navigation with proper offset
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.navmenu a');
+            const headerHeight = document.querySelector('.header').offsetHeight;
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - headerHeight - 50;
+                const sectionBottom = sectionTop + section.offsetHeight;
+                
+                if (window.pageYOffset >= sectionTop && window.pageYOffset < sectionBottom) {
+                    current = section.getAttribute('id');
+                }
+            });
 
-      if (username && password) {
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Alert function
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-custom`;
+            alertDiv.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                ${message}
+            `;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Loading state
+        function setLoading(isLoading) {
+            const btnText = document.querySelector('.btn-text');
+            const loading = document.querySelector('.loading');
+            const submitBtn = document.querySelector('button[type="submit"]');
+            
+            if (isLoading) {
+                btnText.style.display = 'none';
+                loading.style.display = 'inline-block';
+                submitBtn.disabled = true;
+            } else {
+                btnText.style.display = 'inline';
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await login();
+        });
+
+        async function login() {
+            localStorage.removeItem("token");
+            
+            let username = document.getElementById("username").value.trim();
+            let password = document.getElementById("password").value.trim();
+            
+            if (!username || !password) {
+                showAlert("Veuillez remplir correctement le formulaire", 'danger');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
                 const response = await fetch(`${API_URL}/login/`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({username,password}),
-                    credentials: 'include', // Envoie le cookie
-            });
-          
-          const data = await response.json();
-
-          //alert(data.access_token);
-
-          if (data.access_token) {
-
-                localStorage.setItem("token", data.access_token);
-                //document.getElementById("login-form").style.display = "none";
-                const role = await checkUserRole(token);
-                    
-                if (role ==="user") {
-                    window.location.href = 'acceuil.html';
-                  } else {
-                    window.location.href = 'admin_acceuil.html';
-                  }
-  
-                } else { 
-                    alert("Erreur de connexion");   
+                    body: JSON.stringify({username, password}),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP : ${response.status}`);
                 }
-          }else {
-              alert("Veuillez remplir correctement le formulaire");
-          }
-      } 
-        
-
-      async function checkUserRole(token) {
-
-       
-        console.log("Vérification du rôle avec token ::::::");
-        const response = await fetch(`${API_URL}/users/me/${token}`);
-
-        if (!response.ok) {
-              console.error("Erreur lors de la vérification du rôle :", response.statusText);
-              return;
+                
+                const data = await response.json();
+                const token = data.access_token;
+                localStorage.setItem("token", token);
+                
+                showAlert("Connexion réussie ! Redirection en cours...", 'success');
+                
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const role = await checkUserRole();
+                if (role) {
+                    if (role === "user") {
+                        window.location.href = 'acceuil.html';
+                    } else {
+                        window.location.href = 'admin_acceuil.html';
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Erreur FETCH :', error);
+                showAlert("Erreur de connexion. Vérifiez vos identifiants.", 'danger');
+            } finally {
+                setLoading(false);
+            }
         }
 
-        const user = await response.json();
-      
+        async function checkUserRole() {
+            const token = localStorage.getItem("token");
+            
+            if (!token) {
+                console.error("Aucun token trouvé dans localStorage");
+                return null;
+            }
 
-        console.log("Utilisateur récupéré :", user);
-        if (user.id_niv_hab === 4 ) {
-              return "admin";
-        }else {
-          return "user";
+            try {
+                const response = await fetch(`${API_URL}/users/me/`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: "Bearer " + token,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP : ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const user = data.result;
+
+                if (!user || !user.username || user.id_niv_hab === undefined) {
+                    throw new Error("Données utilisateur invalides");
+                }
+
+                console.log("Utilisateur récupéré :", user);
+                return user.id_niv_hab === 4 ? "admin" : "user";
+                
+            } catch (error) {
+                console.error("Erreur lors de la vérification du rôle :", error);
+                return null;
+            }
         }
 
-      }
-  </script>
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -30px 0px'
+        };
 
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
 
+        // Observe elements for animation
+        document.querySelectorAll('.about-card, .login-form').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
 </body>
 </html>

@@ -629,47 +629,38 @@
 
         const API_URL = "http://127.0.0.1:8000/api";
         //const API_URL = "https://workflow-awa.onrender.com/api";
-       
-
-        async function infos_demandes_for_users() {
-
-                const resp1 = await fetch(`${API_URL}/users-joined/`);
-
-                
-                
-                if (!resp1.ok) {
-                        throw new Error(`Erreur HTTP : ${resp1.status}`);
-                }
-                
-                const data1 = await resp1.json();
-
-                const infos_user = data1.results;
-
-
-                const response = await fetch(`${API_URL}/demandes_a_consulter/${infos_user[0].domaine}`);
-                          
-                //Vérifier si la requête a réussi
-                if (!response.ok) {
-                        throw new Error(`Erreur HTTP : ${response.status}`);
-                }
-                                
-
-                const data = await response.json();
-
-                return data.results;
-        }
+    
         
         async function logout() {
-        await fetch(`${API_URL}/logout/`, {
-            method: 'POST',
-            credentials: 'include',
-        });
-            window.location.href = 'index.html';
+        
+            localStorage.removeItem("token");
+            //window.location.href = 'index.html';
+        }
+
+        async function isConnected() {
+
+            const token = localStorage.getItem("token");
+
+            if (token) {
+                console.log("Token présent :", token);
+            } else {
+                console.log("Aucun token trouvé");
+                window.location.href = 'index.html';
+            }
+            
         }
 
         async function infos_user() {
-            
-            const response = await fetch(`${API_URL}/users-joined/`);
+        
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(`${API_URL}/users-joined/`,{
+                method: "GET",
+                headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json",
+                },
+            });
             
             // Vérifier si la requête a réussi
             if (!response.ok) {
@@ -680,6 +671,7 @@
             
             const infos_user = donnees.results;
 
+
             document.getElementById("user_id").innerText = infos_user[0].prenom + " " + infos_user[0].nom;
             
             
@@ -688,51 +680,29 @@
                 document.getElementById('intro_dmd').style.display = 'none';
                 document.getElementById('consult_dmd').style.display = 'none';
                 document.getElementById('valid_dmd').style.display = 'none';
-                document.getElementById('valid_dmd_ggrg').style.display = 'none';
 
             } else if (infos_user[0].niveau_hab==="Niveau 2") {
                 document.getElementById('valid_dmd').style.display = 'none';
-                document.getElementById('valid_dmd_ggrg').style.display = 'none';
                 
             } else if (infos_user[0].niveau_hab==="Niveau 3") {
-
-                if(infos_user[0].banque==="AIG" && (infos_user[0].entite==="GGR")){
-                    document.getElementById('intro_dmd').style.display = 'none';
-                    document.getElementById('consult_dmd').style.display = 'none';
-                    document.getElementById('valid_dmd').style.display = 'none';
-                }else{
-                    document.getElementById('intro_dmd').style.display = 'none';
-                    document.getElementById('consult_dmd').style.display = 'none';
-                    document.getElementById('valid_dmd_ggrg').style.display = 'none';
-                }
-                
-                
+                document.getElementById('intro_dmd').style.display = 'none';
+                document.getElementById('consult_dmd').style.display = 'none';
                 
             } 
-
             
         }
 
-        async function isConnected() {
-            
-            console.log("Vérification du rôle avec token");
-            const response = await fetch(`${API_URL}/current-user/`);
-            if (!response.ok) {
-                console.error("Erreur lors de la vérification du rôle :", response.statusText);
-                window.location.href = 'index.html';
-            }
-          
-        }
-        
+
+
+        window.addEventListener('load', () => isConnected());
+        window.addEventListener('load', () => infos_user());
+
 
         //const demandes_valider  = <?php echo $demandes_valider; ?>;
                                                                       
         //insertion des données lorsque la page se charge
-        window.addEventListener('load', () => fillTable_dmd_insert());
+        //window.addEventListener('load', () => fillTable_dmd_insert());
         //window.addEventListener('load', () => fillTable_dmd_valider(demandes_valider));
-        
-        window.addEventListener('load', () => isConnected());
-        window.addEventListener('load', () => infos_user());
         
         const tabLinks = document.querySelectorAll('.nav-tabs .nav-link');
 

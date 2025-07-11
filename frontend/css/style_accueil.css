@@ -1,0 +1,488 @@
+/* Custom CSS Variables */
+:root {
+  --orange-primary: #ea580c;
+  --orange-light: #fed7aa;
+  --orange-dark: #c2410c;
+  --orange-darker: #9a3412;
+  --red-primary: #dc2626;
+  --red-dark: #b91c1c;
+  --gray-dark: #374151;
+  --gray-light: #f3f4f6;
+  --sidebar-width: 256px;
+  --sidebar-collapsed-width: 64px;
+}
+
+/* Base Styles */
+body {
+  background-color: var(--gray-light);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Mobile Overlay */
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  display: none;
+}
+
+.mobile-overlay.show {
+  display: block;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: white;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+  transition: all 0.3s ease;
+  transform: translateX(-100%);
+}
+
+.sidebar.show {
+  transform: translateX(0);
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+}
+
+@media (min-width: 992px) {
+  .sidebar {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  background-color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.brand-text {
+  font-weight: bold;
+  color: black;
+  font-size: 14px;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .brand-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .brand-container {
+  justify-content: center;
+}
+
+.sidebar-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btn-toggle,
+.btn-close {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: #6b7280;
+  transition: background-color 0.2s ease;
+}
+
+.btn-toggle:hover,
+.btn-close:hover {
+  background-color: #f3f4f6;
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+  padding: 1rem;
+  overflow-y: auto;
+  height: calc(100vh - 80px);
+}
+
+.nav-section {
+  margin-bottom: 1rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  color: #374151;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  background-color: var(--orange-light);
+  color: var(--orange-dark);
+}
+
+.nav-link.active {
+  background-color: var(--orange-light);
+  color: var(--orange-dark);
+}
+
+.nav-link i {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-text {
+  transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .nav-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.nav-badge {
+  font-size: 8px;
+  padding: 2px 4px;
+}
+
+.sidebar.collapsed .nav-badge {
+  display: none;
+}
+
+/* Actions Section */
+.nav-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: black;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-header:hover {
+  background-color: var(--orange-light);
+}
+
+.nav-submenu {
+  margin-top: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.nav-submenu.collapsed {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.submenu-link {
+  padding-left: 2.5rem;
+  font-size: 14px;
+}
+
+.collapsed-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.collapsed-link {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.sidebar.collapsed .actions-section {
+  display: none;
+}
+
+.sidebar.collapsed .collapsed-actions {
+  display: flex !important;
+}
+
+/* Main Content */
+.main-content {
+  transition: margin-left 0.3s ease;
+  margin-left: 0;
+}
+
+@media (min-width: 992px) {
+  .main-content {
+    margin-left: var(--sidebar-width);
+  }
+
+  .main-content.collapsed {
+    margin-left: var(--sidebar-collapsed-width);
+  }
+}
+
+/* Header */
+.top-header {
+  background-color: var(--gray-dark);
+  color: white;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dropdown-toggle::after {
+  margin-left: 0.5rem;
+}
+
+/* Page Content */
+.page-content {
+  padding: 1.5rem;
+}
+
+.content-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: black;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 1rem;
+}
+
+.validation-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Validation Level Badges */
+.level-rejected {
+  border: 1px solid var(--red-primary);
+  color: var(--red-primary);
+  background-color: #fef2f2;
+}
+
+.level-1 {
+  border: 1px solid var(--orange-primary);
+  color: var(--orange-primary);
+  background-color: #fff7ed;
+}
+
+.level-2 {
+  border: 1px solid #eab308;
+  color: #a16207;
+  background-color: #fefce8;
+}
+
+.level-3 {
+  border: 1px solid #3b82f6;
+  color: #1d4ed8;
+  background-color: #eff6ff;
+}
+
+.level-approved {
+  border: 1px solid #10b981;
+  color: #047857;
+  background-color: #f0fdf4;
+}
+
+/* Stats Cards */
+.stats-card {
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s ease;
+}
+
+.stats-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.stats-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: black;
+  margin-bottom: 0.25rem;
+}
+
+.stats-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.bg-orange {
+  background-color: var(--orange-primary) !important;
+}
+
+.bg-orange-dark {
+  background-color: var(--orange-dark) !important;
+}
+
+.bg-orange-darker {
+  background-color: var(--orange-darker) !important;
+}
+
+.bg-red-dark {
+  background-color: var(--red-dark) !important;
+}
+
+/* Custom Buttons */
+.btn-orange {
+  background-color: var(--orange-primary);
+  border-color: var(--orange-primary);
+  color: white;
+  font-size: 12px;
+}
+
+.btn-orange:hover {
+  background-color: var(--orange-dark);
+  border-color: var(--orange-dark);
+  color: white;
+}
+
+.btn-red-outline {
+  border: 1px solid var(--red-primary);
+  color: var(--red-primary);
+  background-color: transparent;
+  font-size: 12px;
+}
+
+.btn-red-outline:hover {
+  background-color: #fef2f2;
+  border-color: var(--red-primary);
+  color: var(--red-primary);
+}
+
+/* Table Styles */
+.table-hover tbody tr:hover {
+  background-color: #fff7ed;
+}
+
+/* Custom Tab Styles */
+.nav-tabs .nav-link.active {
+  background-color: var(--orange-primary);
+  border-color: var(--orange-primary);
+  color: white;
+}
+
+.nav-tabs .nav-link {
+  color: #6b7280;
+  border: 1px solid transparent;
+}
+
+.nav-tabs .nav-link:hover {
+  border-color: var(--orange-light);
+  color: var(--orange-primary);
+}
+
+/* Footer */
+.page-footer {
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.text-orange {
+  color: var(--orange-primary) !important;
+}
+
+.page-footer a:hover {
+  color: var(--orange-primary) !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+  .page-content {
+    padding: 1rem;
+  }
+
+  .validation-legend {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .validation-legend .badge {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-number {
+    font-size: 1.25rem;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+  }
+}

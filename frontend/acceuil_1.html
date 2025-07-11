@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WORKFLOW - AWA Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style_accueil.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay d-lg-none" id="mobileOverlay"></div>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <!-- Sidebar Header -->
+            <div class="sidebar-header">
+                <div class="brand-container" id="brandContainer">
+                    <div class="brand-logo">
+                        <img src="images/sib_logo.PNG" alt="" class="img-fluid">
+                    </div>
+                    <span class="brand-text" id="brandText">WORKFLOW - AWA</span>
+                </div>
+                <div class="sidebar-controls">
+                    <button class="btn-toggle d-none d-lg-block" id="sidebarToggle">
+                        <i class="bi bi-chevron-down" id="toggleIcon"></i>
+                    </button>
+                    <button class="btn-close d-lg-none" id="sidebarClose">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar-nav">
+                <!-- Home Link -->
+                <div class="nav-section">
+                    <a href="#" class="nav-link active">
+                        <i class="bi bi-house"></i>
+                        <span class="nav-text">Accueil</span>
+                        <span class="badge bg-danger ms-auto nav-badge">•</span>
+                    </a>
+                </div>
+
+                <!-- Actions Section -->
+                <div class="nav-section">
+                    <div class="actions-section" id="actionsSection">
+                        <button class="nav-header" id="actionsToggle">
+                            <span>Actions</span>
+                            <i class="bi bi-chevron-down" id="actionsIcon"></i>
+                        </button>
+                        <div class="nav-submenu" id="actionsSubmenu">
+                            <a href="#" class="nav-link submenu-link">
+                                <i class="bi bi-clipboard"></i>
+                                <span class="nav-text">Introduire demande</span>
+                            </a>
+                            <a href="#" class="nav-link submenu-link">
+                                <i class="bi bi-grid"></i>
+                                <span class="nav-text">Consulter mes demandes</span>
+                            </a>
+                            <a href="#" class="nav-link submenu-link">
+                                <i class="bi bi-lock"></i>
+                                <span class="nav-text">Valider des demandes</span>
+                            </a>
+                            <a href="#" class="nav-link submenu-link">
+                                <i class="bi bi-bar-chart"></i>
+                                <span class="nav-text">Statistiques</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Collapsed Actions Icons -->
+                    <div class="collapsed-actions d-none" id="collapsedActions">
+                        <a href="#" class="nav-link collapsed-link" title="Introduire demande">
+                            <i class="bi bi-clipboard"></i>
+                        </a>
+                        <a href="#" class="nav-link collapsed-link" title="Consulter mes demandes">
+                            <i class="bi bi-grid"></i>
+                        </a>
+                        <a href="#" class="nav-link collapsed-link" title="Valider des demandes">
+                            <i class="bi bi-lock"></i>
+                        </a>
+                        <a href="#" class="nav-link collapsed-link" title="Statistiques">
+                            <i class="bi bi-bar-chart"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Other Links -->
+                <div class="nav-section border-top pt-3">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-lock"></i>
+                        <span class="nav-text">Login</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-person"></i>
+                        <span class="nav-text">Signup</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-question-circle"></i>
+                        <span class="nav-text">FAQ</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Header -->
+            <header class="top-header">
+                <button class="btn btn-link text-white d-lg-none" id="mobileMenuToggle">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+
+                <div class="header-user ms-auto">
+                    <span class="text-muted d-none d-sm-inline">|</span>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-white dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <img src="https://via.placeholder.com/32x32/ea580c/ffffff?text=JD" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
+                            <span class="d-none d-sm-inline">John Doe</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Mon profil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-envelope me-2"></i>Messages</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-power me-2"></i>Déconnexion</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="page-content">
+                <div class="content-header">
+                    <h1 class="page-title">Demandes</h1>
+                    <p class="page-subtitle">Tableau de bord des demandes</p>
+
+                    <!-- Validation Levels Legend -->
+                    <div class="validation-legend">
+                        <span class="badge level-rejected">Rejeté</span>
+                        <span class="badge level-1">Niveau 1 - Local</span>
+                        <span class="badge level-2">Niveau 2 - AWA</span>
+                        <span class="badge level-3">Niveau 3 - GGR Group</span>
+                        <span class="badge level-approved">Validé - Approuvé</span>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Demandes introduites</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h2 class="stats-number">45</h2>
+                                        <small class="text-success">+5% ce mois</small>
+                                    </div>
+                                    <div class="stats-indicator bg-orange"></div>
+                                </div>
+                                <button class="btn btn-orange btn-sm mt-2">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Demandes clôturées</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h2 class="stats-number">32</h2>
+                                        <small class="text-success">+0.00% ce mois</small>
+                                    </div>
+                                    <div class="stats-indicator bg-danger"></div>
+                                </div>
+                                <button class="btn btn-orange btn-sm mt-2">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Demandes supprimées</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h2 class="stats-number">8</h2>
+                                        <small class="text-success">+0.00% ce mois</small>
+                                    </div>
+                                    <div class="stats-indicator bg-dark"></div>
+                                </div>
+                                <button class="btn btn-orange btn-sm mt-2">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Validation GGR Local</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h2 class="stats-number">12</h2>
+                                        <small class="text-success">+4% ce mois</small>
+                                    </div>
+                                    <div class="stats-indicator bg-orange-dark"></div>
+                                </div>
+                                <button class="btn btn-orange btn-sm mt-2">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Validation AWA</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h2 class="stats-number">18</h2>
+                                        <small class="text-success">+4% ce mois</small>
+                                    </div>
+                                    <div class="stats-indicator bg-red-dark"></div>
+                                </div>
+                                <button class="btn btn-orange btn-sm mt-2">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Validation GGR Group</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h2 class="stats-number">6</h2>
+                                        <small class="text-success">+4% ce mois</small>
+                                    </div>
+                                    <div class="stats-indicator bg-orange-darker"></div>
+                                </div>
+                                <button class="btn btn-orange btn-sm mt-2">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters and Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" placeholder="Filtrer par Banque" id="filterBank">
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" placeholder="Filtrer par Entité" id="filterEntity">
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" placeholder="Filtrer par Type" id="filterType">
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" placeholder="Filtrer par Contrepartie" id="filterCounterpart">
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" placeholder="Filtrer par date" id="filterDate">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Tabs -->
+                        <ul class="nav nav-tabs" id="demandsTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="introduced-tab" data-bs-toggle="tab" data-bs-target="#introduced" type="button" role="tab">
+                                    Demandes Introduites
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="demandsTabContent">
+                            <div class="tab-pane fade show active" id="introduced" role="tabpanel">
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="fw-bold">Banque</th>
+                                                <th class="fw-bold">Entité</th>
+                                                <th class="fw-bold">Type de demande</th>
+                                                <th class="fw-bold">Contrepartie</th>
+                                                <th class="fw-bold">Date / Heure</th>
+                                                <th class="fw-bold">Niveau validation</th>
+                                                <th class="fw-bold">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="demandsTableBody">
+                                            <!-- Table content will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="page-footer">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                    <div class="mb-3 mb-md-0">
+                        <span class="fw-semibold">© </span>
+                        <a href="#" class="text-orange fw-semibold text-decoration-none">Attijariwestafrica</a>
+                    </div>
+                    <div class="d-flex flex-wrap justify-content-center gap-4">
+                        <a href="#" class="text-decoration-none">About Us</a>
+                        <a href="#" class="text-decoration-none">Help</a>
+                        <a href="#" class="text-decoration-none">Contact</a>
+                        <a href="#" class="text-decoration-none">Terms & Conditions</a>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="js/script_accueil.js"></script>
+</body>
+</html>

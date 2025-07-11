@@ -430,7 +430,6 @@
     <!-- Libs -->
     <script src= "assets/assets_user/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src= "assets/assets_user/libs/eve/eve.js"></script>
-    <!-- <script src= "assets/assets_user/libs/flot/flot.js"></script> -->
     <script src= "assets/assets_user/libs/flot/curvedLines.js"></script>
     <script src= "assets/assets_user/libs/chart-am4/core.js"></script>
     <script src= "assets/assets_user/libs/chart-am4/charts.js"></script>
@@ -449,10 +448,17 @@
 
         async function infos_demandes_for_users() {
 
-                const resp1 = await fetch(`${API_URL}/users-joined/`);
+                const token = localStorage.getItem("token");
 
-                
-                
+                const resp1 = await fetch(`${API_URL}/users-joined/`,{
+                    method: "GET",
+                    headers: {
+                    Authorization: "Bearer " + token,
+                    "Content-Type": "application/json",
+                    },
+                });
+
+                         
                 if (!resp1.ok) {
                         throw new Error(`Erreur HTTP : ${resp1.status}`);
                 }
@@ -462,7 +468,13 @@
                 const infos_user = data1.results;
 
 
-                const response = await fetch(`${API_URL}/demandes_a_consulter/${infos_user[0].domaine}`);
+                const response = await fetch(`${API_URL}/demandes_a_consulter/${infos_user[0].domaine}`,{
+                    method: "GET",
+                    headers: {
+                    Authorization: "Bearer " + token,
+                    "Content-Type": "application/json",
+                    },
+                });
                           
                 //Vérifier si la requête a réussi
                 if (!response.ok) {
@@ -477,22 +489,21 @@
         
         async function logout() {
              
-            alert("logout");
-            console.log("API_URL:", API_URL);
-            
-            const response = await fetch(`${API_URL}/logout/`,{
-                method: 'POST',
-                credentials: 'include',
-            });
-            mess = await response.json();
-            
-            alert(mess.message);
+            localStorage.removeItem("token");
             //window.location.href = 'index.html';
         }
 
         async function infos_user() {
+
+            const token = localStorage.getItem("token");
             
-            const response = await fetch(`${API_URL}/users-joined/`);
+            const response = await fetch(`${API_URL}/users-joined/`, {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
             
             // Vérifier si la requête a réussi
             if (!response.ok) {
@@ -537,13 +548,14 @@
         }
 
         async function isConnected() {
-            
-            const response = await fetch(`${API_URL}/current-user/`);
 
-            if (!response.ok) {
-                alert("is connected");
-                console.error("Erreur lors de la vérification du rôle :", response.statusText);
-                /*window.location.href = 'index.html';*/
+            const token = localStorage.getItem("token");
+
+            if (token) {
+                console.log("Token présent :", token);
+            } else {
+                console.log("Aucun token trouvé");
+                window.location.href = 'index.html';
             }
           
         }
@@ -653,12 +665,12 @@
         //const  demandes = await infos_demandes_for_users();
 
         //insertion des données lorsque la page se charge
-        ///////window.addEventListener('load', () => fillTable_dmd_insert());
+        window.addEventListener('load', () => fillTable_dmd_insert());
         //window.addEventListener('load', () => fillTable_dmd_valider(demandes_valider));
         
 
         
-       /*window.addEventListener('load', function () {
+       window.addEventListener('load', function () {
             // Attendre un court délai pour que Bootstrap mette à jour la classe active
                 document.getElementById('filterbanque').addEventListener('input', () => filterTable_dmd_insert());
                 document.getElementById('filterEntity').addEventListener('input', () => filterTable_dmd_insert());
@@ -666,7 +678,7 @@
                 document.getElementById('filterConterpart').addEventListener('input',() => filterTable_dmd_insert());
                 document.getElementById('filterdate').addEventListener('input',() => filterTable_dmd_insert());
          
-            });*/
+            });
 
         const tabLinks = document.querySelectorAll('.nav-tabs .nav-link');
 
