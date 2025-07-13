@@ -467,9 +467,17 @@
 
         try {
 
+            const token = localStorage.getItem("token");
+
             // Récupération des données pour les menus déroulants depuis l'API
             const banquesResponse = await fetch(`${API_URL}/banques/`);
-            const typedemande_Response = await fetch(`${API_URL}/types_demandes/${entite_user}`);  
+            const typedemande_Response = await fetch(`${API_URL}/types_demandes/${entite_user}`,{
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                }
+            });  
             
             const demande_Response = await fetch(`${API_URL}/demandes/${id_demande}`);
 
@@ -515,7 +523,7 @@
             document.getElementById('client').value = demandes.nom_client;
             document.getElementById('montant').value = demandes.montant;
             if (demandes.note_analyse) {
-                document.getElementById('ma_note').href = "uploads/Demandes/" + demandes.note_analyse.split('/').pop();
+                document.getElementById('ma_note').href = demandes.note_analyse;
             } 
 
             document.getElementById('comm').value = demandes.commentaire_intro;
