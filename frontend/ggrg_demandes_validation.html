@@ -386,17 +386,23 @@
         const API_URL = "https://workflow-awa.onrender.com/api";
 
         async function logout() {
-        await fetch(`${API_URL}/logout/`, {
-            method: 'POST',
-            credentials: 'include',
-        });
-            window.location.href = 'index.html';
+                
+            localStorage.removeItem("token");
+            //window.location.href = 'index.html';
         }
 
         async function infos_user() {
             
-            const response = await fetch(`${API_URL}/users-joined/`);
-            
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(`${API_URL}/users-joined/`,{
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
+
             // Vérifier si la requête a réussi
             if (!response.ok) {
                     throw new Error(`Erreur HTTP : ${response.status}`);
@@ -427,14 +433,16 @@
         }
 
         async function isConnected() {
-            
-            console.log("Vérification du rôle avec token");
-            const response = await fetch(`${API_URL}/current-user/`);
-            if (!response.ok) {
-                console.error("Erreur lors de la vérification du rôle :", response.statusText);
+
+            const token = localStorage.getItem("token");
+
+            if (token) {
+                console.log("Token présent :", token);
+            } else {
+                console.log("Aucun token trouvé");
                 window.location.href = 'index.html';
             }
-          
+            
         }
 
 
@@ -569,8 +577,15 @@
         async function load_data_demandes() {
 
             // CETTE FONCTION CONSISTE A CHARGER LES DONNEES DU FORMULAIRE D'insertion des demandes 
+            const token = localStorage.getItem("token");
 
-            const response = await fetch(`${API_URL}/demandes_a_valider/`);
+            const response = await fetch(`${API_URL}/demandes_a_valider/`,{
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                }
+            });
             
 
             // Vérifier si la requête a réussi
@@ -597,8 +612,15 @@
 
             // CETTE FONCTION CONSISTE A CHARGER DEMANDES ARRIVEES AU BOUT DU PROCESSUS
             
+            const token = localStorage.getItem("token");
 
-            const response = await fetch(`${API_URL}/demandes_a_cloturer/`);
+            const response = await fetch(`${API_URL}/demandes_a_cloturer/`,{
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                }
+            });
 
 
             // Vérifier si la requête a réussi
@@ -659,9 +681,12 @@
 
             try {
                 
+                const token = localStorage.getItem("token");
+
                 const response = await fetch(`${API_URL}/cloturer_demande/${demande_id}`, {
                     method: 'POST',
                     body: formData,
+                    "Authorization": "Bearer " + token
                 });
 
                 if (!response.ok) {

@@ -378,16 +378,22 @@
     const API_URL = "https://workflow-awa.onrender.com/api";
 
     async function logout() {
-    await fetch(`${API_URL}/logout/`, {
-        method: 'POST',
-        credentials: 'include',
-    });
-        window.location.href = 'index.html';
+            
+        localStorage.removeItem("token");
+        //window.location.href = 'index.html';
     }
 
     async function infos_user() {
         
-        const response = await fetch(`${API_URL}/users-joined/`);
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`${API_URL}/users-joined/`,{
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+        });
         
         // Vérifier si la requête a réussi
         if (!response.ok) {
@@ -419,11 +425,13 @@
     }
 
     async function isConnected() {
-        
-        console.log("Vérification du rôle avec token");
-        const response = await fetch(`${API_URL}/current-user/`);
-        if (!response.ok) {
-            console.error("Erreur lors de la vérification du rôle :", response.statusText);
+
+        const token = localStorage.getItem("token");
+
+        if (token) {
+            console.log("Token présent :", token);
+        } else {
+            console.log("Aucun token trouvé");
             window.location.href = 'index.html';
         }
         
@@ -438,7 +446,15 @@
         const id_demande = params.get("id_dmd");
 
 
-        const response = await fetch(`${API_URL}/users-joined/`);
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`${API_URL}/users-joined/`,{
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+        });
         
         // Vérifier si la requête a réussi
         if (!response.ok) {
@@ -499,7 +515,7 @@
             document.getElementById('client').value = demandes.nom_client;
             document.getElementById('montant').value = demandes.montant;
             if (demandes.note_analyse) {
-                document.getElementById('ma_note').href = "Demandes\\" + demandes.note_analyse.split('\\').pop();
+                document.getElementById('ma_note').href = "uploads/Demandes/" + demandes.note_analyse.split('/').pop();
             } 
 
             document.getElementById('comm').value = demandes.commentaire_intro;
@@ -540,7 +556,15 @@
         $('#confirmationModal').modal('hide');
 
         // Récupérer l'user_id
-        const res = await fetch(`${API_URL}/users-joined/`);
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(`${API_URL}/users-joined/`,{
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+        });
         if (!res.ok) {
             throw new Error(`Erreur lors de la récupération de l'utilisateur : ${res.status}`);
         }
