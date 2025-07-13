@@ -103,7 +103,7 @@
                     <li class="sidenav-item">
                       <a href="javascript:" class="sidenav-link sidenav-toggle font-weight-semibold">
                           <i class=""></i>
-                          <div>Actions</div>
+                          <div>Menu</div>
                       </a>
                                             <ul class="sidenav-menu">
                         <li id="intro_dmd" class="sidenav-item">
@@ -207,7 +207,7 @@
 
                     <div class="row">
                         <div class="col-md-12">
-                            
+                            <a id="note_analyse" target="_blank" href="">Télécharger la note d'informations</a>
                             <div class="row no-gutters row-bordered row-border-light h-100">
                                 <div class="container">                       
                                     <div class="card-body">
@@ -442,10 +442,21 @@
         const donnees = await reponse.json();
 
         if (!reponse.ok) {
-            alert(donnee.detail || "Erreur lors de la mise a jour des données de la demande");
+            alert("Erreur lors de la récupération des commentaires");
         }
 
+        const response_data_demandes = await fetch(`${API_URL}/demandes/${demande_id}`);
+
+        if (!response_data_demandes.ok) {
+            alert("Erreur lors de la récupération du lien de la note d'analyse");
+        }
+
+        const data_demandes = await response_data_demandes.json();
+        
+
         const infos_commentaire = donnees.results;
+
+        document.getElementById("note_analyse").href = "Demandes\\" + data_demandes.note_analyse.split('\\').pop();
 
         // Generate HTML content
         const htmlContent = infos_commentaire.map(row => {
