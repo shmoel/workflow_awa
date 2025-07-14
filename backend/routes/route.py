@@ -1446,6 +1446,23 @@ def delete_domaine(domaine_id: int, db: Session = Depends(get_db)):
 def create_userdomaine(userdomaine: schemas.UserDomaineCreate, db: Session = Depends(get_db)):
     return crud.create_userdomaine(db, userdomaine)
 
+@router.get("/user_domaine/{domaine_id}/{user_id}", response_model=schemas.UserDomaine)
+def read_user_domaine(domaine_id: int, user_id: int,db: Session = Depends(get_db)):
+    db_domaine = crud.get_userdomaine(db, user_id, domaine_id)
+    if db_domaine is None:
+        raise HTTPException(status_code=404, detail="Domaine not found")
+    return db_domaine
+
+@router.get("/user_domaine/", response_model=List[schemas.UserDomaine])
+def get_alluserdomaine(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    domaine = crud.get_alluserdomaine(db, skip=skip, limit=limit)
+    return domaine
+
+
+@router.put("/user_domaine/{domaine_id}/{user_id}", response_model=schemas.UserDomaine)
+def update_user_domaine(domaine_id: int,user_id: int, domaine_user: schemas.UserDomaineCreate, db: Session = Depends(get_db)):
+    return crud.update_user_domaine(db=db,user_id = user_id, domaine_id=domaine_id, user_domaine_update=domaine_user)
+
 
 
 @router.get("/count_dmd/{niveau_dmd}")
