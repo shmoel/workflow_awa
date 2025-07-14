@@ -117,7 +117,7 @@ async def login(form_data: schemas.LoginRequest, db: Session = Depends(get_db)):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=30)
+    access_token_expires = timedelta(minutes=60)
     access_token = create_access_token(
         data={"sub": user.username},
         expires_delta=access_token_expires,
@@ -1445,3 +1445,22 @@ def delete_domaine(domaine_id: int, db: Session = Depends(get_db)):
 @router.post("/user_domaine/", response_model=schemas.UserDomaine)
 def create_userdomaine(userdomaine: schemas.UserDomaineCreate, db: Session = Depends(get_db)):
     return crud.create_userdomaine(db, userdomaine)
+
+
+
+@router.get("/count_dmd/{niveau_dmd}")
+def count_dmd(niveau_dmd: int, db: Session = Depends(get_db)):        
+    
+    sql_query = """
+    SELECT 
+        COUNT(d.id) as nombre_avis
+    FROM demandes d
+    JOIN (SELECT id_demande FROM avis GROUP BY id_demande HAVING Max(id_event) = :niveau_dmd) a ON d.id_demande = a.id_demande
+    """
+    params = {"niveau_dmd":niveau_dmd}
+        
+    try:
+        result = crud.execute_raw_sql(db, sql_query, params=params)
+        return {"result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

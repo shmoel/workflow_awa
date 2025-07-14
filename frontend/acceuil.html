@@ -230,9 +230,8 @@
                                         <div class="card card-hover">
                                             <div class="card-body">
                                                 <h5 class="card-title">Demandes introduites</h5>
-                                                <h2 class="card-text" id="userCount"><?php echo count($demands_insert) ; ?></h2>
-                                                <p class="text-success">+5% ce mois</p>
-                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                                <h2 class="card-text" id="Count_1"></h2>
+                                                <button class="btn btn-primary btn-sm" onclick="compter_dmd(1)">Actualiser</button>
                                             </div>
                                         </div>
                                     </div>
@@ -240,9 +239,8 @@
                                         <div class="card card-hover">
                                             <div class="card-body">
                                                 <h5 class="card-title">Demandes en cloturées</h5>
-                                                <h2 class="card-text" id="userCount"><?php echo count($demands_closed); ?></h2>
-                                                <p class="text-success">+0.00% ce mois</p>
-                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                                <h2 class="card-text" id="Count_7"></h2>
+                                                <button class="btn btn-primary btn-sm" onclick="compter_dmd(7)">Actualiser</button>
                                             </div>
                                         </div>
                                     </div>
@@ -251,9 +249,8 @@
                                         <div class="card card-hover">
                                             <div class="card-body">
                                                 <h5 class="card-title">Demandes en supprimées</h5>
-                                                <h2 class="card-text" id="userCount"><?php echo count($demands_delete); ?></h2>
-                                                <p class="text-success">+0.00% ce mois</p>
-                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                                <h2 class="card-text" id="Count_8"></h2>
+                                                <button class="btn btn-primary btn-sm" onclick="compter_dmd(8)">Actualiser</button>
                                             </div>
                                         </div>
                                     </div>
@@ -262,9 +259,8 @@
                                         <div class="card card-hover">
                                             <div class="card-body">
                                                 <h5 class="card-title">Demande en Validation GGR Local</h5>
-                                                <h2 class="card-text" id="userCount"><?php echo count($demands_validate1); ?></h2>
-                                                <p class="text-success">+4% ce mois</p>
-                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                                <h2 class="card-text" id="Count_2"></h2>
+                                                <button class="btn btn-primary btn-sm" onclick="compter_dmd(3)">Actualiser</button>
                                             </div>
                                         </div>
                                     </div>
@@ -273,9 +269,8 @@
                                         <div class="card card-hover">
                                             <div class="card-body">
                                                 <h5 class="card-title">Demande en Validation AWA</h5>
-                                                <h2 class="card-text" id="userCount"><?php echo count($demands_validate2); ?></h2>
-                                                <p class="text-success">+4% ce mois</p>
-                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                                <h2 class="card-text" id="Count_4"></h2>
+                                                <button class="btn btn-primary btn-sm" onclick="compter_dmd(4)">Actualiser</button>
                                             </div>
                                         </div>
                                     </div>
@@ -284,9 +279,8 @@
                                         <div class="card card-hover">
                                             <div class="card-body">
                                                 <h5 class="card-title">Demande en Validation GGR Group</h5>
-                                                <h2 class="card-text" id="userCount"><?php echo count($demands_validate3); ?></h2>
-                                                <p class="text-success">+4% ce mois</p>
-                                                <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
+                                                <h2 class="card-text" id="Count_6"></h2>
+                                                <button class="btn btn-primary btn-sm" onclick="compter_dmd(6)">Actualiser</button>
                                             </div>
                                         </div>
                                     </div>
@@ -493,6 +487,32 @@
             //window.location.href = 'index.html';
         }
 
+        async function expirer_token() {
+            
+            const token  = localStorage.getItem("token");
+
+            const tokenExpiry = localStorage.getItem('tokenExpiry');
+
+            // Vérifier si le token existe
+            if (!token || !tokenExpiry) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('tokenExpiry');
+                console.log('Token non trouvé ou expiré');
+            }
+
+            // Obtenir la date actuelle
+            const currentDate = new Date();
+            const expiryDate = new Date(parseInt(tokenExpiry));
+
+            // Vérifier si le token n'a pas expiré
+            if (currentDate >= expiryDate) {
+                // Token expiré, le supprimer
+                localStorage.removeItem('token');
+                localStorage.removeItem('tokenExpiry');
+                console.log('Token expiré');
+            }
+        }
+
         async function infos_user() {
 
             const token = localStorage.getItem("token");
@@ -558,6 +578,24 @@
                 window.location.href = 'index.html';
             }
           
+        }
+
+        async function compter_dmd(stade_demande) {
+
+            const response = await fetch(`${API_URL}/count_dmd/${stade_demande}`);
+            
+
+            if (!response.ok) {
+                    throw new Error(`Erreur HTTP : ${response.status}`);
+            }
+                
+            const data = await response.json();
+
+            const nombre_dmd = data.result || 0; // Gérer la structure JSON
+            
+            nom_device = "count_" + stade_demande;
+
+            document.getElementById(nom_device).value = nombre_dmd;
         }
 
         async function filterTable_dmd_insert() {
@@ -658,6 +696,14 @@
         
         window.addEventListener('load', () => isConnected());
         window.addEventListener('load', () => infos_user());
+        window.addEventListener('load', () => expirer_token());
+
+        window.addEventListener('load', () => compter_dmd(1));
+        window.addEventListener('load', () => compter_dmd(3));
+        window.addEventListener('load', () => compter_dmd(4));
+        window.addEventListener('load', () => compter_dmd(6));
+        window.addEventListener('load', () => compter_dmd(7));
+        window.addEventListener('load', () => compter_dmd(8));
 
         //const demandes_valider  = <?php echo $demandes_valider; ?>;
                                   
