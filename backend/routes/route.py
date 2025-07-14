@@ -1455,7 +1455,7 @@ def count_dmd(niveau_dmd: int, db: Session = Depends(get_db)):
     SELECT 
         COUNT(d.id) as nombre_avis
     FROM demandes d
-    JOIN (SELECT id_demande FROM avis GROUP BY id_demande HAVING Max(id_event) = :niveau_dmd) a ON d.id_demande = a.id_demande
+    JOIN (SELECT id_demande FROM avis GROUP BY id_demande HAVING Max(id_event) = :niveau_dmd) a ON d.id = a.id_demande
     """
     params = {"niveau_dmd":niveau_dmd}
         
