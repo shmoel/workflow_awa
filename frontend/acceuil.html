@@ -591,9 +591,9 @@
                 
             const data = await response.json();
 
-            const nombre_dmd = data.result || 0; // Gérer la structure JSON
+            const nombre_dmd = data.result[0].nombre_avis; // Gérer la structure JSON
             
-            nom_device = "count_" + stade_demande;
+            nom_device = "Count_" + stade_demande;
 
             document.getElementById(nom_device).value = nombre_dmd;
         }
