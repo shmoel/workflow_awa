@@ -219,7 +219,7 @@
                                         
                                         <div class="card-body">
                                             <h6 class="mb-3">Informations de la demande</h6>
-        
+                                            <div id="alert-container"></div>
                                             <table class="table card-table">
                                                 <thead>
                                                     <tr>                          
@@ -943,6 +943,9 @@
                 }
             });
 
+            showAlert('validation en cours', type = 'success');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(`Erreur HTTP: ${response.status}, Détails: ${JSON.stringify(formData)}`);
@@ -999,6 +1002,24 @@
             window.location.replace("demandes_validation.html");
         }
 
+    }
+
+    // Alert function
+    function showAlert(message, type = 'danger') {
+        const alertContainer = document.getElementById('alert-container');
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-custom`;
+        alertDiv.innerHTML = `
+            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            ${message}
+        `;
+        
+        alertContainer.innerHTML = '';
+        alertContainer.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
     }
                         
     window.addEventListener('load', () => isConnected());

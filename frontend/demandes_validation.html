@@ -771,6 +771,25 @@
         async function valider_demande() {
             
         }
+
+        // Alert function
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-custom`;
+            alertDiv.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                ${message}
+            `;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
         window.addEventListener('load', () => isConnected());
         window.addEventListener('load', () => infos_user());
         window.addEventListener('load', () => infos_user());
