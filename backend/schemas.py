@@ -223,8 +223,8 @@ class Avis(AvisBase):
 
 
 class CommentairesBase(BaseModel):
-    commentaire: Optional[str] = None
     id_user: int
+    commentaire: Optional[str] = None
     date_creation: date
     heure_creation: time
     updated_date: date

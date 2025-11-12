@@ -30,7 +30,7 @@
     <link rel="stylesheet" href= "assets/assets_user/css/bootstrap-material.css">
     <link rel="stylesheet" href= "assets/assets_user/css/shreerang-material.css">
     <link rel="stylesheet" href= "assets/assets_user/css/uikit.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
     <!-- Libs -->
     <link rel="stylesheet" href= "assets/assets_user/libs/perfect-scrollbar/perfect-scrollbar.css">
     <link rel="stylesheet" href= "assets/assets_user/libs/flot/flot.css">
@@ -105,7 +105,7 @@
                     <li class="sidenav-item">
                       <a href="javascript:" class="sidenav-link sidenav-toggle font-weight-semibold">
                           <i class=""></i>
-                          <div>Menu</div>
+                          <div>Actions</div>
                       </a>
                                             <ul class="sidenav-menu">
                         <li id="intro_dmd" class="sidenav-item">
@@ -128,7 +128,7 @@
                         </li>
                         <li id="stats_dmd" class="sidenav-item">
                             <a href="statistiques.html" class="sidenav-link">
-                              <i class="bi bi-bar-chart"></i>
+                              <i class="sidenav-icon feather icon-lock"></i>
                               <div>Statistiques</div>
                             </a>
                           </li>
@@ -142,19 +142,19 @@
                     <li class="sidenav-divider mb-1"></li>
 
                     <li class="sidenav-item">
-                        <a href="" class="sidenav-link">
+                        <a href="pages_authentication_login-v1.html" class="sidenav-link">
                             <i class="sidenav-icon feather icon-lock"></i>
                             <div>Login</div>
                         </a>
                     </li>
                     <li class="sidenav-item">
-                        <a href="" class="sidenav-link">
+                        <a href="pages_authentication_register-v1.html" class="sidenav-link">
                             <i class="sidenav-icon feather icon-user"></i>
                             <div>Signup</div>
                         </a>
                     </li>
                     <li class="sidenav-item">
-                        <a href="" class="sidenav-link">
+                        <a href="pages_faq.html" class="sidenav-link">
                             <i class="sidenav-icon feather icon-anchor"></i>
                             <div>FAQ</div>
                         </a>
@@ -375,6 +375,7 @@
 
         async function infos_user() {
             
+            
             const token = localStorage.getItem("token");
             
             const response = await fetch(`${API_URL}/users-joined/`, {
@@ -415,10 +416,11 @@
         }
 
         async function isConnected() {
-
+            //alert("il est connecte");
             const token = localStorage.getItem("token");
-
-            if (token) {
+            
+            if (typeof token !== 'undefined' && token !== null) {
+                
                 console.log("Token présent :", token);
             } else {
                 console.log("Aucun token trouvé");
@@ -480,6 +482,13 @@
                             <div>
                                 <div class="d-inline-block align-middle">
                                     <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-dark">Détails</button>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <div>
+                                <div class="d-inline-block align-middle">
+                                    <button type="button" onclick="window.location.href='chat.html?id_dmd=${row.id_demande}'" class="btn btn-glow-info btn-info">CHAT</button>
                                 </div>
                             </div>
                         </td>
@@ -598,7 +607,7 @@
                         <td class="align-middle">
                             <div>
                                 <div class="d-inline-block align-middle">
-                                    <button type="button" onclick="window.location.href=" class="btn btn-danger">Arrêté</button>
+                                    <button type="button" class="btn btn-danger" disabled>Arrêté</button>
                                 </div>
                             </div>
                         </td>
@@ -648,7 +657,7 @@
                         <td class="align-middle">
                             <div>
                                 <div class="d-inline-block align-middle">
-                                    <button type="button" onclick="window.location.href=" class="btn btn-default">Terme</button>
+                                    <button type="button" class="btn btn-default" disabled>Terme</button>
                                 </div>
                             </div>
                         </td>
@@ -768,30 +777,8 @@
             }
         }
 
-        async function valider_demande() {
-            
-        }
-
-        // Alert function
-        function showAlert(message, type = 'danger') {
-            const alertContainer = document.getElementById('alert-container');
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-custom`;
-            alertDiv.innerHTML = `
-                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-                ${message}
-            `;
-            
-            alertContainer.innerHTML = '';
-            alertContainer.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 5000);
-        }
 
         window.addEventListener('load', () => isConnected());
-        window.addEventListener('load', () => infos_user());
         window.addEventListener('load', () => infos_user());
         window.addEventListener('load', () => load_data_demandes());
         window.addEventListener('load', () => load_data_demandes_validation());

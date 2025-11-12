@@ -22,11 +22,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["API"])
 
 # Dossier où sauvegarder les fichiers
-#BASE_DIR = Path(__file__).resolve().parent.parent.parent
-#UPLOAD_DIR = BASE_DIR / "frontend/Demandes"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-UPLOAD_DIR ="/uploads/Demandes"
-
+#BASE_DIR = Path("/app")  # Chemin de base sur Render
+UPLOAD_DIR = BASE_DIR / "frontend/Demandes"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.get("/.well-known/appspecific/{path:path}")
@@ -117,7 +116,7 @@ async def login(form_data: schemas.LoginRequest, db: Session = Depends(get_db)):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=60)
+    access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
         data={"sub": user.username},
         expires_delta=access_token_expires,
@@ -438,7 +437,7 @@ def create_Users(Users: schemas.UsersCreate, db: Session = Depends(get_db)):
 
 @router.get("/User/{Users_id}", response_model=schemas.Users)
 def read_User(Users_id: int, db: Session = Depends(get_db)):
-    db_User = crud.get_user(db, user_id=Users_id)
+    db_User = crud.get_user(db, Users_id=Users_id)
     if db_User is None:
         raise HTTPException(status_code=404, detail="Users not found")
     return db_User
@@ -450,11 +449,11 @@ def read_Users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @router.put("/User/{Users_id}", response_model=schemas.Users)
 def update_User(Users_id: int, Users: schemas.UsersCreate, db: Session = Depends(get_db)):
-    return crud.update_user(db=db, user_id=Users_id, user=Users)
+    return crud.update_user(db=db, Users_id=Users_id, Users=Users)
 
 @router.delete("/Users/{Users_id}", response_model=schemas.Users)
 def delete_User(Users_id: int, db: Session = Depends(get_db)):
-    return crud.delete_user(db=db, user_id=Users_id)
+    return crud.delete_user(db=db, Users_id=Users_id)
 
 # demandes Endpoints
 
@@ -589,12 +588,43 @@ async def create_demande(demande_id: int,
         raise HTTPException(status_code=500, detail=f"Erreur lors de la modification de la demande : {str(e)}")
 
 
-@router.get("/demandes/{demande_id}", response_model=schemas.Demande)
+@router.get("/demandes/{demande_id}")
 def read_demande(demande_id: int, db: Session = Depends(get_db)):
-    db_demande = crud.get_demande(db, demande_id=demande_id)
-    if db_demande is None:
-        raise HTTPException(status_code=404, detail="Demande not found")
-    return db_demande
+    # Requête SQL robuste pour ramener toutes les infos liées à la demande, y compris le dernier statut
+    sql_query = """
+        SELECT 
+            t.libelle AS type_demande,
+            t.id AS id_type_demande,
+            c.id AS id_categorie_demande,
+            c.libelle AS categorie_demande,
+            d.nom_client AS nom_client,
+            d.montant AS montant,
+            d.date AS date_creation,
+            d.heure AS heure_creation,
+            d.id AS id_demande,
+            d.note_analyse AS note_analyse,
+            b.sigle AS banque_user,
+            d.commentaire_intro AS commentaire_intro,
+            req.description AS description
+        FROM demandes d
+        JOIN typedemande t ON d.id_typedemande = t.id
+        JOIN categoriedemande c ON c.id = t.id_categoriedemande
+        JOIN banque b ON b.id = d.banque
+        JOIN  (
+            select * from eventstatut 
+            join (select max(id_demande) id_demande, max(id_event) id_statut from (select * from avis where id_demande = :id_dmd)) a 
+            on eventstatut.id = a.id_statut
+        ) req ON req.id_demande = d.id
+        WHERE d.id = :id_demande
+    """
+    try:
+        result = crud.execute_raw_sql(db, sql_query, {"id_dmd": demande_id,"id_demande": demande_id})
+        if not result:
+            raise HTTPException(status_code=404, detail="Demande not found")
+        return {"result": result[0]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 
 #charger le détails des commentaires d'une demande à partir de son identifiant
 @router.get("/commentaires_demande/{demande_id}")
@@ -655,7 +685,7 @@ async def get_demande_particulier(
             d.heure AS heure,
             d.id AS id_demande,
             d.note_analyse AS note_analyse,
-            (d.date || '  ' || d.heure)::timestamp AS date_time,
+            (d.date || ' ' || d.heure)::timestamp AS date_time,
             b.sigle AS banque
         FROM typedemande t 
         JOIN categoriedemande c ON c.id = t.id_categoriedemande
@@ -1336,7 +1366,6 @@ def update_avis(avis_id: int, avis: schemas.AvisCreate, db: Session = Depends(ge
 def delete_avis(avis_id: int, db: Session = Depends(get_db)):
     return crud.delete_avis(db=db, avis_id=avis_id)
 
-
 # poste Endpoints
 @router.post("/poste/", response_model=schemas.Poste)
 def create_poste(poste: schemas.PosteCreate, db: Session = Depends(get_db)):
@@ -1440,44 +1469,54 @@ def update_domaine(domaine_id: int, domaine: schemas.DomaineCreate, db: Session 
 def delete_domaine(domaine_id: int, db: Session = Depends(get_db)):
     return crud.delete_domaine(db=db, domaine_id=domaine_id)
 
-
-# User-domaine
-@router.post("/user_domaine/", response_model=schemas.UserDomaine)
-def create_userdomaine(userdomaine: schemas.UserDomaineCreate, db: Session = Depends(get_db)):
-    return crud.create_userdomaine(db, userdomaine)
-
-@router.get("/user_domaine/{domaine_id}/{user_id}", response_model=schemas.UserDomaine)
-def read_user_domaine(domaine_id: int, user_id: int,db: Session = Depends(get_db)):
-    db_domaine = crud.get_userdomaine(db, user_id, domaine_id)
-    if db_domaine is None:
-        raise HTTPException(status_code=404, detail="Domaine not found")
-    return db_domaine
-
-@router.get("/user_domaine/", response_model=List[schemas.UserDomaine])
-def get_alluserdomaine(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    domaine = crud.get_alluserdomaine(db, skip=skip, limit=limit)
-    return domaine
-
-
-@router.put("/user_domaine/{domaine_id}/{user_id}", response_model=schemas.UserDomaine)
-def update_user_domaine(domaine_id: int,user_id: int, domaine_user: schemas.UserDomaineCreate, db: Session = Depends(get_db)):
-    return crud.update_user_domaine(db=db,user_id = user_id, domaine_id=domaine_id, user_domaine_update=domaine_user)
-
-
-
-@router.get("/count_dmd/{niveau_dmd}")
-def count_dmd(niveau_dmd: int, db: Session = Depends(get_db)):        
+# chemin pour enregistrer une entrer un commentaire dans le chat
+@router.post("/commenter/", response_model=schemas.Commentaires)
+async def inserer_commentaire(id_user: int = Form(...),
+                         commentaire: str = Form(...),
+                         demande_id: int = Form(...), 
+                         db: Session = Depends(get_db)):
     
-    sql_query = """
-    SELECT 
-        COUNT(d.id) as nombre_avis
-    FROM demandes d
-    JOIN (SELECT id_demande FROM avis GROUP BY id_demande HAVING Max(id_event) = :niveau_dmd) a ON d.id = a.id_demande
-    """
-    params = {"niveau_dmd":niveau_dmd}
-        
+    logger.info(f"Reçu demande: id_user={id_user}, commentaire={commentaire}, demande_id={demande_id}")
+    
+    current_date = datetime.now().strftime("%Y-%m-%d")  # Format YYYY-MM-DD
+    current_heure = datetime.now().strftime("%H:%M:%S")    # Format HH:MM:SS
+
+    # Créer un objet DemandeCreate
+    commentaire_data = {
+        "id_user": id_user,
+        "commentaire": commentaire,
+        "date_creation": current_date,
+        "heure_creation": current_heure,
+        "updated_date": current_date,
+        "updated_heure": current_heure,
+        "demande_id": demande_id
+    }
+
+    comm = schemas.CommentairesBase(**commentaire_data)
+
     try:
-        result = crud.execute_raw_sql(db, sql_query, params=params)
-        return {"result": result}
+        db_commentaire = crud.create_commentaire(db=db, usercomm=comm)
+        logger.info("Demande créée dans la base de données")
+        return db_commentaire
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la création du commentaire : {str(e)}")
+    
+@router.get("/messages_chat/{id_demande}")
+async def get_messages_staff(
+    id_demande : int,
+    user: schemas.Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    
+    if isinstance(user, RedirectResponse):
+        return user
+    # Requête SQL avec jointures
+    requete = "SELECT * FROM commentaires " \
+    " JOIN users ON commentaires.id_user = users.id WHERE commentaires.demande_id=:id_demande ORDER BY (commentaires.date_creation || ' ' || commentaires.heure_creation)::timestamp ASC"
+    parametres = {"id_demande":id_demande}
+
+    try:
+        result = crud.execute_raw_sql(db, requete, params=parametres)
+        return {"results": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
