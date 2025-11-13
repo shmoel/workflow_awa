@@ -456,7 +456,7 @@
         const data_demandes = await response_data_demandes.json();
         
 
-        const infos_commentaire = data_demandes.results;
+        const infos_commentaire = donnees.results;
 
         document.getElementById("note_analyse").href = "Demandes\\" + data_demandes.note_analyse.split('\\').pop();
 

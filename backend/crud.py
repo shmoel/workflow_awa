@@ -5,8 +5,6 @@ from typing import List
 from . import models, schemas
 
 
-
-
 def execute_raw_sql(db: Session, sql_query: str, params: dict = None):
     """
     Exécute une requête SQL brute avec des paramètres liés pour éviter les injections SQL.
@@ -710,3 +708,14 @@ def delete_user_domaine(db: Session, user_id: int, domaine_id: int):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=f"Error deleting UserDomaine: {str(e)}")
+    
+
+# CRUD for commentaire
+
+def create_commentaire(db: Session, usercomm: schemas.CommentairesCreate):
+    db_usercommentaire = models.Commentaires(**usercomm.model_dump())
+    db.add(db_usercommentaire)
+    db.commit()
+    db.refresh(db_usercommentaire)
+    return db_usercommentaire
+
