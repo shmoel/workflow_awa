@@ -444,21 +444,10 @@
         const donnees = await reponse.json();
 
         if (!reponse.ok) {
-            alert("Erreur lors de la récupération des commentaires");
+            alert(donnee.detail || "Erreur lors de la mise a jour des données de la demande");
         }
-
-        const response_data_demandes = await fetch(`${API_URL}/demandes/${demande_id}`);
-
-        if (!response_data_demandes.ok) {
-            alert("Erreur lors de la récupération du lien de la note d'analyse");
-        }
-
-        const data_demandes = await response_data_demandes.json();
-        
 
         const infos_commentaire = donnees.results;
-
-        document.getElementById("note_analyse").href = "Demandes\\" + data_demandes.note_analyse.split('\\').pop();
 
         // Generate HTML content
         const htmlContent = infos_commentaire.map(row => {
