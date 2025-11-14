@@ -23,7 +23,7 @@ router = APIRouter(prefix="/api", tags=["API"])
 
 # Dossier où sauvegarder les fichiers
 #BASE_DIR = Path(__file__).resolve().parent.parent.parent
-BASE_DIR = "/var/data/notes_analyses"
+BASE_DIR = "/var/data"
 
 #BASE_DIR = Path("/app")  # Chemin de base sur Render
 UPLOAD_DIR = BASE_DIR + "/notes_analyse"
@@ -507,7 +507,7 @@ async def create_demande(id_user: int = Form(...),
             with open(file_path, "wb") as f:
                 f.write(await note_analyse.read())
             logger.info(f"Fichier sauvegardé: {file_path}")
-            demande.note_analyse = file_path
+            demande.note_analyse = unique_filename
         except Exception as e:
             logger.error(f"Erreur sauvegarde fichier: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Erreur lors de la sauvegarde du fichier : {str(e)}")
