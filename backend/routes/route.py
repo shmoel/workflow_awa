@@ -23,7 +23,7 @@ router = APIRouter(prefix="/api", tags=["API"])
 
 # Dossier où sauvegarder les fichiers
 #BASE_DIR = Path(__file__).resolve().parent.parent.parent
-BASE_DIR = "/uploads/Demandes"
+BASE_DIR = "/var/data/notes_analyses"
 
 #BASE_DIR = Path("/app")  # Chemin de base sur Render
 UPLOAD_DIR = BASE_DIR + "/notes_analyse"
