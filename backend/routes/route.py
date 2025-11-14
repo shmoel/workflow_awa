@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api", tags=["API"])
 BASE_DIR = "/uploads/Demandes"
 
 #BASE_DIR = Path("/app")  # Chemin de base sur Render
-UPLOAD_DIR = BASE_DIR / "notes_analyse"
+UPLOAD_DIR = BASE_DIR + "/notes_analyse"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.get("/.well-known/appspecific/{path:path}")
