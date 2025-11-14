@@ -538,6 +538,13 @@
                                 </div>
                             </div>
                         </td>
+                        <td class="align-middle">
+                            <div>
+                                <div class="d-inline-block align-middle">
+                                    <button type="button" onclick="window.location.href='chat.html?id_dmd=${row.id_demande}'" class="btn btn-glow-info btn-info">CHAT</button>
+                                </div>
+                            </div>
+                        </td>
                     `;
                     tableBody.appendChild(tr);
                 });
@@ -605,6 +612,13 @@
                                 </div>
                             </div>
                         </td>
+                        <td class="align-middle">
+                            <div>
+                                <div class="d-inline-block align-middle">
+                                    <button type="button" onclick="window.location.href='chat.html?id_dmd=${row.id_demande}'" class="btn btn-glow-info btn-info">CHAT</button>
+                                </div>
+                            </div>
+                        </td>
                         `;
                     }else{
                         tr.innerHTML = `
@@ -652,6 +666,13 @@
                             <div>
                                 <div class="d-inline-block align-middle">
                                     <button type="button" onclick="window.location.href='detail_consulter_demande.html?id_dmd=${row.id_demande}'" class="btn btn-glow-secondary btn-secondary">Détails</button>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <div>
+                                <div class="d-inline-block align-middle">
+                                    <button type="button" onclick="window.location.href='chat.html?id_dmd=${row.id_demande}'" class="btn btn-glow-info btn-info">CHAT</button>
                                 </div>
                             </div>
                         </td>

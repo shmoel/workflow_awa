@@ -22,10 +22,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["API"])
 
 # Dossier où sauvegarder les fichiers
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+#BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = "/uploads/Demandes"
 
 #BASE_DIR = Path("/app")  # Chemin de base sur Render
-UPLOAD_DIR = BASE_DIR / "frontend/Demandes"
+UPLOAD_DIR = BASE_DIR / "notes_analyse"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.get("/.well-known/appspecific/{path:path}")
@@ -618,10 +619,10 @@ def read_demande(demande_id: int, db: Session = Depends(get_db)):
         WHERE d.id = :id_demande
     """
     try:
-        result = crud.execute_raw_sql(db, sql_query, {"id_dmd": demande_id,"id_demande": demande_id})
-        if not result:
+        results = crud.execute_raw_sql(db, sql_query, {"id_dmd": demande_id,"id_demande": demande_id})
+        if not results:
             raise HTTPException(status_code=404, detail="Demande not found")
-        return {"result": result[0]}
+        return {"result": results[0]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
