@@ -593,7 +593,7 @@
         document.getElementById("entite").innerText = infos_demandes[0].categorie_demande;
         document.getElementById("contrepartie").innerText = infos_demandes[0].nom_client;
         document.getElementById("montant").innerText = infos_demandes[0].montant;
-        document.getElementById("note_analyse").href = "Demandes\\" + infos_demandes[0].note_analyse.split('\\').pop();
+        document.getElementById("note_analyse").href = infos_demandes[0].note_analyse.split('\\').pop();
         document.getElementById("date_time").innerText = infos_demandes[0].date_time;
     }
 

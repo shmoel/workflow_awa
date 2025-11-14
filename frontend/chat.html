@@ -594,6 +594,10 @@
             //window.location.href = 'index.html';
         }
 
+        /**
+         * Récupère les informations de l'utilisateur connecté et adapte l'affichage du menu selon son niveau d'habilitation.
+        */
+
         async function infos_user() {
 
             const token = localStorage.getItem("token");
@@ -665,50 +669,8 @@
             
         }
 
-        /**
-         * Récupère les informations de l'utilisateur connecté et adapte l'affichage du menu selon son niveau d'habilitation.
-         */
-        async function infos_user() {
-        
-            const token = localStorage.getItem("token");
-
-            const response = await fetch(`${API_URL}/users-joined/`,{
-                method: "GET",
-                headers: {
-                Authorization: "Bearer " + token,
-                "Content-Type": "application/json",
-                },
-            });
-            
-            // Vérifier si la requête a réussi
-            if (!response.ok) {
-                    throw new Error(`Erreur HTTP : ${response.status}`);
-            }
-                
-            const donnees = await response.json();
-            
-            const infos_user = donnees.results;
 
 
-            document.getElementById("user_id").innerText = infos_user[0].prenom + " " + infos_user[0].nom;
-            
-            
-            if (infos_user[0].niveau_hab==="Niveau 1") {
-                
-                document.getElementById('intro_dmd').style.display = 'none';
-                document.getElementById('consult_dmd').style.display = 'none';
-                document.getElementById('valid_dmd').style.display = 'none';
-
-            } else if (infos_user[0].niveau_hab==="Niveau 2") {
-                document.getElementById('valid_dmd').style.display = 'none';
-                
-            } else if (infos_user[0].niveau_hab==="Niveau 3") {
-                document.getElementById('intro_dmd').style.display = 'none';
-                document.getElementById('consult_dmd').style.display = 'none';
-                
-            } 
-            
-        }
 
  
 
