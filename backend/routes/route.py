@@ -77,7 +77,7 @@ async def download_file(request: Request, filename: str):
         path=file_path,
         media_type="application/octet-stream",
         filename=filename_only,
-        headers={"Content-Disposition": f'attachment; filename*=UTF-8\'\'{filename_only}'}
+        headers={"Content-Disposition": f'inline; filename*=UTF-8\'\'{filename_only}'}
     )
 
 
