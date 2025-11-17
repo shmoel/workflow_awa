@@ -5,6 +5,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
+
+import urllib
 from .. import models, schemas, crud
 from ..database import get_db
 from ..auth import get_password_hash, authenticate_user, create_access_token, get_current_user
@@ -13,7 +15,7 @@ from datetime import datetime
 import logging
 from pathlib import Path
 from fastapi.responses import FileResponse
-import os
+
 
 
 logging.basicConfig(level=logging.INFO)
@@ -44,27 +46,27 @@ def test_route():
 
 @router.get("/download/{filename}")
 async def download_file(filename: str):
-    file_path = os.path.join(UPLOAD_DIR, filename)
+    # Decode l'URL (les %20, %C3%A9, etc.)
+    decoded_filename = urllib.parse.unquote(filename)
+    file_path = os.path.join(UPLOAD_DIR, decoded_filename)
 
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Fichier introuvable")
 
-     # Détection simple du type
-    ext = filename.split(".")[-1].lower()
-
+    # Type MIME
+    ext = decoded_filename.split(".")[-1].lower()
     media_types = {
         "pdf": "application/pdf",
-        "jpg": "image/jpeg",
-        "jpeg": "image/jpeg",
-        "png": "image/png"
+        "jpg": "image/jpeg", "jpeg": "image/jpeg",
+        "png": "image/png",
     }
-
     media_type = media_types.get(ext, "application/octet-stream")
 
     return FileResponse(
         path=file_path,
-        filename=filename,
-        media_type=media_types
+        filename=decoded_filename,          # nom original avec accents/espaces
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename*=UTF-8\'\'{urllib.parse.quote(decoded_filename)}'}
     )
 
 
