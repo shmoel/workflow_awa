@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Form, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Form, UploadFile, File, Request
 from starlette.responses import RedirectResponse
 from typing import List
 from fastapi.responses import HTMLResponse
@@ -44,32 +44,33 @@ def test_route():
 
 
 
-@router.get("/download/{filename}")
-async def download_file(filename: str):
-    # Decode l'URL (les %20, %C3%A9, etc.)
-    # 1. Décode proprement l'URL (%20 → espace, %C3%A9 → é, etc.)
-    decoded_filename = unquote(filename)
-    
-    # 2. Chemin complet
-    file_path = os.path.join(UPLOAD_DIR, decoded_filename)
-    
-    # Debug rapide (tu peux enlever après)
-    print(f"Demande de téléchargement → {decoded_filename}")
-    print(f"Chemin calculé → {file_path}")
-    print(f"Existe ? → {os.path.exists(file_path)}")
-    
+@router.get("/download/{filename:path}")
+async def download_file(request: Request, filename: str):
+    # FastAPI donne parfois le chemin déjà décodé, parfois non → on force le décodage propre
+    raw_path = str(request.url.path)              # ex: /download/20251114_172542_Rapport%20annuel%202023.pdf
+    decoded_path = unquote(raw_path)              # transforme tous les %20, %C3%A9 etc.
+    filename_only = decoded_path.split("/download/")[-1].strip()
+
+    file_path = os.path.join(UPLOAD_DIR, filename_only)
+
+    # === DEBUG (à garder 2 jours, puis tu pourras enlever) ===
+    print("\n=== TENTATIVE DE DOWNLOAD ===")
+    print(f"URL brute reçue     : {raw_path}")
+    print(f"Nom décodé          : {filename_only}")
+    print(f"Chemin complet      : {file_path}")
+    print(f"Fichier existe ?    : {os.path.exists(file_path)}")
+    print(f"Contenu du dossier  : {os.listdir(UPLOAD_DIR)}")
+    print("===============================\n")
+    # =======================================================
+
     if not os.path.exists(file_path):
-        # Liste le contenu pour voir ce qu'il y a vraiment
-        print(f"Contenu du dossier : {os.listdir(UPLOAD_DIR)}")
-        raise HTTPException(status_code=404, detail="Fichier introuvable")
+        raise HTTPException(status_code=404, detail=f"Fichier non trouvé : {filename_only}")
 
     return FileResponse(
         path=file_path,
-        media_type="application/octet-stream",  # plus simple et ça marche partout
-        filename=decoded_filename,
-        headers={
-            "Content-Disposition": f'attachment; filename*=UTF-8\'\'{quote(decoded_filename)}'
-        }
+        media_type="application/octet-stream",
+        filename=filename_only,
+        headers={"Content-Disposition": f'attachment; filename*=UTF-8\'\'{filename_only}'}
     )
 
 
