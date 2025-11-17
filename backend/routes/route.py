@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
 
-import urllib
+from urllib.parse import unquote, quote
 from .. import models, schemas, crud
 from ..database import get_db
 from ..auth import get_password_hash, authenticate_user, create_access_token, get_current_user
@@ -47,26 +47,29 @@ def test_route():
 @router.get("/download/{filename}")
 async def download_file(filename: str):
     # Decode l'URL (les %20, %C3%A9, etc.)
-    decoded_filename = urllib.parse.unquote(filename)
+    # 1. Décode proprement l'URL (%20 → espace, %C3%A9 → é, etc.)
+    decoded_filename = unquote(filename)
+    
+    # 2. Chemin complet
     file_path = os.path.join(UPLOAD_DIR, decoded_filename)
-
+    
+    # Debug rapide (tu peux enlever après)
+    print(f"Demande de téléchargement → {decoded_filename}")
+    print(f"Chemin calculé → {file_path}")
+    print(f"Existe ? → {os.path.exists(file_path)}")
+    
     if not os.path.exists(file_path):
+        # Liste le contenu pour voir ce qu'il y a vraiment
+        print(f"Contenu du dossier : {os.listdir(UPLOAD_DIR)}")
         raise HTTPException(status_code=404, detail="Fichier introuvable")
-
-    # Type MIME
-    ext = decoded_filename.split(".")[-1].lower()
-    media_types = {
-        "pdf": "application/pdf",
-        "jpg": "image/jpeg", "jpeg": "image/jpeg",
-        "png": "image/png",
-    }
-    media_type = media_types.get(ext, "application/octet-stream")
 
     return FileResponse(
         path=file_path,
-        filename=decoded_filename,          # nom original avec accents/espaces
-        media_type=media_type,
-        headers={"Content-Disposition": f'attachment; filename*=UTF-8\'\'{urllib.parse.quote(decoded_filename)}'}
+        media_type="application/octet-stream",  # plus simple et ça marche partout
+        filename=decoded_filename,
+        headers={
+            "Content-Disposition": f'attachment; filename*=UTF-8\'\'{quote(decoded_filename)}'
+        }
     )
 
 
