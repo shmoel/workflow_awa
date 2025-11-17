@@ -12,6 +12,8 @@ import os
 from datetime import datetime
 import logging
 from pathlib import Path
+from fastapi.responses import FileResponse
+import os
 
 
 logging.basicConfig(level=logging.INFO)
@@ -36,6 +38,35 @@ async def ignore_devtools(path: str):
 @router.get("/test")
 def test_route():
     return {"message": "Test réussi"}
+
+
+
+
+@router.get("/download/{filename}")
+async def download_file(filename: str):
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Fichier introuvable")
+
+     # Détection simple du type
+    ext = filename.split(".")[-1].lower()
+
+    media_types = {
+        "pdf": "application/pdf",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png"
+    }
+
+    media_type = media_types.get(ext, "application/octet-stream")
+
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type=media_types
+    )
+
 
 @router.get("/types_demandes/{categorie}/")
 async def get_types_demandes_categories(
@@ -491,21 +522,23 @@ async def create_demande(id_user: int = Form(...),
     # Gérer le fichier
     file_path = None
     if note_analyse:
+
         
         allowed_extensions = {".pdf", ".jpg", ".jpeg", ".png"}
         file_extension = os.path.splitext(note_analyse.filename)[1].lower()
         if file_extension not in allowed_extensions:
             raise HTTPException(status_code=400, detail=f"Type de fichier non autorisé. Utilisez {allowed_extensions}")
-        if note_analyse.size > 5 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail="Le fichier ne doit pas dépasser 5MB")
+        content = await note_analyse.read()
 
+        if len(content) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Le fichier ne doit pas dépasser 5MB")
         unique_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{note_analyse.filename}"
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
 
         try:
             os.makedirs(UPLOAD_DIR, exist_ok=True)
             with open(file_path, "wb") as f:
-                f.write(await note_analyse.read())
+                f.write(content)
             logger.info(f"Fichier sauvegardé: {file_path}")
             demande.note_analyse = unique_filename
         except Exception as e:
