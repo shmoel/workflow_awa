@@ -41,7 +41,14 @@ async def ignore_devtools(path: str):
 def test_route():
     return {"message": "Test réussi"}
 
-
+@router.get("/debug-test")
+async def debug_test():
+    return {
+        "UPLOAD_DIR": UPLOAD_DIR,
+        "contenu_du_dossier": os.listdir(UPLOAD_DIR),
+        "chemin_absolu_du_fichier": os.path.join(UPLOAD_DIR, "20251117_124244_testworkflow.pdf"),
+        "fichier_existe": os.path.exists(os.path.join(UPLOAD_DIR, "20251117_124244_testworkflow.pdf"))
+    }
 
 
 @router.get("/download/{filename:path}")
