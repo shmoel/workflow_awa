@@ -472,6 +472,7 @@
 
             // Récupération des données pour les menus déroulants depuis l'API
             const banquesResponse = await fetch(`${API_URL}/banques/`);
+            
             const typedemande_Response = await fetch(`${API_URL}/types_demandes/${entite_user}`,{
                 method: "GET",
                 headers: {
@@ -480,16 +481,22 @@
                 }
             });  
             
-            const demande_Response = await fetch(`${API_URL}/demandes/${id_demande}`);
 
+            const demande_Response = await fetch(`${API_URL}/demandes/${id_demande}`,{
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                }
+            });
 
             const banques = await banquesResponse.json();
             const type_demandes = await typedemande_Response.json();
-            const demandes = await demande_Response.json();
+            const demandes_json = await demande_Response.json();
 
             
             const list_type_demande = type_demandes.results;
-            
+            const demandes = demandes_json.results;
 
             // Remplissage du menu déroulant des banques
             const banqueSelect = document.getElementById('banque');
@@ -503,7 +510,7 @@
 
             // Sélectionner la première option valide si elle existe
             if (banques.length > 0) {
-                banqueSelect.selectedIndex = demandes.banque - 1;
+                banqueSelect.selectedIndex = demandes.id_banque - 1;
             }
 
 
@@ -518,13 +525,13 @@
 
             // Sélectionner la première option valide si elle existe
             if (list_type_demande.length > 0) {
-                type_dmd.selectedIndex = demandes.id_typedemande - 1;  
+                type_dmd.selectedIndex = demandes.id_type_demande - 1;  
             }
             
             document.getElementById('client').value = demandes.nom_client;
             document.getElementById('montant').value = demandes.montant;
             if (demandes.note_analyse) {
-                document.getElementById('ma_note').href = demandes.note_analyse;
+                document.getElementById('ma_note').href = "/api/download/" + demandes.note_analyse;
             } 
 
             document.getElementById('comm').value = demandes.commentaire_intro;

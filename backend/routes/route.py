@@ -663,6 +663,7 @@ def read_demande(demande_id: int, db: Session = Depends(get_db)):
             d.id AS id_demande,
             d.note_analyse AS note_analyse,
             b.sigle AS banque_user,
+            b.id AS id_banque,
             d.commentaire_intro AS commentaire_intro,
             req.description AS description
         FROM demandes d
@@ -680,7 +681,7 @@ def read_demande(demande_id: int, db: Session = Depends(get_db)):
         results = crud.execute_raw_sql(db, sql_query, {"id_dmd": demande_id,"id_demande": demande_id})
         if not results:
             raise HTTPException(status_code=404, detail="Demande not found")
-        return {"result": results[0]}
+        return {"results": results[0]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
