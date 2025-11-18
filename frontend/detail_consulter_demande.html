@@ -385,7 +385,7 @@
 
         const infos_demandes = donnees.results;
     
-        document.getElementById("note_analyse").href = "/api/download/" + infos_demandes.note_analyse;
+        document.getElementById("note_analyse").href = "/api/download/" + infos_demandes[0].note_analyse.split('\\').pop();;
   
     }
 
