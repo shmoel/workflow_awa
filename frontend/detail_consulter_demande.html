@@ -406,13 +406,13 @@
         });
 
 
-        document.getElementById("type_demande").innerText = infos_demandes[0].type_demande;
-        document.getElementById("banque").innerText = infos_demandes[0].banque;
-        document.getElementById("entite").innerText = infos_demandes[0].categorie_demande;
-        document.getElementById("contrepartie").innerText = infos_demandes[0].nom_client;
-        document.getElementById("montant").innerText = infos_demandes[0].montant;
-        document.getElementById("note_analyse").href = "/api/download/" + infos_demandes[0].note_analyse;
-        document.getElementById("date_time").innerText = infos_demandes[0].date_time;
+        document.getElementById("type_demande").innerText = infos_demandes.type_demande;
+        document.getElementById("banque").innerText = infos_demandes.banque;
+        document.getElementById("entite").innerText = infos_demandes.categorie_demande;
+        document.getElementById("contrepartie").innerText = infos_demandes.nom_client;
+        document.getElementById("montant").innerText = infos_demandes.montant;
+        document.getElementById("note_analyse").href = "/api/download/" + infos_demandes.note_analyse;
+        document.getElementById("date_time").innerText = infos_demandes.date_time;
     }
 
     async function charger_details_commentaire() {
