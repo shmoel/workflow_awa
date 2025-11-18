@@ -369,13 +369,13 @@
 
         const demande_id = params.get("id_dmd");
 
-        const reponse = await fetch(`${API_URL}/demande_particulier/${demande_id}`,{
+        const reponse = await fetch(`${API_URL}/demande_particulier/${demande_id}`, {
             method: "GET",
             headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json",
-            },
-        });
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
 
         const donnees = await reponse.json();
 
@@ -384,35 +384,9 @@
         }
 
         const infos_demandes = donnees.results;
-
-        const rep = await fetch(`${API_URL}/decisions/`);
-
-        const liste_decision = await rep.json();
-
-        if (!rep.ok) {
-            alert(data.detail || "Erreur lors de la mise a jour des données de la demande");
-        }
-
-        const liste_deroulante = document.getElementById('decision');
-        liste_deroulante.innerHTML = '';
-
-        liste_decision.forEach(t => {
-
-            const option = document.createElement("option");
-            option.value = t.id
-            option.text = t.libelle
-            liste_deroulante.appendChild(option);
-
-        });
-
-
-        document.getElementById("type_demande").innerText = infos_demandes.type_demande;
-        document.getElementById("banque").innerText = infos_demandes.banque;
-        document.getElementById("entite").innerText = infos_demandes.categorie_demande;
-        document.getElementById("contrepartie").innerText = infos_demandes.nom_client;
-        document.getElementById("montant").innerText = infos_demandes.montant;
+    
         document.getElementById("note_analyse").href = "/api/download/" + infos_demandes.note_analyse;
-        document.getElementById("date_time").innerText = infos_demandes.date_time;
+  
     }
 
     async function charger_details_commentaire() {
