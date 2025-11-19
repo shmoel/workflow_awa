@@ -526,8 +526,9 @@
             // Sélectionner la première option valide si elle existe
             if (list_type_demande.length > 0) {
 
+                const target = String(demandes.id_type_demande);
                 for (const opt of type_dmd.options) {
-                    if (opt.value === String(demandes.id_type_demande)) {
+                    if (opt.value === target) {
                         opt.selected = true;
                         break;
                     }
