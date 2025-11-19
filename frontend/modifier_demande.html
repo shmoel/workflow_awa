@@ -525,7 +525,14 @@
 
             // Sélectionner la première option valide si elle existe
             if (list_type_demande.length > 0) {
-                type_dmd.value = String(demandes.id_type_demande);  
+
+                for (const opt of type_dmd.options) {
+                    if (opt.value === String(demandes.id_type_demande)) {
+                        opt.selected = true;
+                        break;
+                    }
+                }
+                
             }
             
             document.getElementById('client').value = demandes.nom_client;
