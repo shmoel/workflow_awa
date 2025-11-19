@@ -479,7 +479,7 @@
                     "Authorization": "Bearer " + token,
                     "Content-Type": "application/json"
                 }
-            });  
+            }); 
             
 
             const demande_Response = await fetch(`${API_URL}/demandes/${id_demande}`,{
@@ -525,7 +525,7 @@
 
             // Sélectionner la première option valide si elle existe
             if (list_type_demande.length > 0) {
-                type_dmd.selectedIndex = demandes.id_type_demande - 1;  
+                type_dmd.selectedIndex = demandes.id_type_demande;  
             }
             
             document.getElementById('client').value = demandes.nom_client;
