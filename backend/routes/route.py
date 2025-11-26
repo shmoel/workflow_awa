@@ -1220,7 +1220,7 @@ async def get_demandes_a_valider(
             id_event = 2
 
         sql_query = """
-        SELECT dmd.*, a.max_event
+        SELECT dmd.*, a.max_event, a.date_time_avis
         FROM (SELECT 
             t.libelle AS type_demande,
             t.id AS id_type_demande,
@@ -1238,8 +1238,8 @@ async def get_demandes_a_valider(
             JOIN demandes d ON d.id_typedemande = t.id
             JOIN banque b ON b.id = d.banque
             WHERE d.banque = :id_banque) dmd
-        JOIN (SELECT id_demande, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
-        ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+        JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+        ORDER BY date_time_avis DESC
         """
         params = {"id_banque":user.id_banque, "id_event":id_event}
 
@@ -1251,9 +1251,9 @@ async def get_demandes_a_valider(
 
 
 # Nouvelle route: /derniere_demande_a_valider/{id_demande}
-@router.get("/derniere_demande_a_valider/{id_demande}")
+@router.get("/derniere_demande_a_valider/{id_avis}")
 async def get_demandes_a_valider_from_id(
-    id_demande: int,
+    id_avis: int,
     user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -1358,7 +1358,7 @@ async def get_demandes_a_valider_from_id(
         else:
             id_event = 2
         sql_query = """
-        SELECT dmd.*, a.max_event
+        SELECT dmd.*, a.max_event, a.date_time_avis
         FROM (SELECT 
             t.libelle AS type_demande,
             t.id AS id_type_demande,
@@ -1376,14 +1376,14 @@ async def get_demandes_a_valider_from_id(
             JOIN demandes d ON d.id_typedemande = t.id
             JOIN banque b ON b.id = d.banque
             WHERE d.banque = :id_banque) dmd
-        JOIN (SELECT id_demande, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
-        ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+        JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+        ORDER BY date_time_avis DESC
         """
         params = {"id_banque": user.id_banque, "id_event": id_event}
     try:
         result = crud.execute_raw_sql(db, sql_query, params=params)
-        # Filtrer côté Python sur id_demande
-        filtered = [r for r in result if int(r.get('id_demande', 0)) >= id_demande]
+        # Filtrer côté Python sur id_avis
+        filtered = [r for r in result if int(r.get('id_avis', 0)) >= id_avis]
         return {"results": filtered}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1502,7 +1502,7 @@ async def get_demandes_a_valider(
             id_event = 2
 
         sql_query = """
-        SELECT dmd.*, a.max_event
+        SELECT dmd.*, a.max_event, a.date_time_avis
         FROM (SELECT 
             t.libelle AS type_demande,
             t.id AS id_type_demande,
@@ -1520,8 +1520,8 @@ async def get_demandes_a_valider(
             JOIN demandes d ON d.id_typedemande = t.id
             JOIN banque b ON b.id = d.banque
             WHERE d.banque = :id_banque) dmd
-        JOIN (SELECT id_demande, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
-        ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+        JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+        ORDER BY date_time_avis DESC
         """
         params = {"id_banque":user.id_banque, "id_event":id_event}
 
