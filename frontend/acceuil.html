@@ -608,11 +608,12 @@
         // --- Système d'alerte nouvelle demande à valider ---
         let pollingInterval = null;
 
+
         async function checkNouvelleDemande() {
             const token = localStorage.getItem("token");
             if (!token) return;
             try {
-                // On commence par récupérer la dernière demande connue
+                console.log('[DEBUG] Vérification nouvelle demande à valider...');
                 const resp = await fetch(`${API_URL}/derniere_demande_a_valider/`, {
                     method: "GET",
                     headers: {
@@ -620,27 +621,32 @@
                         "Content-Type": "application/json",
                     },
                 });
-                if (!resp.ok) return;
+                console.log('[DEBUG] Réponse /derniere_demande_a_valider/', resp);
+                if (!resp.ok) { console.log('[DEBUG] Réponse non OK'); return; }
                 const data = await resp.json();
+                console.log('[DEBUG] Data /derniere_demande_a_valider/', data);
                 const lastDemande = data.results;
-                if (!lastDemande || !lastDemande.id_demande) return;
+                if (!lastDemande || !lastDemande.id_demande) { console.log('[DEBUG] Pas de lastDemande ou pas d\'id_demande'); return; }
                 const lastId = lastDemande.id_demande;
                 const storedId = localStorage.getItem("lastIdDemandeValidee");
+                console.log('[DEBUG] lastId:', lastId, 'storedId:', storedId);
                 if (!storedId) {
                     localStorage.setItem("lastIdDemandeValidee", lastId);
+                    console.log('[DEBUG] Initialisation lastIdDemandeValidee à', lastId);
                     return;
                 }
                 if (parseInt(lastId) > parseInt(storedId)) {
-                    // Nouvelle(s) demande(s) détectée(s), on récupère toutes les nouvelles
+                    console.log('[DEBUG] Nouvelle(s) demande(s) détectée(s), appel de showPopupDemandesFromId(', parseInt(storedId) + 1, ')');
                     await showPopupDemandesFromId(parseInt(storedId) + 1);
                 }
-            } catch (e) { /* ignore */ }
+            } catch (e) { console.error('[DEBUG] Erreur checkNouvelleDemande', e); }
         }
 
         async function showPopupDemandesFromId(id_demande) {
             const token = localStorage.getItem("token");
             if (!token) return;
             try {
+                console.log('[DEBUG] Appel /derniere_demande_a_valider/' + id_demande);
                 const resp = await fetch(`${API_URL}/derniere_demande_a_valider/${id_demande}`, {
                     method: "GET",
                     headers: {
@@ -648,16 +654,19 @@
                         "Content-Type": "application/json",
                     },
                 });
-                if (!resp.ok) return;
+                console.log('[DEBUG] Réponse /derniere_demande_a_valider/{id_demande}', resp);
+                if (!resp.ok) { console.log('[DEBUG] Réponse non OK'); return; }
                 const data = await resp.json();
+                console.log('[DEBUG] Data /derniere_demande_a_valider/{id_demande}', data);
                 const demandes = data.results;
                 if (demandes && Array.isArray(demandes) && demandes.length > 0) {
                     showPopupDemandesList(demandes);
                 } else if (demandes && typeof demandes === 'object' && demandes.id_demande) {
-                    // Cas où l'API retourne un seul objet
                     showPopupDemandesList([demandes]);
+                } else {
+                    console.log('[DEBUG] Pas de nouvelles demandes à afficher');
                 }
-            } catch (e) { /* ignore */ }
+            } catch (e) { console.error('[DEBUG] Erreur showPopupDemandesFromId', e); }
         }
 
         function showPopupDemandesList(demandes) {
