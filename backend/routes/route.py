@@ -1108,7 +1108,7 @@ async def get_demandes_fin_process(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# chargement des demandes à valider pour les profils valideurs
+#chargement des demandes à valider pour les profils valideurs
 @router.get("/demandes_a_valider/")
 async def get_demandes_a_valider(
     user: schemas.Users = Depends(get_current_user),
@@ -1248,6 +1248,295 @@ async def get_demandes_a_valider(
         return {"results": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Nouvelle route: /derniere_demande_a_valider/{id_demande}
+@router.get("/derniere_demande_a_valider/{id_demande}")
+async def get_demandes_a_valider_from_id(
+    id_demande: int,
+    user: schemas.Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if isinstance(user, RedirectResponse):
+        return user
+    requete1 = "SELECT * FROM banque WHERE id=:id_banque"
+    infos_banque = crud.execute_raw_sql(db, requete1, params={"id_banque": user.id_banque})
+    if infos_banque:
+        banque = infos_banque[0]['sigle']
+    else:
+        banque = ""
+    requete2 = "SELECT * FROM entite WHERE id=:id_entite"
+    infos_entite = crud.execute_raw_sql(db, requete2, params={"id_entite": user.id_entite})
+    if infos_entite:
+        entite = infos_entite[0]['libelle']
+    else:
+        entite = ""
+    # On reprend la logique de la route précédente, mais on filtre sur id_demande >= id_demande
+    if banque == "AWA" or banque == "AIG":
+        if banque == "AWA":
+            id_event = 3
+            sql_query = """
+            SELECT dmd.*, a.max_event
+            FROM (SELECT 
+                t.libelle AS type_demande,
+                t.id AS id_type_demande,
+                c.id AS id_categorie_demande,
+                c.libelle AS categorie_demande,
+                d.nom_client AS nom_client,
+                d.montant AS montant,
+                d.date AS date,
+                d.heure AS heure,
+                d.id AS id_demande,
+                (d.date || ' ' || d.heure)::timestamp AS date_time,
+                b.sigle AS banque
+                FROM typedemande t 
+                JOIN categoriedemande c ON c.id = t.id_categoriedemande
+                JOIN demandes d ON d.id_typedemande = t.id
+                JOIN banque b ON b.id = d.banque
+                WHERE d.id >= :id_demande
+                ) dmd
+            JOIN (SELECT id_demande, MAX(id_event) AS max_event, MAX(heure) AS heure_avis, MAX(date) AS date_avis FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+            ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+            """
+            params = {"id_event": id_event, "id_demande": id_demande}
+        else:
+            if entite == "GGR":
+                id_event = 5
+                sql_query = """
+                SELECT dmd.*, a.max_event
+                FROM (SELECT 
+                    t.libelle AS type_demande,
+                    t.id AS id_type_demande,
+                    c.id AS id_categorie_demande,
+                    c.libelle AS categorie_demande,
+                    d.nom_client AS nom_client,
+                    d.montant AS montant,
+                    d.date AS date,
+                    d.heure AS heure,
+                    d.id AS id_demande, 
+                    (d.date || ' ' || d.heure)::timestamp AS date_time,
+                    b.sigle AS banque
+                    FROM typedemande t 
+                    JOIN categoriedemande c ON c.id = t.id_categoriedemande
+                    JOIN demandes d ON d.id_typedemande = t.id
+                    JOIN banque b ON b.id = d.banque
+                    WHERE d.id >= :id_demande
+                    ) dmd
+                JOIN (SELECT id_demande, MAX(date) date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+                ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+                """
+                params = {"id_event": id_event, "id_demande": id_demande}
+            else:
+                id_event = 4
+                sql_query = """
+                SELECT dmd.*, a.max_event
+                FROM (SELECT 
+                    t.libelle AS type_demande,
+                    t.id AS id_type_demande,
+                    c.id AS id_categorie_demande,
+                    c.libelle AS categorie_demande,
+                    d.nom_client AS nom_client,
+                    d.montant AS montant,
+                    d.date AS date,
+                    d.heure AS heure,
+                    d.id AS id_demande,
+                    dg.id AS id_departementGroup,
+                    dg.libelle AS departemenGroup, 
+                    (d.date || ' ' || d.heure)::timestamp AS date_time,
+                    b.sigle AS banque
+                    FROM typedemande t 
+                    JOIN categoriedemande c ON c.id = t.id_categoriedemande
+                    JOIN departementgroup dg ON dg.id = c.id_departementgroup
+                    JOIN demandes d ON d.id_typedemande = t.id
+                    JOIN banque b ON b.id = d.banque
+                    WHERE dg.libelle = :entite AND d.id >= :id_demande) dmd
+                JOIN (SELECT id_demande, MAX(date) AS date_avis, MAX(heure) AS heure_avis, MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+                ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+                """
+                params = {"entite": entite, "id_event": id_event, "id_demande": id_demande}
+    else:
+        if entite == "GGR":
+            id_event = 1
+        else:
+            id_event = 2
+        sql_query = """
+        SELECT dmd.*, a.max_event
+        FROM (SELECT 
+            t.libelle AS type_demande,
+            t.id AS id_type_demande,
+            c.id AS id_categorie_demande,
+            c.libelle AS categorie_demande,
+            d.nom_client AS nom_client,
+            d.montant AS montant,
+            d.date AS date,
+            d.heure AS heure,
+            d.id AS id_demande,
+            (d.date || ' ' || d.heure)::timestamp AS date_time,
+            b.sigle AS banque
+            FROM typedemande t 
+            JOIN categoriedemande c ON c.id = t.id_categoriedemande
+            JOIN demandes d ON d.id_typedemande = t.id
+            JOIN banque b ON b.id = d.banque
+            WHERE d.banque = :id_banque AND d.id >= :id_demande) dmd
+        JOIN (SELECT id_demande, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+        ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+        """
+        params = {"id_banque": user.id_banque, "id_event": id_event, "id_demande": id_demande}
+    try:
+        result = crud.execute_raw_sql(db, sql_query, params=params)
+        return {"results": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+#CHARGEMENT DE LA DERNIERE DEMANDE A VALIDER SELON LE PROFIL DU USER
+@router.get("/derniere_demande_a_valider/")
+async def get_demandes_a_valider(
+    user: schemas.Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    if isinstance(user, RedirectResponse):
+        return user
+    
+    # Requête SQL avec jointures
+    requete1 = "SELECT * FROM banque WHERE id=:id_banque"
+    infos_banque = crud.execute_raw_sql(db,requete1, params={"id_banque":user.id_banque})
+
+    if infos_banque:
+        banque = infos_banque[0]['sigle']
+    else:
+        banque = ""
+
+    requete2 = "SELECT * FROM entite WHERE id=:id_entite"
+    infos_entite = crud.execute_raw_sql(db,requete2, params={"id_entite":user.id_entite})
+
+    if infos_entite:
+        entite = infos_entite[0]['libelle']
+
+
+    if banque == "AWA" or banque == "AIG":
+        if banque =="AWA":
+            id_event = 3
+            sql_query = """
+            SELECT dmd.*, a.max_event
+            FROM (SELECT 
+                t.libelle AS type_demande,
+                t.id AS id_type_demande,
+                c.id AS id_categorie_demande,
+                c.libelle AS categorie_demande,
+                d.nom_client AS nom_client,
+                d.montant AS montant,
+                d.date AS date,
+                d.heure AS heure,
+                d.id AS id_demande,
+                (d.date || ' ' || d.heure)::timestamp AS date_time,
+                b.sigle AS banque
+                FROM typedemande t 
+                JOIN categoriedemande c ON c.id = t.id_categoriedemande
+                JOIN demandes d ON d.id_typedemande = t.id
+                JOIN banque b ON b.id = d.banque
+                ) dmd
+            JOIN (SELECT id_demande, MAX(id_event) AS max_event, MAX(heure) AS heure_avis, MAX(date) AS date_avis FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+            ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+            """
+            params = {"id_event":id_event}
+        else:
+            if entite == "GGR":
+                id_event = 5
+                sql_query = """
+                SELECT dmd.*, a.max_event
+                FROM (SELECT 
+                    t.libelle AS type_demande,
+                    t.id AS id_type_demande,
+                    c.id AS id_categorie_demande,
+                    c.libelle AS categorie_demande,
+                    d.nom_client AS nom_client,
+                    d.montant AS montant,
+                    d.date AS date,
+                    d.heure AS heure,
+                    d.id AS id_demande, 
+                    (d.date || ' ' || d.heure)::timestamp AS date_time,
+                    b.sigle AS banque
+                    FROM typedemande t 
+                    JOIN categoriedemande c ON c.id = t.id_categoriedemande
+                    JOIN demandes d ON d.id_typedemande = t.id
+                    JOIN banque b ON b.id = d.banque) dmd
+                JOIN (SELECT id_demande, MAX(date) date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+                ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+                """
+                params = {"id_event":id_event}
+            else:
+                id_event = 4
+                sql_query = """
+                SELECT dmd.*, a.max_event
+                FROM (SELECT 
+                    t.libelle AS type_demande,
+                    t.id AS id_type_demande,
+                    c.id AS id_categorie_demande,
+                    c.libelle AS categorie_demande,
+                    d.nom_client AS nom_client,
+                    d.montant AS montant,
+                    d.date AS date,
+                    d.heure AS heure,
+                    d.id AS id_demande,
+                    dg.id AS id_departementGroup,
+                    dg.libelle AS departemenGroup, 
+                    (d.date || ' ' || d.heure)::timestamp AS date_time,
+                    b.sigle AS banque
+                    FROM typedemande t 
+                    JOIN categoriedemande c ON c.id = t.id_categoriedemande
+                    JOIN departementgroup dg ON dg.id = c.id_departementgroup
+                    JOIN demandes d ON d.id_typedemande = t.id
+                    JOIN banque b ON b.id = d.banque
+                    WHERE dg.libelle = :entite) dmd
+                JOIN (SELECT id_demande, MAX(date) AS date_avis, MAX(heure) AS heure_avis, MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+                ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+                """
+                params = {"entite":entite,"id_event":id_event}
+    else:
+        if entite == "GGR":
+            id_event = 1
+        else:
+            id_event = 2
+
+        sql_query = """
+        SELECT dmd.*, a.max_event
+        FROM (SELECT 
+            t.libelle AS type_demande,
+            t.id AS id_type_demande,
+            c.id AS id_categorie_demande,
+            c.libelle AS categorie_demande,
+            d.nom_client AS nom_client,
+            d.montant AS montant,
+            d.date AS date,
+            d.heure AS heure,
+            d.id AS id_demande,
+            (d.date || ' ' || d.heure)::timestamp AS date_time,
+            b.sigle AS banque
+            FROM typedemande t 
+            JOIN categoriedemande c ON c.id = t.id_categoriedemande
+            JOIN demandes d ON d.id_typedemande = t.id
+            JOIN banque b ON b.id = d.banque
+            WHERE d.banque = :id_banque) dmd
+        JOIN (SELECT id_demande, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+        ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
+        """
+        params = {"id_banque":user.id_banque, "id_event":id_event}
+
+    try:
+        result = crud.execute_raw_sql(db, sql_query, params=params)
+        # Retourner uniquement le premier élément (ou None si vide)
+        if result and len(result) > 0:
+            return {"results": result[0]}
+        else:
+            return {"results": None}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 # chargement des demandes à valider pour les profils valideurs
 @router.get("/demandes_deja_valider/")
