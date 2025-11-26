@@ -1271,7 +1271,7 @@ async def get_demandes_a_valider_from_id(
         entite = infos_entite[0]['libelle']
     else:
         entite = ""
-    # On reprend la logique de la route précédente, mais on filtre sur id_demande >= id_demande
+    # On reprend la logique de la route précédente, puis on filtre sur id_demande côté Python
     if banque == "AWA" or banque == "AIG":
         if banque == "AWA":
             id_event = 3
@@ -1293,12 +1293,11 @@ async def get_demandes_a_valider_from_id(
                 JOIN categoriedemande c ON c.id = t.id_categoriedemande
                 JOIN demandes d ON d.id_typedemande = t.id
                 JOIN banque b ON b.id = d.banque
-                WHERE d.id >= :id_demande
                 ) dmd
             JOIN (SELECT id_demande, MAX(id_event) AS max_event, MAX(heure) AS heure_avis, MAX(date) AS date_avis FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
             ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
             """
-            params = {"id_event": id_event, "id_demande": id_demande}
+            params = {"id_event": id_event}
         else:
             if entite == "GGR":
                 id_event = 5
@@ -1320,12 +1319,11 @@ async def get_demandes_a_valider_from_id(
                     JOIN categoriedemande c ON c.id = t.id_categoriedemande
                     JOIN demandes d ON d.id_typedemande = t.id
                     JOIN banque b ON b.id = d.banque
-                    WHERE d.id >= :id_demande
                     ) dmd
                 JOIN (SELECT id_demande, MAX(date) date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
                 ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
                 """
-                params = {"id_event": id_event, "id_demande": id_demande}
+                params = {"id_event": id_event}
             else:
                 id_event = 4
                 sql_query = """
@@ -1349,11 +1347,11 @@ async def get_demandes_a_valider_from_id(
                     JOIN departementgroup dg ON dg.id = c.id_departementgroup
                     JOIN demandes d ON d.id_typedemande = t.id
                     JOIN banque b ON b.id = d.banque
-                    WHERE dg.libelle = :entite AND d.id >= :id_demande) dmd
+                    WHERE dg.libelle = :entite) dmd
                 JOIN (SELECT id_demande, MAX(date) AS date_avis, MAX(heure) AS heure_avis, MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
                 ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
                 """
-                params = {"entite": entite, "id_event": id_event, "id_demande": id_demande}
+                params = {"entite": entite, "id_event": id_event}
     else:
         if entite == "GGR":
             id_event = 1
@@ -1377,14 +1375,16 @@ async def get_demandes_a_valider_from_id(
             JOIN categoriedemande c ON c.id = t.id_categoriedemande
             JOIN demandes d ON d.id_typedemande = t.id
             JOIN banque b ON b.id = d.banque
-            WHERE d.banque = :id_banque AND d.id >= :id_demande) dmd
+            WHERE d.banque = :id_banque) dmd
         JOIN (SELECT id_demande, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
         ORDER BY (a.date_avis || ' ' || a.heure_avis)::timestamp DESC
         """
-        params = {"id_banque": user.id_banque, "id_event": id_event, "id_demande": id_demande}
+        params = {"id_banque": user.id_banque, "id_event": id_event}
     try:
         result = crud.execute_raw_sql(db, sql_query, params=params)
-        return {"results": result}
+        # Filtrer côté Python sur id_demande
+        filtered = [r for r in result if int(r.get('id_demande', 0)) >= id_demande]
+        return {"results": filtered}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
