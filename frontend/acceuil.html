@@ -696,11 +696,25 @@
         function showPopupDemandesList(demandes) {
             const popup = document.getElementById('popup-nouvelle-demande');
             const details = document.getElementById('popup-demande-details');
-            let html = '<b>Nouvelles demandes à valider :</b><br><ul style="text-align:left;">';
+            let html = '<b>Nouvelles demandes à valider :</b><br>';
+            html += `<table style="width:100%;border-collapse:collapse;text-align:left;">
+                <thead>
+                    <tr style="background:#ea580c;color:#fff;">
+                        <th style="padding:6px 8px;">Banque</th>
+                        <th style="padding:6px 8px;">Type</th>
+                        <th style="padding:6px 8px;">Contrepartie</th>
+                        <th style="padding:6px 8px;">Date | heure</th>
+                    </tr>
+                </thead><tbody>`;
             for (const d of demandes) {
-                html += `<li><b>Banque :</b> ${escapeHtml(d.banque || '')} | <b>Type :</b> ${escapeHtml(d.type_demande || '')} | <b>Contrepartie :</b> ${escapeHtml(d.nom_client || '')} | <b>Date :</b> ${escapeHtml(d.date_avis || '')} ${escapeHtml(d.heure_avis || '')}</li>`;
+                html += `<tr style="border-bottom:1px solid #f3e7de;">
+                    <td style="padding:6px 8px;">${escapeHtml(d.banque || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.type_demande || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.nom_client || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.date_time_avis || '')}</td>
+                </tr>`;
             }
-            html += '</ul>';
+            html += '</tbody></table>';
             details.innerHTML = html;
             popup.style.display = 'block';
         }
@@ -726,8 +740,8 @@
                 if (!resp.ok) return;
                 const data = await resp.json();
                 const lastDemande = data.results;
-                if (lastDemande && lastDemande.id_demande) {
-                    localStorage.setItem("lastIdDemandeValidee", lastDemande.id_demande);
+                if (lastDemande && lastDemande.id_avis) {
+                    localStorage.setItem("lastIdDemandeValidee", lastDemande.id_avis);
                 }
             } catch (e) { /* ignore */ }
         }
