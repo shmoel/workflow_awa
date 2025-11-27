@@ -612,6 +612,30 @@
         async function checkNouvelleDemande() {
             const token = localStorage.getItem("token");
             if (!token) return;
+
+            const response = await fetch(`${API_URL}/users-joined/`, {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
+            
+            // Vérifier si la requête a réussi
+            if (!response.ok) {
+                    throw new Error(`Erreur HTTP : ${response.status}`);
+            }
+                
+            const donnees = await response.json();
+            
+            const infos_user = donnees.results;
+
+            if (infos_user[0].niveau_hab==="Niveau 1") {
+                console.log('[DEBUG] L\'utilisateur n\'est pas validateur AWA, arrêt du polling.');
+                clearInterval(pollingInterval);
+                return;
+            }
+
             try {
                 console.log('[DEBUG] Vérification nouvelle demande à valider...');
                 const resp = await fetch(`${API_URL}/derniere_demande_a_valider/`, {
