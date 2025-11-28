@@ -701,17 +701,19 @@
                 <thead>
                     <tr style="background:#ea580c;color:#fff;">
                         <th style="padding:6px 8px;">Banque</th>
-                        <th style="padding:6px 8px;">Type</th>
+                        <th style="padding:6px 8px;">Entité</th>
                         <th style="padding:6px 8px;">Contrepartie</th>
-                        <th style="padding:6px 8px;">Date | heure</th>
+                        <th style="padding:6px 8px;">Date</th>
+                        <th style="padding:6px 8px;">Heure</th>
                     </tr>
                 </thead><tbody>`;
             for (const d of demandes) {
                 html += `<tr style="border-bottom:1px solid #f3e7de;">
                     <td style="padding:6px 8px;">${escapeHtml(d.banque || '')}</td>
-                    <td style="padding:6px 8px;">${escapeHtml(d.type_demande || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.categorie_demande || '')}</td>
                     <td style="padding:6px 8px;">${escapeHtml(d.nom_client || '')}</td>
-                    <td style="padding:6px 8px;">${escapeHtml(d.date_time_avis || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.date_avis || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.heure_avis || '')}</td>
                 </tr>`;
             }
             html += '</tbody></table>';

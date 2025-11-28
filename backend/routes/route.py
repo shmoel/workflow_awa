@@ -1138,7 +1138,7 @@ async def get_demandes_a_valider(
         if banque =="AWA":
             id_event = 3
             sql_query = """
-            SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+            SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
             FROM (SELECT 
                 t.libelle AS type_demande,
                 t.id AS id_type_demande,
@@ -1164,7 +1164,7 @@ async def get_demandes_a_valider(
             if entite == "GGR":
                 id_event = 5
                 sql_query = """
-                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
                 FROM (SELECT 
                     t.libelle AS type_demande,
                     t.id AS id_type_demande,
@@ -1188,7 +1188,7 @@ async def get_demandes_a_valider(
             else:
                 id_event = 4
                 sql_query = """
-                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
                 FROM (SELECT 
                     t.libelle AS type_demande,
                     t.id AS id_type_demande,
@@ -1220,7 +1220,7 @@ async def get_demandes_a_valider(
             id_event = 2
 
         sql_query = """
-        SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+        SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
         FROM (SELECT 
             t.libelle AS type_demande,
             t.id AS id_type_demande,
@@ -1276,7 +1276,7 @@ async def get_demandes_a_valider_from_id(
         if banque == "AWA":
             id_event = 3
             sql_query = """
-            SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+            SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis,a.heure_avis, a.date_avis
             FROM (SELECT 
                 t.libelle AS type_demande,
                 t.id AS id_type_demande,
@@ -1302,7 +1302,7 @@ async def get_demandes_a_valider_from_id(
             if entite == "GGR":
                 id_event = 5
                 sql_query = """
-                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis,a.heure_avis, a.date_avis
                 FROM (SELECT 
                     t.libelle AS type_demande,
                     t.id AS id_type_demande,
@@ -1327,7 +1327,7 @@ async def get_demandes_a_valider_from_id(
             else:
                 id_event = 4
                 sql_query = """
-                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
                 FROM (SELECT 
                     t.libelle AS type_demande,
                     t.id AS id_type_demande,
@@ -1358,7 +1358,7 @@ async def get_demandes_a_valider_from_id(
         else:
             id_event = 2
         sql_query = """
-        SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+        SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
         FROM (SELECT 
             t.libelle AS type_demande,
             t.id AS id_type_demande,
@@ -1420,7 +1420,7 @@ async def get_demandes_a_valider(
         if banque =="AWA":
             id_event = 3
             sql_query = """
-            SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+            SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis,a.heure_avis, a.date_avis
             FROM (SELECT 
                 t.libelle AS type_demande,
                 t.id AS id_type_demande,
@@ -1446,7 +1446,7 @@ async def get_demandes_a_valider(
             if entite == "GGR":
                 id_event = 5
                 sql_query = """
-                SELECT dmd.*, a.max_event, a.date_time_avis, id_avis
+                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
                 FROM (SELECT 
                     t.libelle AS type_demande,
                     t.id AS id_type_demande,
@@ -1470,7 +1470,7 @@ async def get_demandes_a_valider(
             else:
                 id_event = 4
                 sql_query = """
-                SELECT dmd.*, a.max_event, a.date_time_avis, id_avis
+                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
                 FROM (SELECT 
                     t.libelle AS type_demande,
                     t.id AS id_type_demande,
@@ -1502,7 +1502,7 @@ async def get_demandes_a_valider(
             id_event = 2
 
         sql_query = """
-        SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis
+        SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
         FROM (SELECT 
             t.libelle AS type_demande,
             t.id AS id_type_demande,
