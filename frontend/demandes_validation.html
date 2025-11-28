@@ -3,6 +3,47 @@
 <html lang="fr" class="material-style layout-fixed">
 
 <head>
+    <!-- Pop-up alerte nouvelle demande à valider -->
+    <style>
+        #popup-nouvelle-demande {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; right: 0; top: 0; bottom: 0;
+            background: rgba(0,0,0,0.35);
+        }
+        #popup-nouvelle-demande .popup-content {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px #ea580c33;
+            max-width: 400px;
+            margin: 120px auto;
+            padding: 32px 24px 24px 24px;
+            text-align: center;
+            border: 2px solid #ea580c;
+        }
+        #popup-nouvelle-demande .popup-title {
+            color: #ea580c;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        #popup-nouvelle-demande .popup-btn {
+            background: #ea580c;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 28px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 18px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #ea580c22;
+        }
+        #popup-nouvelle-demande .popup-btn:hover {
+            background: #d45a0b;
+        }
+    </style>
     <title>Compte utilisateur niveau_2</title>
 
     <meta charset="utf-8">
@@ -365,7 +406,7 @@
     <script>
 
         //const API_URL = "http://127.0.0.1:8000/api";
-        const API_URL = "https://workflow-awa.onrender.com/api";
+    // const API_URL déjà déclaré plus haut
 
         async function logout() {
              
@@ -787,5 +828,169 @@
     </script>
     
 </body>
+    <!-- Pop-up nouvelle demande à valider -->
+    <div id="popup-nouvelle-demande">
+        <div class="popup-content">
+            <div class="popup-title">Nouvelle demande à valider !</div>
+            <div id="popup-demande-details" style="margin-bottom:10px;"></div>
+            <button class="popup-btn" onclick="closePopupDemande()">OK</button>
+        </div>
+    </div>
+    <script>
+        //const API_URL = "http://127.0.0.1:8000/api";
+    // const API_URL déjà déclaré plus haut
+
+        // --- Système d'alerte nouvelle demande à valider ---
+        let pollingInterval = null;
+
+        async function checkNouvelleDemande() {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            const response = await fetch(`${API_URL}/users-joined/`, {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            }
+            });
+            
+            // Vérifier si la requête a réussi
+            if (!response.ok) {
+                    throw new Error(`Erreur HTTP : ${response.status}`);
+            }
+                
+            const donnees = await response.json();
+            
+            const infos_user = donnees.results;
+
+            if (infos_user[0].niveau_hab==="Niveau 1") {
+                console.log('[DEBUG] L\'utilisateur n\'est pas validateur AWA, arrêt du polling.');
+                clearInterval(pollingInterval);
+                return;
+            }
+
+            try {
+                console.log('[DEBUG] Vérification nouvelle demande à valider...');
+                const resp = await fetch(`${API_URL}/derniere_demande_a_valider/`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: "Bearer " + token,
+                        "Content-Type": "application/json",
+                    },
+                });
+                console.log('[DEBUG] Réponse /derniere_demande_a_valider/', resp);
+                if (!resp.ok) { console.log('[DEBUG] Réponse non OK'); return; }
+                const data = await resp.json();
+                console.log('[DEBUG] Data /derniere_demande_a_valider/', data);
+                const lastDemande = data.results;
+                if (!lastDemande || !lastDemande.id_demande) { console.log('[DEBUG] Pas de lastDemande ou pas d\'id_demande'); return; }
+                const lastId = lastDemande.id_avis;
+                const storedId = localStorage.getItem("lastIdDemandeValidee");
+                console.log('[DEBUG] lastId:', lastId, 'storedId:', storedId);
+                if (!storedId) {
+                    localStorage.setItem("lastIdDemandeValidee", lastId);
+                    console.log('[DEBUG] Initialisation lastIdDemandeValidee à', lastId);
+                    return;
+                }
+                if (parseInt(lastId) > parseInt(storedId)) {
+                    console.log('[DEBUG] Nouvelle(s) demande(s) détectée(s), appel de showPopupDemandesFromId(', parseInt(storedId) + 1, ')');
+                    await showPopupDemandesFromId(parseInt(storedId) + 1);
+                }
+            } catch (e) { console.error('[DEBUG] Erreur checkNouvelleDemande', e); }
+        }
+
+        async function showPopupDemandesFromId(id_avis) {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+            try {
+                console.log('[DEBUG] Appel /derniere_demande_a_valider/' + id_avis);
+                const resp = await fetch(`${API_URL}/derniere_demande_a_valider/${id_avis}`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: "Bearer " + token,
+                        "Content-Type": "application/json",
+                    },
+                });
+                console.log('[DEBUG] Réponse /derniere_demande_a_valider/{id_avis}', resp);
+                if (!resp.ok) { console.log('[DEBUG] Réponse non OK'); return; }
+                const data = await resp.json();
+                console.log('[DEBUG] Data /derniere_demande_a_valider/{id_avis}', data);
+                const demandes = data.results;
+                if (demandes && Array.isArray(demandes) && demandes.length > 0) {
+                    showPopupDemandesList(demandes);
+                } else if (demandes && typeof demandes === 'object' && demandes.id_avis) {
+                    showPopupDemandesList([demandes]);
+                } else {
+                    console.log('[DEBUG] Pas de nouvelles demandes à afficher');
+                }
+            } catch (e) { console.error('[DEBUG] Erreur showPopupDemandesFromId', e); }
+        }
+
+        function showPopupDemandesList(demandes) {
+            const popup = document.getElementById('popup-nouvelle-demande');
+            const details = document.getElementById('popup-demande-details');
+            let html = '';
+            html += `<table style="width:100%;border-collapse:collapse;text-align:left;">
+                <thead>
+                    <tr style="background:#ea580c;color:#fff;">
+                        <th style="padding:6px 8px;">Banque</th>
+                        <th style="padding:6px 8px;">Entité</th>
+                        <th style="padding:6px 8px;">Contrepartie</th>
+                        <th style="padding:6px 8px;">Date</th>
+                        <th style="padding:6px 8px;">Heure</th>
+                    </tr>
+                </thead><tbody>`;
+            for (const d of demandes) {
+                html += `<tr style="border-bottom:1px solid #f3e7de;">
+                    <td style="padding:6px 8px;">${escapeHtml(d.banque || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.categorie_demande || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.nom_client || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.date_avis || '')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(d.heure_avis || '')}</td>
+                </tr>`;
+            }
+            html += '</tbody></table>';
+            details.innerHTML = html;
+            popup.style.display = 'block';
+        }
+
+        function closePopupDemande() {
+            const popup = document.getElementById('popup-nouvelle-demande');
+            popup.style.display = 'none';
+            // Mettre à jour l'id stocké avec la dernière demande
+            fetchDerniereIdDemandeEtStocke();
+        }
+
+        async function fetchDerniereIdDemandeEtStocke() {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+            try {
+                const resp = await fetch(`${API_URL}/derniere_demande_a_valider/`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: "Bearer " + token,
+                        "Content-Type": "application/json",
+                    },
+                });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const lastDemande = data.results;
+                if (lastDemande && lastDemande.id_avis) {
+                    localStorage.setItem("lastIdDemandeValidee", lastDemande.id_avis);
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // Démarrer le polling après le chargement de la page
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                pollingInterval = setInterval(checkNouvelleDemande, 15000); // toutes les 15s
+            }, 3000);
+        });
+       
+
+    // --- Fin système d'alerte nouvelle demande à valider ---
+    </script>
 
 </html>
