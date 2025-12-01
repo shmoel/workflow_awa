@@ -90,7 +90,7 @@
                     <li class="sidenav-item active">
                         <a href="acceuil.html" class="sidenav-link">
                             <i class="sidenav-icon feather icon-home"></i>
-                            <div>Acceuil</div>
+                            <div>Accueil</div>
                             <div class="pl-1 ml-auto">
                                 <div class="badge badge-danger"></div>
                             </div>
@@ -256,10 +256,8 @@
                                     </div>
                                     <div class="form-group">
                                         <label style="font-weight: bold;" class="form-label w-100">Note d'analyse</label>
-
-                                            <input class='form-control' type='file' id='note_analyse' name='note_analyse' required>    
-                                        
-                                        <small class="form-text text-muted">Joindre le fichier.</small>
+                                        <input class='form-control' type='file' id='note_analyse' name='note_analyse' required accept="application/pdf">    
+                                        <small class="form-text text-muted">Joindre le fichier (PDF uniquement).</small>
                                     </div>
                                     <div class="form-group">
                                         <label style="font-weight: bold;" for="comm">Commentaire</label>
@@ -367,6 +365,7 @@
 <script src= "assets/assets_user/js/demo.js"></script><script src="assets/assets_user/js/analytics.js"></script>
 <script src= "assets/assets_user/js/pages/dashboards_index.js"></script> 
 <script src="js/design.js"></script>
+
 
 <script>
 
@@ -517,15 +516,22 @@
 
     const form = document.getElementById("intro_demande");
 
+
     async function showConfirmation(event) {
-
-        event.preventDefault();  
-
+        event.preventDefault();
+        // PDF validation before showing confirmation modal
+        const fileInput = document.getElementById('note_analyse');
+        if (!fileInput || fileInput.files.length === 0) {
+            alert("Erreur : Veuillez sélectionner un fichier pour la note d'analyse.");
+            return;
+        }
+        const file = fileInput.files[0];
+        if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith('.pdf')) {
+            alert("Veuillez sélectionner un fichier PDF uniquement.");
+            fileInput.value = "";
+            return;
+        }
         $('#confirmationModal').modal('show');
-
-        //const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-            
-        //modal.show();
     }
 
     function showConfirmation_validation(event) {
