@@ -494,7 +494,7 @@ def create_Users(Users: schemas.UsersCreate, db: Session = Depends(get_db)):
 
 @router.get("/User/{Users_id}", response_model=schemas.Users)
 def read_User(Users_id: int, db: Session = Depends(get_db)):
-    db_User = crud.get_user(db, Users_id=Users_id)
+    db_User = crud.get_user(db, user_id=Users_id)
     if db_User is None:
         raise HTTPException(status_code=404, detail="Users not found")
     return db_User
@@ -506,11 +506,11 @@ def read_Users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @router.put("/User/{Users_id}", response_model=schemas.Users)
 def update_User(Users_id: int, Users: schemas.UsersCreate, db: Session = Depends(get_db)):
-    return crud.update_user(db=db, Users_id=Users_id, Users=Users)
+    return crud.update_user(db=db, user_id=Users_id, Users=Users)
 
 @router.delete("/Users/{Users_id}", response_model=schemas.Users)
 def delete_User(Users_id: int, db: Session = Depends(get_db)):
-    return crud.delete_user(db=db, Users_id=Users_id)
+    return crud.delete_user(db=db, user_id=Users_id)
 
 # demandes Endpoints
 
