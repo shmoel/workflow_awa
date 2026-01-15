@@ -497,11 +497,23 @@ def get_user(db: Session, user_id: int):
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Users).offset(skip).limit(limit).all()
 
-def update_user(db: Session, user_id: int, user: schemas.Users):
+def update_user(db: Session, user_id: int, user: schemas.UsersCreate, hashed_password: str):
+    user_ = models.Users(
+        username = user.username,
+        nom = user.nom,
+        prenom = user.prenom,
+        hashed_password = hashed_password,
+        password = user.password,
+        email = user.email,
+        id_banque = user.id_banque,
+        id_niv_hab = user.id_niv_hab,
+        id_entite = user.id_entite,
+        id_poste = user.id_poste
+    )
     db_user = db.query(models.Users).filter(models.Users.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    for key, value in user.model_dump().items():
+    for key, value in user_.model_dump().items():
         setattr(db_user, key, value)
     db.commit()
     db.refresh(db_user)

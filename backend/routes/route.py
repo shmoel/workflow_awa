@@ -226,6 +226,30 @@ def register_user(user: schemas.UsersCreate, db: Session = Depends(get_db)):
         print(f"Error in register_user: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+
+# Endpoint pour l'inscription
+@router.put("/register", response_model=schemas.Users)
+def update_user(user: schemas.UsersCreate, db: Session = Depends(get_db)):
+    try:
+        # Vérifier l'unicité du username
+        if not crud.get_user_by_username(db, user.username):
+            raise HTTPException(status_code=400, detail="Username not registered")
+        # Vérifier l'unicité de l'email (si fourni)
+        if not user.email and crud.get_user_by_email(db, user.email):
+            raise HTTPException(status_code=400, detail="Email not registered")
+        # Hacher le mot de passe
+        hashed_password = get_password_hash(user.password)
+
+        # Créer l'utilisateur
+        db_user = crud.update_user(db, user, hashed_password)
+        return db_user
+    except Exception as e:
+        # Journaliser l'erreur pour le débogage
+        print(f"Error in register_user: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+
 @router.get("/register", response_model=List[schemas.Users])
 def read_register_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     try:
