@@ -490,7 +490,7 @@ def delete_type_demande(type_demande_id: int, db: Session = Depends(get_db)):
 # Users Endpoints
 @router.post("/User/", response_model=schemas.Users)
 def create_Users(Users: schemas.UsersCreate, db: Session = Depends(get_db)):
-    return crud.create_user(db=db, Users=Users)
+    return crud.create_user(db=db, user=Users)
 
 @router.get("/User/{Users_id}", response_model=schemas.Users)
 def read_User(Users_id: int, db: Session = Depends(get_db)):
@@ -506,7 +506,7 @@ def read_Users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @router.put("/User/{Users_id}", response_model=schemas.Users)
 def update_User(Users_id: int, Users: schemas.UsersCreate, db: Session = Depends(get_db)):
-    return crud.update_user(db=db, user_id=Users_id, Users=Users)
+    return crud.update_user(db=db, user_id=Users_id, user=Users)
 
 @router.delete("/Users/{Users_id}", response_model=schemas.Users)
 def delete_User(Users_id: int, db: Session = Depends(get_db)):
@@ -1869,3 +1869,18 @@ async def get_messages_staff(
         return {"results": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@router.post("/user_domaine/", response_model=schemas.UserDomaine)
+def create_userdomaine(userdom: schemas.UserDomaineCreate, db: Session = Depends(get_db)):
+    return crud.create_userdomaine(db=db, userdomaine=userdom)
+
+
+@router.put("/user_domaine/{user_id}/{domaine_id}", response_model=schemas.UserDomaine)
+def update_user_domaine(user_id: int,domaine_id:int, userdom: schemas.UserDomaine, db: Session = Depends(get_db)):
+    return crud.update_user_domaine(db=db, user_id=user_id, domaine_id=domaine_id, user_domaine_update=userdom)
+
+@router.get("/user_domaine/", response_model=List[schemas.UserDomaine])
+def read_userdomaine_list(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    user_domaine = crud.get_alluserdomaine(db, skip=skip, limit=limit)
+    return user_domaine

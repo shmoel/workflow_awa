@@ -667,7 +667,7 @@ def get_userdomaine(db: Session, user_id: int, domaine_id: int):
 def get_alluserdomaine(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.UserDomaine).offset(skip).limit(limit).all()
 
-def update_user_domaine(db: Session, user_id: int, domaine_id: int, user_domaine_update: models.UserDomaine):
+def update_user_domaine(db: Session, user_id: int, domaine_id: int, user_domaine_update: schemas.UserDomaine):
     """
     Update a UserDomaine entry by its composite primary key.
     """
