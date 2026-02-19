@@ -1086,7 +1086,7 @@
                 addMessage(userMessage, true);
                 userInput.value = '';
                 const botResponse = await getBotResponse(userMessage);
-                addMessage(botResponse, false, botName);
+                /* addMessage(botResponse, false, botName); */ 
             } catch (e) {
                 // Erreur déjà gérée
             } finally {
