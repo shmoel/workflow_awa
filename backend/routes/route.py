@@ -1912,8 +1912,9 @@ def read_userdomaine_list(skip: int = 0, limit: int = 100, db: Session = Depends
 
 
 # renvoi le nombre de demande par categories
-@router.get("/nombre_demandes/")
+@router.get("/nombre_demandes/{niveau_dmd}")
 async def get_nombre_demandes(
+    niveau_dmd : int,
     user: schemas.Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -1939,9 +1940,9 @@ async def get_nombre_demandes(
 
     if banque == "AWA" or banque == "AIG":
         if banque =="AWA":
-            id_event = 3
+            id_event = niveau_dmd
             sql_query = """
-            SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
+            SELECT COUNT(*) AS nb_dmd, dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
             FROM (SELECT 
                 t.libelle AS type_demande,
                 t.id AS id_type_demande,
@@ -1967,7 +1968,7 @@ async def get_nombre_demandes(
             if entite == "GGR":
                 id_event = 5
                 sql_query = """
-                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
+                SELECT COUNT(*) AS nb_dmd, dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
                 FROM (SELECT 
                     t.libelle AS type_demande,
                     t.id AS id_type_demande,
@@ -2048,7 +2049,7 @@ async def get_nombre_demandes(
 
     try:
         result = crud.execute_raw_sql(db, sql_query, params=params)
-        return {"results": result}
+        return {"nombre_dmd": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -379,9 +379,9 @@
                                     <div class="col-md-4 col-lg-4 mb-4">
                                         <div class="card card-hover">
                                             <div class="card-body">
-                                                <h5 class="card-title">Demandes introduites</h5>
+                                                <h5 class="card-title">Demande en Validation GGR Local</h5>
                                                 <h2 class="card-text" id="userCount"><?php echo count($demands_insert) ; ?></h2>
-                                                <p class="text-success">+5% ce mois</p>
+                                                <p class="text-success" id="" ></p>
                                                 <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
                                             </div>
                                         </div>
@@ -400,7 +400,7 @@
                                     <div class="col-md-4 col-lg-4 mb-4">
                                         <div class="card card-hover">
                                             <div class="card-body">
-                                                <h5 class="card-title">Demandes en supprimées</h5>
+                                                <h5 class="card-title">Demandes en Validation FO Group</h5>
                                                 <h2 class="card-text" id="userCount"><?php echo count($demands_delete); ?></h2>
                                                 <p class="text-success">+0.00% ce mois</p>
                                                 <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
@@ -411,7 +411,7 @@
                                     <div class="col-md-4 col-lg-4 mb-4">
                                         <div class="card card-hover">
                                             <div class="card-body">
-                                                <h5 class="card-title">Demande en Validation GGR Local</h5>
+                                                <h5 class="card-title">Demande en Validation DG Local</h5>
                                                 <h2 class="card-text" id="userCount"><?php echo count($demands_validate1); ?></h2>
                                                 <p class="text-success">+4% ce mois</p>
                                                 <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
@@ -424,7 +424,7 @@
                                             <div class="card-body">
                                                 <h5 class="card-title">Demande en Validation AWA</h5>
                                                 <h2 class="card-text" id="userCount"><?php echo count($demands_validate2); ?></h2>
-                                                <p class="text-success">+4% ce mois</p>
+                                                <p class="text-success" id="id_awa" ></p>
                                                 <button class="btn btn-primary btn-sm" onclick="updateUsers()">Actualiser</button>
                                             </div>
                                         </div>
@@ -1080,6 +1080,34 @@
             }, 50); // Délai de 50ms pour laisser Bootstrap finir
         });
     });
+
+        window.addEventListener('load', async () => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const niveau_val = 2;
+                const token = localStorage.getItem('token');
+                const user = await getCurrentUser();
+                const id_user = user.user_id;
+                const response = await fetch(`${API_URL}/nombre_demandes/${niveau_val}`, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: 'Bearer ' + token,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (!response.ok) throw new Error('Erreur chargement du nombre de demandes');
+                const nbre_dmd_awa = await response.json();
+                console.log('Réponse JSON messages_chat:', nbre_dmd_awa); // <-- LOG AJOUTÉ
+                const nombre_demandes = nbre_dmd_awa.nombre_dmd;
+                if (nombre_demandes === 0) {
+                    
+                } else {
+                    document.getElementById('id_awa').textContent = nombre_demandes;
+                }
+            } catch (e) {
+                showNotification(e.message, 'error');
+            }
+        });
 
     </script>
 
