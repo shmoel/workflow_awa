@@ -1942,7 +1942,7 @@ async def get_nombre_demandes(
         if banque =="AWA":
             id_event = niveau_dmd
             sql_query = """
-            SELECT COUNT(*) AS nb_dmd, dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
+            SELECT COUNT(*) AS nb_dmd
             FROM (SELECT 
                 t.libelle AS type_demande,
                 t.id AS id_type_demande,
