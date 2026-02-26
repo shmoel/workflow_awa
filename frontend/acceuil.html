@@ -1083,7 +1083,6 @@
 
         window.addEventListener('load', async () => {
             try {
-                const params = new URLSearchParams(window.location.search);
                 const niveau_val = 2;
                 const token = localStorage.getItem('token');
                 const user = await getCurrentUser();
@@ -1100,7 +1099,7 @@
                 console.log('Réponse JSON messages_chat:', nbre_dmd_awa); // <-- LOG AJOUTÉ
                 const nombre_demandes = nbre_dmd_awa.nombre_dmd;
                 if (nombre_demandes === 0) {
-                    
+                    alert("C'est bizarre")
                 } else {
                     document.getElementById('id_awa').textContent = nombre_demandes;
                 }
