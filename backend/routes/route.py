@@ -2048,9 +2048,22 @@ async def get_nombre_demandes(
 
     try:
         result = crud.execute_raw_sql(db, sql_query, params=params)
-        return {"nombre_dmd": result}
+        
+        if not result:
+            return {"nombre_dmd": 0}
+            
+        row = result[0]
+        # On cherche la clé qui contient le count (peu importe son nom)
+        for key in row:
+            if key.lower() in ("nb_dmd", "count", "nombre", "total"):
+                return {"nombre_dmd": row[key] or 0}
+                
+        # fallback si structure inattendue
+        return {"nombre_dmd": 0}
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 
