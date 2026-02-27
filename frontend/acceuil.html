@@ -1082,31 +1082,67 @@
     });
 
         window.addEventListener('load', async () => {
+            console.log("→ Début du chargement");
+
             try {
                 const niveau_val = 2;
                 const token = localStorage.getItem('token');
-                const user = await getCurrentUser();
-                const id_user = user.user_id;
+                console.log("Token présent ?", !!token);
+
                 const response = await fetch(`${API_URL}/nombre_demandes/${niveau_val}`, {
                     method: 'GET',
                     headers: {
-                        Authorization: 'Bearer ' + token,
+                        Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });
-                if (!response.ok) throw new Error('Erreur chargement du nombre de demandes');
-                const nbre_dmd_awa = await response.json();
-                console.log('Réponse JSON messages_chat:', nbre_dmd_awa); // <-- LOG AJOUTÉ
-                const nombre_demandes = nbre_dmd_awa.nombre_dmd;
-                if (nombre_demandes === 0) {
-                    alert("C'est bizarre")
-                } else {
-                    document.getElementById('id_awa').textContent = nombre_demandes;
+
+                console.log("Statut HTTP :", response.status);
+
+                if (!response.ok) {
+                    console.log("Réponse pas OK →", await response.text());
+                    throw new Error(`HTTP ${response.status}`);
                 }
-            } catch (e) {
-                alert("erreur");
-                showNotification(e.message, 'error');
+
+                const data = await response.json();
+                console.log("Données brutes :", data);
+                console.log("Type de data :", typeof data);
+
+                // Tentatives d'extraction
+                let nombre = data.nombre_dmd ?? data.nombre ?? data.count ?? data.nb ?? data.nombre_demandes ?? data.nb_demandes ?? null;
+                if (nombre === null && typeof data === 'number') nombre = data;
+
+                console.log("→ Nombre extrait :", nombre, "(type:", typeof nombre, ")");
+
+                if (nombre == null || Number.isNaN(Number(nombre))) {
+                    console.warn("Impossible d'obtenir un nombre valide");
+                    document.getElementById('id_awa').textContent = "?";
+                    return;
+                }
+
+                nombre = Number(nombre); // force conversion
+
+                console.log("→ Valeur finale pour affichage :", nombre);
+
+                const elem = document.getElementById('id_awa');
+                if (!elem) {
+                    console.error("Élément #id_awa introuvable dans le DOM !");
+                    return;
+                }
+
+                elem.textContent = nombre;
+
+                if (nombre === 0) {
+                    console.log("On est bien dans le cas 0");
+                    alert("C'est bizarre – il y a vraiment 0 demande");
+                }
+
+            } catch (err) {
+                console.error("Erreur capturée :", err);
+                alert("Erreur visible dans la console : " + err.message);
             }
+
+            console.log("→ Fin du bloc");
         });
 
     </script>
