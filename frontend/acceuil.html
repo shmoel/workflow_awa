@@ -1098,121 +1098,101 @@
         });
     });
 
-       window.addEventListener('load', async () => {
-            console.log("→ Début chargement compteurs validations");
+    window.addEventListener('load', async () => {
+        console.log("→ Début chargement compteurs validations");
 
-            const elements = {
-                ggrl: document.getElementById('id_ggrl'),
-                dgl:  document.getElementById('id_dgl'),
-                awa: document.getElementById('id_awa'),
-                // Ajoute ici les autres si besoin : awa, fog, etc.
-            };
+        const elements = {
+            ggrl: document.getElementById('id_ggrl'),
+            dgl:  document.getElementById('id_dgl'),
+            awa:  document.getElementById('id_awa'),
+        };
 
-            // Vérification précoce des éléments DOM
-            Object.entries(elements).forEach(([key, el]) => {
-                if (!el) console.warn(`Élément #id_${key} introuvable dans le DOM`);
-            });
+        // Valeur par défaut pendant le chargement
+        Object.values(elements).forEach(el => el && (el.textContent = "…"));
 
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.warn("Aucun token → utilisateur non connecté ?");
-                Object.values(elements).forEach(el => { if (el) el.textContent = "—"; });
-                return;
-            }
+        // Vérification éléments
+        Object.entries(elements).forEach(([key, el]) => {
+            if (!el) console.warn(`Élément #id_${key} introuvable`);
+        });
 
-            const niveaux = {
-                ggrl: 1,
-                dgl:  2,
-                awa:  3,
-                // fog:  4,
-                // etc.
-            };
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.warn("Aucun token trouvé");
+            Object.values(elements).forEach(el => el && (el.textContent = "—"));
+            return;
+        }
+
+        if (typeof API_URL === 'undefined' || !API_URL) {
+            console.error("API_URL n'est pas défini !");
+            Object.values(elements).forEach(el => el && (el.textContent = "Config err"));
+            return;
+        }
+
+        const niveaux = {
+            ggrl: 1,
+            dgl:  2,
+            awa:  3,
+        };
+
+        // Fonction réutilisable par compteur
+        async function loadCounter(key, niveau) {
+            const elem = elements[key];
+            if (!elem) return;
 
             try {
-                // Exécuter les deux requêtes en parallèle
-                const [respGgrl, respDgl, respAwa] = await Promise.all([
-                    fetch(`${API_URL}/nombre_demandes/${niveaux.ggrl}`, {
-                        method: 'GET',
-                        headers: { Authorization: `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        }
-                    }),
-                    fetch(`${API_URL}/nombre_demandes/${niveaux.dgl}`, {
-                        method: 'GET',
-                        headers: { Authorization: `Bearer ${token}`,
-                                'Content-Type': 'application/json',
-                         }
-                    }),
-                    fetch(`${API_URL}/nombre_demandes/${niveaux.awa}`, {
-                        method: 'GET',
-                        headers: { Authorization: `Bearer ${token}`,
-                                   'Content-Type': 'application/json',
-                        }
-                    })
-                ]);
+                console.log(`→ ${key.toUpperCase()} - Requête niveau ${niveau}`);
 
-                console.log(`GGR-L → statut: ${respGgrl.status}`);
-                console.log(`DGL   → statut: ${respDgl.status}`);
+                const resp = await fetch(`${API_URL}/nombre_demandes/${niveau}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',     // plus sûr que Content-Type ici
+                    }
+                });
 
-                // Gestion erreur par requête
-                if (!respGgrl.ok) {
-                    const err = await respGgrl.text().catch(() => "—");
-                    console.error("GGR-L erreur:", respGgrl.status, err);
-                    if (elements.ggrl) elements.ggrl.textContent = "?";
+                console.log(`${key.toUpperCase()} → statut HTTP ${resp.status}`);
+
+                if (!resp.ok) {
+                    let msg = await resp.text().catch(() => "—");
+                    console.error(`${key.toUpperCase()} erreur : ${resp.status} → ${msg.slice(0, 150)}`);
+                    elem.textContent = "?";
+                    return;
                 }
 
-                if (!respDgl.ok) {
-                    const err = await respDgl.text().catch(() => "—");
-                    console.error("DGL erreur:", respDgl.status, err);
-                    if (elements.dgl) elements.dgl.textContent = "?";
+                const data = await resp.json();
+                console.log(`${key.toUpperCase()} données :`, data);
+
+                const nb = Number(
+                    data?.nombre_dmd ??
+                    data?.count ??
+                    data?.nb_demandes ??
+                    data?.nombre ??
+                    data?.nb ??
+                    (typeof data === 'number' ? data : 0)
+                ) || 0;
+
+                elem.textContent = nb.toLocaleString('fr-FR');
+
+                if (nb === 0) {
+                    elem.classList.add('text-warning');
                 }
-
-                if (!respAw.ok) {
-                    const err = await respAwa.text().catch(() => "—");
-                    console.error("AWA erreur:", respAwa.status, err);
-                    if (elements.Awa) elements.Awa.textContent = "?";
-                }
-
-                // Lecture JSON seulement si OK
-                let dataGgrl = respGgrl.ok ? await respGgrl.json().catch(() => ({})) : {};
-                let dataDgl  = respDgl.ok  ? await respDgl.json().catch(() => ({}))  : {};
-                let dataAwa  = respAwa.ok  ? await respAwa.json().catch(() => ({}))  : {};
-
-                // Extraction robuste
-                const getNombre = data => 
-                    Number(
-                        data?.nombre_dmd ??
-                        data?.count ??
-                        data?.nb ??
-                        data?.nombre ??
-                        (typeof data === 'number' ? data : 0)
-                    ) || 0;
-
-                const nbGgrl = getNombre(dataGgrl);
-                const nbDgl  = getNombre(dataDgl);
-                const nbAwa  = getNombre(dataAwa);
-
-                console.log(`→ GGR-L : ${nbGgrl}   |   DGL : ${nbDgl}`);
-
-                // Mise à jour affichage
-                if (elements.ggrl) elements.ggrl.textContent = nbGgrl.toLocaleString('fr-FR');
-                if (elements.dgl)  elements.dgl.textContent  = nbDgl.toLocaleString('fr-FR');
-                if (elements.awa)  elements.awa.textContent  = nbAwa.toLocaleString('fr-FR');
-
-                // Option : signaler zéro
-                if (nbGgrl === 0 && elements.ggrl) elements.ggrl.classList.add('text-warning');
-                if (nbDgl  === 0 && elements.dgl)  elements.dgl.classList.add('text-warning');
 
             } catch (err) {
-                console.error("Erreur globale lors du chargement :", err);
-                Object.values(elements).forEach(el => {
-                    if (el) el.textContent = "Err";
-                });
-                // alert("Problème de chargement – voir console");
+                console.error(`${key.toUpperCase()} → ÉCHEC :`, err.message);
+                elem.textContent = "Err";
+                elem.title = err.message;
             }
+        }
 
-            console.log("→ Fin chargement compteurs");
-        });
+        // Lancement parallèle → une erreur n’arrête pas les autres
+        await Promise.allSettled([
+            loadCounter('ggrl', niveaux.ggrl),
+            loadCounter('dgl',  niveaux.dgl),
+            loadCounter('awa',  niveaux.awa),
+        ]);
+
+        console.log("→ Fin chargement compteurs");
+    });
 
     </script>
 
