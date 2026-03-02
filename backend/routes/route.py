@@ -1965,9 +1965,9 @@ async def get_nombre_demandes(
             params = {"id_event":id_event}
         else:
             if entite == "GGR":
-                id_event = 5
+                id_event = niveau_dmd
                 sql_query = """
-                SELECT COUNT(*) AS nb_dmd, dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
+                SELECT COUNT(*) AS nb_dmd
                 FROM (SELECT 
                     t.libelle AS type_demande,
                     t.id AS id_type_demande,
@@ -1985,13 +1985,12 @@ async def get_nombre_demandes(
                     JOIN demandes d ON d.id_typedemande = t.id
                     JOIN banque b ON b.id = d.banque) dmd
                 JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
-                ORDER BY a.date_time_avis DESC
                 """
                 params = {"id_event":id_event}
             else:
-                id_event = 4
+                id_event = niveau_dmd
                 sql_query = """
-                SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
+                SELECT COUNT(*) AS nb_dmd
                 FROM (SELECT 
                     t.libelle AS type_demande,
                     t.id AS id_type_demande,
@@ -2013,17 +2012,13 @@ async def get_nombre_demandes(
                     JOIN banque b ON b.id = d.banque
                     WHERE dg.libelle = :entite) dmd
                 JOIN (SELECT id_demande,MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
-                ORDER BY a.date_time_avis DESC
                 """
                 params = {"entite":entite,"id_event":id_event}
     else:
-        if entite == "GGR":
-            id_event = 1
-        else:
-            id_event = 2
+        id_event = niveau_dmd
 
         sql_query = """
-        SELECT dmd.*, a.max_event, a.date_time_avis, a.id_avis, a.heure_avis, a.date_avis
+        SELECT COUNT(*) AS nb_dmd
         FROM (SELECT 
             t.libelle AS type_demande,
             t.id AS id_type_demande,
@@ -2042,7 +2037,6 @@ async def get_nombre_demandes(
             JOIN banque b ON b.id = d.banque
             WHERE d.banque = :id_banque) dmd
         JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
-        ORDER BY a.date_time_avis DESC
         """
         params = {"id_banque":user.id_banque, "id_event":id_event}
 

@@ -315,9 +315,15 @@
                             </a>
                         </li>
                         <li id="stats_dmd" class="sidenav-item">
-                            <a href="statistiques.html" class="sidenav-link">
+                            <a href="" class="sidenav-link">
                               <i class="bi bi-bar-chart"></i>
                               <div>   Statistiques</div>
+                            </a>
+                        </li>
+                        <li id="hist_dmd" class="sidenav-item">
+                            <a href="historique.html" class="sidenav-link">
+                              <i class="bi bi-bar-chart"></i>
+                              <div>   Historique</div>
                             </a>
                         </li>
                       </ul>
@@ -853,10 +859,12 @@
                 document.getElementById('consult_dmd').style.display = 'none';
                 document.getElementById('valid_dmd').style.display = 'none';
                 document.getElementById('valid_dmd_ggrg').style.display = 'none';
+                document.getElementById('hist_dmd').style.display = 'none';
 
             } else if (infos_user[0].niveau_hab==="Niveau 2") {
                 document.getElementById('valid_dmd').style.display = 'none';
                 document.getElementById('valid_dmd_ggrg').style.display = 'none';
+                document.getElementById('hist_dmd').style.display = 'none';
                 
             } else if (infos_user[0].niveau_hab==="Niveau 3") {
 
@@ -1105,6 +1113,10 @@
             ggrl: document.getElementById('id_ggrl'),
             dgl:  document.getElementById('id_dgl'),
             awa:  document.getElementById('id_awa'),
+            fog:  document.getElementById('id_fog'),
+            ggrg: document.getElementById('id_ggrg'),
+            dc: document.getElementById('id_dc'),
+
         };
 
         // Valeur par défaut pendant le chargement
@@ -1132,6 +1144,10 @@
             ggrl: 1,
             dgl:  2,
             awa:  3,
+            fog:  4,
+            ggrg: 5,
+            dc: 7,
+
         };
 
         // Fonction réutilisable par compteur
@@ -1174,7 +1190,7 @@
                 elem.textContent = nb.toLocaleString('fr-FR');
 
                 if (nb === 0) {
-                    elem.classList.add('text-warning');
+                    //elem.classList.add('text-warning');
                 }
 
             } catch (err) {
@@ -1189,6 +1205,9 @@
             loadCounter('ggrl', niveaux.ggrl),
             loadCounter('dgl',  niveaux.dgl),
             loadCounter('awa',  niveaux.awa),
+            loadCounter('fog',  niveaux.fog),
+            loadCounter('ggrg',  niveaux.ggrg),
+            loadCounter('dc',  niveaux.dc),
         ]);
 
         console.log("→ Fin chargement compteurs");
