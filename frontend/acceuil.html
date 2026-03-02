@@ -1132,13 +1132,22 @@
                 // Exécuter les deux requêtes en parallèle
                 const [respGgrl, respDgl, respAwa] = await Promise.all([
                     fetch(`${API_URL}/nombre_demandes/${niveaux.ggrl}`, {
-                        headers: { Authorization: `Bearer ${token}` }
+                        method: 'GET',
+                        headers: { Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        }
                     }),
                     fetch(`${API_URL}/nombre_demandes/${niveaux.dgl}`, {
-                        headers: { Authorization: `Bearer ${token}` }
+                        method: 'GET',
+                        headers: { Authorization: `Bearer ${token}`,
+                                'Content-Type': 'application/json',
+                         }
                     }),
                     fetch(`${API_URL}/nombre_demandes/${niveaux.awa}`, {
-                        headers: { Authorization: `Bearer ${token}` }
+                        method: 'GET',
+                        headers: { Authorization: `Bearer ${token}`,
+                                   'Content-Type': 'application/json',
+                        }
                     })
                 ]);
 
