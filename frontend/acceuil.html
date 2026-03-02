@@ -1102,11 +1102,19 @@
             console.log("→ Début du chargement");
 
             try {
-                const niveau_val = 2;
+                const validation_ggrl = 1;
+                const validation_dgl = 2;
+                const validation_awa = 3;
+                const validation_fog = 4;
+                const validation_ggrg = 5;
+                const validation_dc = 7;
+                const validation_ds= 8;
+                const validation_dr = 9;
+
                 const token = localStorage.getItem('token');
                 console.log("Token présent ?", !!token);
 
-                const response = await fetch(`${API_URL}/nombre_demandes/${niveau_val}`, {
+                const response1 = await fetch(`${API_URL}/nombre_demandes/${validation_ggrl}`, {
                     method: 'GET',
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -1114,44 +1122,58 @@
                     },
                 });
 
-                console.log("Statut HTTP :", response.status);
+                const response2 = await fetch(`${API_URL}/nombre_demandes/${validation_dgl}`, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
 
-                if (!response.ok) {
+                console.log("Statut HTTP :", response1.status);
+                console.log("Statut HTTP :", response2.status);
+
+                if (!response1.ok && !response2.ok) {
                     console.log("Réponse pas OK →", await response.text());
                     throw new Error(`HTTP ${response.status}`);
                 }
 
-                const data = await response.json();
-                console.log("Données brutes :", data);
-                console.log("Type de data :", typeof data);
+                const data1 = await response1.json();
+                const data2 = await response2.json();
 
                 // Tentatives d'extraction
-                let nombre = data.nombre_dmd ?? data.nombre ?? data.count ?? data.nb ?? data.nombre_demandes ?? data.nb_demandes ?? null;
-                if (nombre === null && typeof data === 'number') nombre = data;
+                let nombre1 = data1.nombre_dmd ?? 0;
+                let nombre2 = data2.nombre_dmd ?? 0;
 
-                console.log("→ Nombre extrait :", nombre, "(type:", typeof nombre, ")");
+                if (nombre1 === null && typeof data1 === 'number') nombre1 = data1;
+                if (nombre2 === null && typeof data2 === 'number') nombre2 = data2;
+
+                //console.log("→ Nombre extrait :", nombre, "(type:", typeof nombre, ")");
 
                 if (nombre == null || Number.isNaN(Number(nombre))) {
                     console.warn("Impossible d'obtenir un nombre valide");
-                    document.getElementById('id_awa').textContent = "?";
+                    document.getElementById('id_ggrl').textContent = "?";
                     return;
                 }
 
-                nombre = Number(nombre); // force conversion
+                nombre1 = Number(nombre1); // force conversion
+                nombre2 = Number(nombre2); // force conversion
 
-                console.log("→ Valeur finale pour affichage :", nombre);
+                console.log("→ Valeur finale pour affichage :", nombre1, nombre2);
 
-                const elem = document.getElementById('id_awa');
+                const elem1 = document.getElementById('id_ggrl');
+                const elem2 = document.getElementById('id_dgl');
                 if (!elem) {
                     console.error("Élément #id_awa introuvable dans le DOM !");
                     return;
                 }
 
-                elem.textContent = nombre;
-
+                elem1.textContent = nombre1;
+                elem2.textContent = nombre2;
+                
                 if (nombre === 0) {
                     console.log("On est bien dans le cas 0");
-                    alert("C'est bizarre – il y a vraiment 0 demande");
+                    //alert("C'est bizarre – il y a vraiment 0 demande");
                 }
 
             } catch (err) {
