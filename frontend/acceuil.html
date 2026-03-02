@@ -1098,90 +1098,111 @@
         });
     });
 
-        window.addEventListener('load', async () => {
-            console.log("→ Début du chargement");
+       window.addEventListener('load', async () => {
+            console.log("→ Début chargement compteurs validations");
 
-            try {
-                const validation_ggrl = 1;
-                const validation_dgl = 2;
-                const validation_awa = 3;
-                const validation_fog = 4;
-                const validation_ggrg = 5;
-                const validation_dc = 7;
-                const validation_ds= 8;
-                const validation_dr = 9;
+            const elements = {
+                ggrl: document.getElementById('id_ggrl'),
+                dgl:  document.getElementById('id_dgl'),
+                awa: document.getElementById('id_awa'),
+                // Ajoute ici les autres si besoin : awa, fog, etc.
+            };
 
-                const token = localStorage.getItem('token');
-                console.log("Token présent ?", !!token);
+            // Vérification précoce des éléments DOM
+            Object.entries(elements).forEach(([key, el]) => {
+                if (!el) console.warn(`Élément #id_${key} introuvable dans le DOM`);
+            });
 
-                const response1 = await fetch(`${API_URL}/nombre_demandes/${validation_ggrl}`, {
-                    method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                const response2 = await fetch(`${API_URL}/nombre_demandes/${validation_dgl}`, {
-                    method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                console.log("Statut HTTP :", response1.status);
-                console.log("Statut HTTP :", response2.status);
-
-                if (!response1.ok && !response2.ok) {
-                    console.log("Réponse pas OK →", await response.text());
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data1 = await response1.json();
-                const data2 = await response2.json();
-
-                // Tentatives d'extraction
-                let nombre1 = data1.nombre_dmd ?? 0;
-                let nombre2 = data2.nombre_dmd ?? 0;
-
-                if (nombre1 === null && typeof data1 === 'number') nombre1 = data1;
-                if (nombre2 === null && typeof data2 === 'number') nombre2 = data2;
-
-                //console.log("→ Nombre extrait :", nombre, "(type:", typeof nombre, ")");
-
-                if (nombre == null || Number.isNaN(Number(nombre))) {
-                    console.warn("Impossible d'obtenir un nombre valide");
-                    document.getElementById('id_ggrl').textContent = "?";
-                    return;
-                }
-
-                nombre1 = Number(nombre1); // force conversion
-                nombre2 = Number(nombre2); // force conversion
-
-                console.log("→ Valeur finale pour affichage :", nombre1, nombre2);
-
-                const elem1 = document.getElementById('id_ggrl');
-                const elem2 = document.getElementById('id_dgl');
-                if (!elem) {
-                    console.error("Élément #id_awa introuvable dans le DOM !");
-                    return;
-                }
-
-                elem1.textContent = nombre1;
-                elem2.textContent = nombre2;
-                
-                if (nombre === 0) {
-                    console.log("On est bien dans le cas 0");
-                    //alert("C'est bizarre – il y a vraiment 0 demande");
-                }
-
-            } catch (err) {
-                console.error("Erreur capturée :", err);
-                alert("Erreur visible dans la console : " + err.message);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.warn("Aucun token → utilisateur non connecté ?");
+                Object.values(elements).forEach(el => { if (el) el.textContent = "—"; });
+                return;
             }
 
-            console.log("→ Fin du bloc");
+            const niveaux = {
+                ggrl: 1,
+                dgl:  2,
+                awa:  3,
+                // fog:  4,
+                // etc.
+            };
+
+            try {
+                // Exécuter les deux requêtes en parallèle
+                const [respGgrl, respDgl, respAwa] = await Promise.all([
+                    fetch(`${API_URL}/nombre_demandes/${niveaux.ggrl}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }),
+                    fetch(`${API_URL}/nombre_demandes/${niveaux.dgl}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }),
+                    fetch(`${API_URL}/nombre_demandes/${niveaux.awa}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                ]);
+
+                console.log(`GGR-L → statut: ${respGgrl.status}`);
+                console.log(`DGL   → statut: ${respDgl.status}`);
+
+                // Gestion erreur par requête
+                if (!respGgrl.ok) {
+                    const err = await respGgrl.text().catch(() => "—");
+                    console.error("GGR-L erreur:", respGgrl.status, err);
+                    if (elements.ggrl) elements.ggrl.textContent = "?";
+                }
+
+                if (!respDgl.ok) {
+                    const err = await respDgl.text().catch(() => "—");
+                    console.error("DGL erreur:", respDgl.status, err);
+                    if (elements.dgl) elements.dgl.textContent = "?";
+                }
+
+                if (!respAw.ok) {
+                    const err = await respAwa.text().catch(() => "—");
+                    console.error("AWA erreur:", respAwa.status, err);
+                    if (elements.Awa) elements.Awa.textContent = "?";
+                }
+
+                // Lecture JSON seulement si OK
+                let dataGgrl = respGgrl.ok ? await respGgrl.json().catch(() => ({})) : {};
+                let dataDgl  = respDgl.ok  ? await respDgl.json().catch(() => ({}))  : {};
+                let dataAwa  = respAwa.ok  ? await respAwa.json().catch(() => ({}))  : {};
+
+                // Extraction robuste
+                const getNombre = data => 
+                    Number(
+                        data?.nombre_dmd ??
+                        data?.count ??
+                        data?.nb ??
+                        data?.nombre ??
+                        (typeof data === 'number' ? data : 0)
+                    ) || 0;
+
+                const nbGgrl = getNombre(dataGgrl);
+                const nbDgl  = getNombre(dataDgl);
+                const nbAwa  = getNombre(dataAwa);
+
+                console.log(`→ GGR-L : ${nbGgrl}   |   DGL : ${nbDgl}`);
+
+                // Mise à jour affichage
+                if (elements.ggrl) elements.ggrl.textContent = nbGgrl.toLocaleString('fr-FR');
+                if (elements.dgl)  elements.dgl.textContent  = nbDgl.toLocaleString('fr-FR');
+                if (elements.awa)  elements.awa.textContent  = nbAwa.toLocaleString('fr-FR');
+
+                // Option : signaler zéro
+                if (nbGgrl === 0 && elements.ggrl) elements.ggrl.classList.add('text-warning');
+                if (nbDgl  === 0 && elements.dgl)  elements.dgl.classList.add('text-warning');
+
+            } catch (err) {
+                console.error("Erreur globale lors du chargement :", err);
+                Object.values(elements).forEach(el => {
+                    if (el) el.textContent = "Err";
+                });
+                // alert("Problème de chargement – voir console");
+            }
+
+            console.log("→ Fin chargement compteurs");
         });
 
     </script>
