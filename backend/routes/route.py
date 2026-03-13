@@ -2017,28 +2017,52 @@ async def get_nombre_demandes(
     else:
         id_event = niveau_dmd
 
-        sql_query = """
-        SELECT COUNT(*) AS nb_dmd
-        FROM (SELECT 
-            t.libelle AS type_demande,
-            t.id AS id_type_demande,
-            c.id AS id_categorie_demande,
-            c.libelle AS categorie_demande,
-            d.nom_client AS nom_client,
-            d.montant AS montant,
-            d.date AS date,
-            d.heure AS heure,
-            d.id AS id_demande,
-            (d.date || ' ' || d.heure)::timestamp AS date_time,
-            b.sigle AS banque
-            FROM typedemande t 
-            JOIN categoriedemande c ON c.id = t.id_categoriedemande
-            JOIN demandes d ON d.id_typedemande = t.id
-            JOIN banque b ON b.id = d.banque
-            WHERE d.banque = :id_banque) dmd
-        JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
-        """
-        params = {"id_banque":user.id_banque, "id_event":id_event}
+        if entite == "GGR":
+            sql_query = """
+            SELECT COUNT(*) AS nb_dmd
+            FROM (SELECT 
+                t.libelle AS type_demande,
+                t.id AS id_type_demande,
+                c.id AS id_categorie_demande,
+                c.libelle AS categorie_demande,
+                d.nom_client AS nom_client,
+                d.montant AS montant,
+                d.date AS date,
+                d.heure AS heure,
+                d.id AS id_demande,
+                (d.date || ' ' || d.heure)::timestamp AS date_time,
+                b.sigle AS banque
+                FROM typedemande t 
+                JOIN categoriedemande c ON c.id = t.id_categoriedemande
+                JOIN demandes d ON d.id_typedemande = t.id
+                JOIN banque b ON b.id = d.banque
+                WHERE d.banque = :id_banque) dmd
+            JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+            """
+            params = {"id_banque":user.id_banque, "id_event":id_event}
+        else:
+            sql_query = """
+            SELECT COUNT(*) AS nb_dmd
+            FROM (SELECT 
+                t.libelle AS type_demande,
+                t.id AS id_type_demande,
+                c.id AS id_categorie_demande,
+                c.libelle AS categorie_demande,
+                d.nom_client AS nom_client,
+                d.montant AS montant,
+                d.date AS date,
+                d.heure AS heure,
+                d.id AS id_demande,
+                (d.date || ' ' || d.heure)::timestamp AS date_time,
+                b.sigle AS banque
+                FROM typedemande t 
+                JOIN categoriedemande c ON c.id = t.id_categoriedemande
+                JOIN demandes d ON d.id_typedemande = t.id
+                JOIN banque b ON b.id = d.banque
+                WHERE d.banque = :id_banque AND c.libelle = :entite) dmd
+            JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(date) AS date_avis, MAX(heure) AS heure_avis , MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+            """
+            params = {"id_banque":user.id_banque,"entite":entite ,"id_event":id_event}
 
     try:
         result = crud.execute_raw_sql(db, sql_query, params=params)
