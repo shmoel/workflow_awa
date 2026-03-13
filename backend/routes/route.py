@@ -2218,5 +2218,21 @@ async def get_demandes_a_valider(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.put("/update_avis/{id_avis}")
+async def put_update(
+    id_avis : int,
+    db: Session = Depends(get_db)
+):
+    
+
+    # Requête SQL avec jointures
+    requete = "UPDATE avis SET libelle = 'Pas d\'objection' WHERE id=:id_avis"
+    parametres = {"id_avis":id_avis}
+
+    try:
+        result = crud.execute_raw_sql(db, requete, params=parametres)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
