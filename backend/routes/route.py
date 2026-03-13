@@ -1205,7 +1205,7 @@ async def get_demandes_a_valider(
                     JOIN categoriedemande c ON c.id = t.id_categoriedemande
                     JOIN demandes d ON d.id_typedemande = t.id
                     JOIN banque b ON b.id = d.banque) dmd
-                JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+                JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(id_event) AS max_event, MAX(heure) AS heure_avis, MAX(date) AS date_avis FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande
                 ORDER BY a.date_time_avis DESC
                 """
                 params = {"id_event":id_event}
@@ -1233,7 +1233,7 @@ async def get_demandes_a_valider(
                     JOIN demandes d ON d.id_typedemande = t.id
                     JOIN banque b ON b.id = d.banque
                     WHERE dg.libelle = :entite) dmd
-                JOIN (SELECT id_demande,MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(id_event) AS max_event FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
+                JOIN (SELECT id_demande, MAX(id) as id_avis, (MAX(date) || ' ' || MAX(heure))::timestamp AS date_time_avis, MAX(id_event) AS max_event, MAX(heure) AS heure_avis, MAX(date) AS date_avis FROM avis GROUP BY id_demande HAVING MAX(id_event) = :id_event) a ON a.id_demande = dmd.id_demande 
                 ORDER BY a.date_time_avis DESC
                 """
                 params = {"entite":entite,"id_event":id_event}
