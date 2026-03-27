@@ -1783,11 +1783,11 @@ def read_decisions_list(skip: int = 0, limit: int = 100, db: Session = Depends(g
 
 @router.put("/decision/{decision_id}", response_model=schemas.Decision)
 def update_poste(decision_id: int, decision: schemas.DecisionCreate, db: Session = Depends(get_db)):
-    return crud.update_poste(db=db, decision_id=decision_id, decision=decision)
+    return crud.update_decision(db=db, decision_id=decision_id, decision=decision)
 
 @router.delete("/decision/{decision_id}", response_model=schemas.Decision)
 def delete_avis(decision_id: int, db: Session = Depends(get_db)):
-    return crud.delete_poste(db=db, decision_id=decision_id)
+    return crud.delete_decision(db=db, decision_id=decision_id)
 
 # commentaires sur les demandes
 
