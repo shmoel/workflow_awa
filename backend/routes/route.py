@@ -738,7 +738,7 @@ async def get_commentaire_demande(
         JOIN entite e ON e.id = u.id_entite
         JOIN decision d ON d.id = a.id_decision
         JOIN eventstatut AS event ON event.id = a.id_event 
-        WHERE a.id_demande = :id_demande ORDER BY (a.date || '  ' || a.heure)::timestamp DESC
+        WHERE a.id_demande = :id_demande ORDER BY (a.date || '  ' || a.heure)::timestamp ASC
     """
     try:
         result = crud.execute_raw_sql(db, sql_query, {"id_demande": demande_id})
