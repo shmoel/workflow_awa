@@ -363,7 +363,7 @@
                 <!-- [ Layout navbar ( Header ) ] Start -->
                 <nav class="layout-navbar navbar navbar-expand-lg align-items-lg-center bg-dark container-p-x" id="layout-navbar">
 
-                    <div class="navbar-collapse collapse" id="layout-navbar-collapse">
+                    <div class="navbar-collapSellapse" id="layout-navbar-collapse">
                         <!-- Divider -->
                         <div class="navbar-nav align-items-lg-center ml-auto">
 
@@ -626,8 +626,7 @@
 
     <script>
 
-        //const API_URL = "http://127.0.0.1:8000/api";
-        const API_URL = "https://workflow-awa.onrender.com/api";
+        const API_URL = `${window.location.origin}/api`;
 
         // --- Système d'alerte nouvelle demande à valider ---
         let pollingInterval = null;

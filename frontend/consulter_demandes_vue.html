@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulter mes demandes — Workflow AWA</title>
+  <link rel="icon" type="image/x-icon" href="images/sib_logo.PNG" />
+
+  <!-- Tokens CSS couleurs de marque -->
+  <link rel="stylesheet" href="static/css/tokens.css" />
+
+  <!-- Tailwind CDN avec couleur brand personnalisée -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: "#ea580c",
+              dark:    "#c2410c",
+              light:   "#fff7ed",
+              border:  "#fed7aa",
+            },
+          },
+          fontFamily: {
+            sans: ["Segoe UI", "system-ui", "-apple-system", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Import map Vue 3 ESM -->
+  <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+    }
+  }
+  </script>
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--color-bg-page);
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-base);
+      color: var(--color-text-primary);
+    }
+
+    /* Liens footer */
+    .footer-link {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-link:hover { color: var(--color-brand); }
+
+    /* Icônes sidebar */
+    .nav-icon  { width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
+    .nav-label { font-size: 0.875rem; white-space: nowrap; overflow: hidden; }
+
+    /* Scrollbar tableau */
+    .overflow-x-auto::-webkit-scrollbar       { height: 5px; }
+    .overflow-x-auto::-webkit-scrollbar-track { background: #f1f5f9; }
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+      background: var(--color-brand-border);
+      border-radius: 9999px;
+    }
+
+    /* Transitions modales */
+    .modal-fade-enter-active,
+    .modal-fade-leave-active { transition: opacity 0.2s ease; }
+    .modal-fade-enter-from,
+    .modal-fade-leave-to     { opacity: 0; }
+
+    /* Transition popup polling */
+    .fade-enter-active,
+    .fade-leave-active { transition: opacity 0.2s ease; }
+    .fade-enter-from,
+    .fade-leave-to     { opacity: 0; }
+  </style>
+</head>
+
+<body>
+  <!-- Point de montage Vue — toute l'UI est rendue par ConsulterDemandesPage.js -->
+  <div id="app"></div>
+
+  <script type="module">
+    import { createApp } from "vue";
+    import ConsulterDemandesPage from "./static/js/pages/ConsulterDemandesPage.js";
+
+    createApp(ConsulterDemandesPage).mount("#app");
+  </script>
+</body>
+</html>
