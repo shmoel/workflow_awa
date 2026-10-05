@@ -104,7 +104,10 @@ export function isAuthenticated(redirect = true) {
  * @returns {Promise<{ token: string, role: "admin"|"user" }>}
  */
 export async function login(username, password) {
-  const data = await apiPost("/login/", { username, password });
+  // Ancien token supprimé avant l'appel (legacy), et pas de redirection
+  // sur 401 : la page de connexion affiche l'erreur
+  _clearToken();
+  const data = await apiPost("/login/", { username, password }, { redirectOn401: false });
   const token = data.access_token;
   _setToken(token);
 

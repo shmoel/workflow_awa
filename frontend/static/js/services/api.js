@@ -59,14 +59,18 @@ function _authHeadersOnly() {
  *     du token backend (30 min). Le serveur fait autorité.
  *   Décision validée : CORRECTION-02 (voir CHANGELOG_REFACTORING.md)
  *
+ * Exception : POST /login/ passe redirectOn401 = false — un 401 y signifie
+ * « identifiants incorrects » et la page de connexion affiche l'erreur.
+ *
  * @param {Response} response
  * @param {string} context - label pour le message d'erreur
+ * @param {{ redirectOn401?: boolean }} [options]
  * @returns {Response}
  */
-async function _checkResponse(response, context = "") {
+async function _checkResponse(response, context = "", { redirectOn401 = true } = {}) {
   if (!response.ok) {
     // 401 : token absent, invalide ou expiré côté serveur → redirection login
-    if (response.status === 401) {
+    if (response.status === 401 && redirectOn401) {
       localStorage.removeItem("token");
       window.location.href = "index.html";
       // On lève quand même une erreur pour interrompre la chaîne appelante
@@ -117,19 +121,20 @@ export async function apiGet(path) {
  *
  * @param {string} path   - chemin relatif ex: "/avis"
  * @param {object} body   - données à envoyer (sérialisées en JSON)
+ * @param {{ redirectOn401?: boolean }} [options] - false pour /login/
  * @returns {Promise<any>}
  *
  * @example
  *   const result = await apiPost("/login/", { username, password });
  *   const token = result.access_token;
  */
-export async function apiPost(path, body = {}) {
+export async function apiPost(path, body = {}, options = {}) {
   const response = await fetch(`${API_URL}${path}`, {
     method: "POST",
     headers: _authHeaders(),
     body: JSON.stringify(body),
   });
-  await _checkResponse(response, `POST ${path}`);
+  await _checkResponse(response, `POST ${path}`, options);
   return response.json();
 }
 
