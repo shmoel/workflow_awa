@@ -4,3 +4,6 @@ __init__.py
 venv/
 AWA_W1/
 *.pyc
+
+# Rapport de sécurité transmis hors dépôt (dépôt public)
+SECURITE.md

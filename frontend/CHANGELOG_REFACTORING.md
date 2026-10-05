@@ -251,28 +251,64 @@ d'une page 404. **Changement visible par l'utilisateur.**
 
 ---
 
+## [CORRECTION-08] Page détail d'une demande : plantages et informations manquantes
+
+| Champ        | Valeur |
+|---|---|
+| **Fichier legacy concerné**   | `detail_consulter_demande.html` |
+| **Brique introduite**         | Brique detail_consulter_demande |
+| **Fichiers Vue corrigés**     | `frontend/static/js/pages/DetailDemandePage.js`, `frontend/static/js/components/demandes/AvisTimeline.js` |
+| **Statut**                    | ✅ **Validé** — décision du 05/10/2026 |
+
+### Corrections de comportement
+
+1. **Popup de notification.** Le bloc HTML `#popup-nouvelle-demande` était
+   commenté dans le legacy, mais le polling tournait : à la détection d'une
+   nouvelle demande, `showPopupDemandesList()` plantait sur `popup === null`
+   et rien ne s'affichait. La popup s'affiche désormais comme sur les autres
+   pages.
+2. **Demande sans note d'analyse.** `note_analyse.split(...)` plantait sur
+   `null` et le bouton gardait un lien vide. La page affiche désormais
+   « Aucune note jointe ».
+3. **Nom du fichier de note.** Le legacy ne découpait le chemin que sur `\`.
+   Il est désormais découpé sur `\` et `/`, puis encodé et passé à
+   `downloadUrl()`.
+4. **`id_dmd` absent, invalide ou inconnu.** Le legacy envoyait les appels avec
+   `null` et plantait. La page affiche « Demande introuvable » avec un lien
+   vers l'accueil.
+5. **Carte récapitulative.** `GET /demande_particulier/{id}` renvoyait banque,
+   type, catégorie, contrepartie, montant et date, mais le legacy n'en
+   utilisait que `note_analyse`. Ces informations sont désormais affichées
+   en tête de page.
+
+### Changements techniques (sans validation requise)
+
+- Accordéon des avis : un seul panneau ouvert à la fois, **le dernier avis
+  ouvert par défaut**. Les panneaux sont identifiés par leur position et
+  non plus par `event_d` (deux avis du même type s'ouvraient ensemble).
+- Message d'erreur : le legacy référençait `donnee.detail` (variable
+  inexistante), ce qui plantait l'affichage de l'erreur. Les erreurs passent
+  désormais par `apiGet()` et un bandeau.
+- Les deux appels API sont lancés en parallèle.
+- Bouton « Retour » (page précédente, ou accueil si la page a été ouverte
+  directement).
+- Code mort non repris : `showConfirmation()`, `confirmSubmission()`
+  (`POST /valider_avis/{id}/process_ongoing/1`, sans header `Authorization`)
+  et `confirmerEnvoi()`. Aucun élément de la page ne les déclenchait.
+
+### Impact fonctionnel
+La page indique désormais de quelle demande il s'agit, ne plante plus sur
+une demande sans note, et affiche la popup de notification.
+**Changements visibles par l'utilisateur.**
+
+---
+
 ## Points ouverts backend (à sécuriser avant mise en production)
 
-### Point 1 — `POST /api/register` sans authentification
+**Failles de sécurité backend :** rapport détaillé transmis à l'équipe backend
+le 05/10/2026 (hors dépôt).
 
-`POST /api/register` n'exige aucun token ni droit particulier. N'importe qui
-ayant accès au réseau peut créer un compte rattaché à n'importe quelle banque
-(y compris AWA — niveau central) et avec n'importe quel niveau d'habilitation.
-
-**Risque :** création de comptes non autorisés avec droits élevés.
-
-**À discuter avec l'équipe backend :** restreindre cet endpoint à un rôle
-administrateur, ou le supprimer du périmètre public et fournir un mécanisme
-d'invitation sécurisé.
-
-*(Identifié lors de la création du compte de test local — 01/10/2026)*
-
-### Point 2 — Colonne `users.password` en clair
-
-Colonne users.password en clair : volontaire pour les tests, à supprimer avant
-mise en production.
-
-### Point 3 — Dépendances `requirements.txt`
+### Point 1 — Dépendances `requirements.txt`
 
 requirements.txt : psycopg absent et version de SQLAlchemy non fixée, une
 installation propre plante au démarrage. Ajouter psycopg[binary] ou fixer
@@ -283,62 +319,28 @@ cette version fixée.
 
 *(Identifié lors de la réinitialisation de la base locale — 02/10/2026)*
 
-### Point 4 — Historique incomplet
+### Point 2 — Historique incomplet
 
 `/demandes_cloturer/` ne renvoie que `id_event = 6` ; les demandes clôturées
 (7), supprimées (8) et rejetées (9) n'apparaissent dans aucun endpoint
 d'historique.
 
-### Point 5 — `POST /avis/` générique, sans contrôle
-
-`id_event = 8` (suppression) est posé depuis le frontend via le `POST /avis/`
-générique. Ce endpoint n'exige **aucune authentification** (pas de
-`get_current_user`) et ne vérifie pas le droit de l'utilisateur à poser
-l'`id_event` envoyé : n'importe qui peut faire avancer, approuver ou supprimer
-une demande.
-
-**À discuter avec l'équipe backend :** authentifier l'endpoint et contrôler,
-côté serveur, quel `id_event` chaque profil (banque / entité) peut poser.
-
-### Point 6 — Rejets aux niveaux AWA, AIG et GGR
+### Point 3 — Rejets aux niveaux AWA, AIG et GGR
 
 Gestion à clarifier : seul le rejet local (`id_event = 9`, DG Local) est
 identifié. Aucun statut de rejet n'existe pour les niveaux AWA, AIG et GGR.
 
-### Point 7 — Secrets dans le dépôt
+*(Points 2 et 3 identifiés lors de la constitution du jeu de test — 05/10/2026)*
 
-`backend/.env` est suivi par git dans un dépôt public ; `backend/email_utils.py`
-contient des identifiants SMTP en dur. Retirer `.env` du suivi
-(`git rm --cached`), passer les identifiants SMTP en variables d'environnement
-et changer les secrets exposés (ils restent dans l'historique git).
+### Point 4 — Plus de création de compte depuis l'interface
 
-*(Points 4 à 7 identifiés lors de la constitution du jeu de test — 05/10/2026)*
-
-### Point 8 — Notes d'analyse servies sans authentification dans `frontend/Demandes/`
-
-`frontend/Demandes/` contient d'anciennes notes d'analyse (PDF). Comme
-FastAPI monte tout `frontend/` sous `/workflow`, ces fichiers sont
-téléchargeables par n'importe qui via `/workflow/Demandes/<fichier>.pdf`,
-sans token. Le backend écrit aujourd'hui dans `backend/notes_analyse`.
-
-**Côté frontend :** le dossier sera déplacé dans `legacy_frontend/` (hors du
-dossier servi) lors de la bascule finale.
-
-**À discuter avec l'équipe backend :** vérifier qu'aucune donnée n'est
-référencée vers ce dossier et décider de son sort (suppression ou archivage
-hors serveur).
-
-### Point 9 — Plus de création de compte depuis l'interface
-
-`formulaire_inscription.html` n'est pas migré (page orpheline, et elle
-s'appuie sur `POST /api/register` sans authentification — voir Point 1).
-Après la bascule, **aucune création de compte n'est possible depuis
-l'interface**.
+`formulaire_inscription.html` n'est pas migré (page orpheline). Après la
+bascule, **aucune création de compte n'est possible depuis l'interface**.
 
 **À définir :** le processus de création des comptes (rôle administrateur
 côté backend, invitation, script d'exploitation…).
 
-*(Points 8 et 9 identifiés lors de la préparation de la bascule finale — 05/10/2026)*
+*(Identifié lors de la préparation de la bascule finale — 05/10/2026)*
 
 ---
 
