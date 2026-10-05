@@ -31,6 +31,7 @@ import {
 } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
 
 import { apiGet }                     from "../services/api.js";
+import { lastMsgKey, messageStamp, markMessagesSeen } from "../services/chatSeen.js";
 import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
 
@@ -40,11 +41,6 @@ import AppFooter      from "../components/layout/AppFooter.js";
 import StatCard       from "../components/demandes/StatCard.js";
 import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
 import DemandeFilters from "../components/demandes/DemandeFilters.js";
-
-// ---------------------------------------------------------------------------
-// Clé localStorage pour le badge "Nouveau message"
-// ---------------------------------------------------------------------------
-function lastMsgKey(id) { return `lastMsg_${id}`; }
 
 // ---------------------------------------------------------------------------
 // Colonnes du tableau (ordre identique au legacy)
@@ -135,8 +131,7 @@ export default defineComponent({
         const data = await apiGet(`/messages_chat/${id}`);
         const msgs = data.results;
         if (!msgs || msgs.length === 0) return false;
-        const last = msgs[msgs.length - 1];
-        const lastDate = `${last.date_creation || ""} ${last.heure_creation || ""}`.trim();
+        const lastDate = messageStamp(msgs[msgs.length - 1]);
         const key = lastMsgKey(id);
         const seen = localStorage.getItem(key);
         if (seen === null) { localStorage.setItem(key, ""); return false; }
@@ -186,12 +181,7 @@ export default defineComponent({
     async function handleChatClick(id) {
       try {
         const data = await apiGet(`/messages_chat/${id}`);
-        const msgs = data.results;
-        if (msgs && msgs.length > 0) {
-          const last = msgs[msgs.length - 1];
-          const lastDate = `${last.date_creation || ""} ${last.heure_creation || ""}`.trim();
-          localStorage.setItem(lastMsgKey(id), lastDate);
-        }
+        markMessagesSeen(id, data.results);
       } catch { /* silencieux */ }
       setTimeout(() => { window.location.href = `chat.html?id_dmd=${id}`; }, 100);
     }
