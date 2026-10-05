@@ -219,6 +219,38 @@ Fonctionne en local (`http://127.0.0.1:8000`) et en production (`https://workflo
 
 ---
 
+## [CORRECTION-07] Redirection vers `admin_acceuil.html` inexistant après login
+
+| Champ        | Valeur |
+|---|---|
+| **Fichiers legacy concernés** | `index.html` — fonction `login()` ; `index_.html` — fonction `login()` |
+| **Brique introduite**         | Brique login (index) — appliquée lors de la migration de la page de connexion |
+| **Fichier Vue corrigé**       | Page de connexion Vue (à venir) |
+| **Statut**                    | ✅ **Validé** — décision du 05/10/2026 |
+
+### Description du bug legacy
+```js
+// index.html — login()
+if (role === "user") {
+    window.location.href = 'acceuil_vue.html';
+} else {
+    window.location.href = 'admin_acceuil.html';   // ← fichier inexistant
+}
+```
+`checkUserRole()` renvoie `"admin"` pour `id_niv_hab === 4`. Ces utilisateurs
+étaient redirigés vers `admin_acceuil.html`, qui n'existe pas : 404 après
+une connexion réussie.
+
+### Correction appliquée
+Tous les utilisateurs, quel que soit leur `id_niv_hab`, sont redirigés vers
+l'accueil après connexion.
+
+### Impact fonctionnel
+Les utilisateurs de niveau 4 accèdent désormais à l'application au lieu
+d'une page 404. **Changement visible par l'utilisateur.**
+
+---
+
 ## Points ouverts backend (à sécuriser avant mise en production)
 
 ### Point 1 — `POST /api/register` sans authentification
@@ -281,6 +313,32 @@ contient des identifiants SMTP en dur. Retirer `.env` du suivi
 et changer les secrets exposés (ils restent dans l'historique git).
 
 *(Points 4 à 7 identifiés lors de la constitution du jeu de test — 05/10/2026)*
+
+### Point 8 — Notes d'analyse servies sans authentification dans `frontend/Demandes/`
+
+`frontend/Demandes/` contient d'anciennes notes d'analyse (PDF). Comme
+FastAPI monte tout `frontend/` sous `/workflow`, ces fichiers sont
+téléchargeables par n'importe qui via `/workflow/Demandes/<fichier>.pdf`,
+sans token. Le backend écrit aujourd'hui dans `backend/notes_analyse`.
+
+**Côté frontend :** le dossier sera déplacé dans `legacy_frontend/` (hors du
+dossier servi) lors de la bascule finale.
+
+**À discuter avec l'équipe backend :** vérifier qu'aucune donnée n'est
+référencée vers ce dossier et décider de son sort (suppression ou archivage
+hors serveur).
+
+### Point 9 — Plus de création de compte depuis l'interface
+
+`formulaire_inscription.html` n'est pas migré (page orpheline, et elle
+s'appuie sur `POST /api/register` sans authentification — voir Point 1).
+Après la bascule, **aucune création de compte n'est possible depuis
+l'interface**.
+
+**À définir :** le processus de création des comptes (rôle administrateur
+côté backend, invitation, script d'exploitation…).
+
+*(Points 8 et 9 identifiés lors de la préparation de la bascule finale — 05/10/2026)*
 
 ---
 
