@@ -62,7 +62,12 @@ export default defineComponent({
       localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed.value ? "1" : "0");
     }
 
-    return { user, collapsed, toggleCollapse, logout };
+    // menu est un computed rangé dans un objet ordinaire : le template ne
+    // déballe que les refs de premier niveau, d'où l'exposition directe.
+    // (user.menu.accueil dans le template valait undefined → sidebar vide)
+    const menu = user.menu;
+
+    return { user, menu, collapsed, toggleCollapse, logout };
   },
 
   template: /* html */ `
@@ -109,7 +114,7 @@ export default defineComponent({
         <ul class="list-none m-0 p-0 space-y-0.5" role="list">
 
           <!-- Accueil (toujours visible) -->
-          <li v-if="user.menu.accueil">
+          <li v-if="menu.accueil">
             <a
               href="acceuil.html"
               :class="navClass('accueil')"
@@ -128,7 +133,7 @@ export default defineComponent({
           <li role="separator" class="my-2 mx-4 border-t border-slate-700"></li>
 
           <!-- Introduire demande -->
-          <li v-if="user.menu.intro_dmd">
+          <li v-if="menu.intro_dmd">
             <a
               href="introduire_demandes.html"
               :class="navClass('intro_dmd')"
@@ -144,7 +149,7 @@ export default defineComponent({
           </li>
 
           <!-- Consulter mes demandes -->
-          <li v-if="user.menu.consult_dmd">
+          <li v-if="menu.consult_dmd">
             <a
               href="consulter_demandes.html"
               :class="navClass('consult_dmd')"
@@ -160,7 +165,7 @@ export default defineComponent({
           </li>
 
           <!-- Valider des demandes (AWA / DG Local) -->
-          <li v-if="user.menu.valid_dmd">
+          <li v-if="menu.valid_dmd">
             <a
               href="demandes_validation.html"
               :class="navClass('valid_dmd')"
@@ -176,7 +181,7 @@ export default defineComponent({
           </li>
 
           <!-- Valider des demandes (GGR Group) -->
-          <li v-if="user.menu.valid_dmd_ggrg">
+          <li v-if="menu.valid_dmd_ggrg">
             <a
               href="ggrg_demandes_validation.html"
               :class="navClass('valid_dmd_ggrg')"
@@ -192,7 +197,7 @@ export default defineComponent({
           </li>
 
           <!-- Historique -->
-          <li v-if="user.menu.hist_dmd">
+          <li v-if="menu.hist_dmd">
             <a
               href="historique.html"
               :class="navClass('hist_dmd')"
@@ -208,7 +213,7 @@ export default defineComponent({
           </li>
 
           <!-- Statistiques -->
-          <li v-if="user.menu.stats_dmd">
+          <li v-if="menu.stats_dmd">
             <a
               href="#"
               :class="navClass('stats_dmd')"
