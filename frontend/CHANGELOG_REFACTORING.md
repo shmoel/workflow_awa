@@ -471,6 +471,41 @@ l'utilisateur.**
 
 ---
 
+## Bascule finale (05/10/2026)
+
+Sauvegarde : tag git **`pre-bascule-vue`** (commit `7547874`, poussé sur
+`origin`). C'est la seule copie du legacy : aucune archive dans le dépôt.
+Restaurer un fichier : `git checkout pre-bascule-vue -- frontend/<fichier>`.
+
+### Supprimés (`git rm`)
+- Pages legacy : `acceuil.html`, `chat.html`, `consulter_demandes.html`,
+  `demandes_validation.html`, `detail_consulter_demande.html`,
+  `ggrg_demandes_validation.html`, `historique.html`, `index.html`,
+  `introduire_demandes.html`, `modifier_demande.html`, `valider_demande.html`
+- Pages orphelines : `index_.html`, `acceuil_1.html`,
+  `formulaire_inscription.html` (voir point ouvert 4)
+- Dossiers : `js/`, `css/`, `Demandes/` (anciennes notes PDF de test ; le
+  backend stocke les notes dans `/var/data/notes_analyse`),
+  `assets/assets_index/` (plus aucune référence)
+- Ressources legacy non référencées : `assets/assets_user/` (librairies du
+  layout legacy, 20 Mo) et `images/image_impulsion.PNG` — le dossier
+  `assets/` n'existe plus
+
+### Renommés (`git mv`)
+Chaque `*_vue.html` devient `*.html` (11 pages). Les URL des pages
+redeviennent celles du legacy : favoris et liens existants restent valides.
+
+### Vérifications
+- `grep` : aucune occurrence de `_vue.html` dans le code ni dans `CLAUDE.md` ;
+  aucune référence aux pages ou dossiers supprimés (hors commentaires
+  historiques).
+- Les 11 pages, `tokens.css`, les images et tous les modules
+  `static/js/**/*.js` répondent HTTP 200 via `/workflow/`.
+- Syntaxe JS (`node --check`) et compilation des templates Vue :
+  aucune erreur.
+
+---
+
 ## À confirmer
 
 Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
@@ -545,6 +580,20 @@ l'utilisateur connecté (pas de `response_model`). Le frontend n'en lit que
 `username` et `id_niv_hab`.
 
 *(Identifié lors de la migration du chat — 05/10/2026)*
+
+### Point 6 — Accueil des filiales : `/demandes_a_consulter/{domaine}` en erreur 500
+
+Pour les comptes de filiale (`introci`, `dgci`), l'endpoint plante :
+`A value is required for bind parameter 'user_id'` (paramètre SQL non
+fourni). Le tableau de l'accueil affiche un bandeau d'erreur ; les cartes
+de compteurs restent affichées. Même comportement avec le legacy.
+
+### Point 7 — Historique AIG/GGR : `/demandes_cloturer/` en erreur 500
+
+Pour `testggr` (AIG, GGR) : `column a.heure_avis does not exist`. La page
+historique affiche un bandeau d'erreur. `testawa` n'est pas concerné.
+
+*(Points 6 et 7 identifiés lors de la recette de bascule — 05/10/2026)*
 
 ---
 

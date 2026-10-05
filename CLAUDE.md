@@ -15,7 +15,7 @@ The frontend is served by FastAPI (`/workflow`, same origin as `/api`):
 uvicorn backend.main:app --reload
 ```
 
-Open `http://127.0.0.1:8000/workflow/<page>.html` (legacy) or `http://127.0.0.1:8000/workflow/<page>_vue.html` (refactored).
+Open `http://127.0.0.1:8000/workflow/index.html` (login), then `http://127.0.0.1:8000/workflow/<page>.html`.
 Do **not** use `python -m http.server 5500`: different origin, so API calls fail (CORS).
 
 API docs at `http://127.0.0.1:8000/docs`.
@@ -27,13 +27,13 @@ API docs at `http://127.0.0.1:8000/docs`.
 - **Tailwind CSS via CDN** — color tokens defined in `frontend/static/css/tokens.css`
 - Page components in `frontend/static/js/pages/`, reusable components in `frontend/static/js/components/`
 
-## Migration rules
+## Frontend rules
 
 - `API_URL` toujours relative à `window.location.origin` — utiliser `` `${window.location.origin}/api` ``, jamais d'URL en dur (ni Render, ni `127.0.0.1`)
-- One page migrated at a time; result is a `*_vue.html` file alongside the legacy `.html`
-- All `v-html` bindings must pass content through `escapeHtml()` first
+- Migration complete (bascule finale du 05/10/2026): every page is Vue 3; the legacy HTML is only in git tag `pre-bascule-vue`
+- No `v-html`; if ever unavoidable, content must go through `escapeHtml()` first
 - Links and downloads use Vue `:href` bindings, never `document.getElementById(...).href`
-- Update `CHANGELOG_REFACTORING.md` after completing each page migration
+- Record every behavior change in `frontend/CHANGELOG_REFACTORING.md`
 - Propose a plan before any significant change
 
 ## Domain: Workflow AWA (demandes CIB / CDCF)
@@ -73,25 +73,36 @@ Centralisation et validation des demandes d'autorisation d'opérations bancaires
 
 ```
 frontend/
-  index.html, index_.html          # Login pages
-  acceuil.html / acceuil_vue.html  # Dashboard (legacy / refactored)
-  *_vue.html                       # Refactored pages (Vue 3)
-  *.html                           # Legacy pages (plain HTML + inline JS)
+  CHANGELOG_REFACTORING.md         # Behavior changes vs legacy, open points
+  *.html                           # One thin shell per page: Tailwind config + importmap,
+                                   # mounts static/js/pages/<Page>.js on #app
+    index.html                     #   LoginPage — login form only
+    acceuil.html                   #   AccueilPage — dashboard
+    introduire_demandes.html       #   IntroduireDemandePage
+    modifier_demande.html          #   ModifierDemandePage (?id_dmd=)
+    consulter_demandes.html        #   ConsulterDemandesPage
+    detail_consulter_demande.html  #   DetailDemandePage (?id_dmd=)
+    chat.html                      #   ChatPage (?id_dmd=)
+    demandes_validation.html       #   DemandesValidationPage
+    valider_demande.html           #   ValiderDemandePage (?id_dmd=)
+    ggrg_demandes_validation.html  #   GgrgValidationPage
+    historique.html                #   HistoriquePage
+  images/                          # sib_logo.PNG, avatar.png
   static/
-    css/tokens.css                 # Tailwind color tokens
+    css/tokens.css                 # Color tokens (CSS variables)
     js/
       services/
-        auth.js                    # Token storage, logout (redirects to index.html)
-        api.js                     # fetch wrapper with Bearer token
+        api.js                     # fetch wrapper with Bearer token, 401 → index.html
+        auth.js                    # login, logout (redirects to index.html), token storage
+        chatSeen.js                # lastMsg_{id} — "Nouveau" chat badge (Accueil / Chat)
       composables/
-        useCurrentUser.js
-        useNotificationPolling.js
+        useCurrentUser.js          # profile + sidebar menu flags
+        useNotificationPolling.js  # "Nouvelle demande à valider" popup
       components/
         layout/                    # AppNavbar, AppSidebar, AppFooter
-        demandes/                  # StatCard, DemandeFilters, DemandesTable
-        ui/                        # ConfirmModal
+        demandes/                  # StatCard, DemandeFilters, DemandesTable, AvisTimeline, DemandeForm
+        ui/                        # ConfirmModal, InfoModal
       pages/                       # One file per page: AccueilPage.js, etc.
-  assets/assets_index/             # Bootstrap, AOS, vendor libs, images
 ```
 
 ## Data model (for reference)
