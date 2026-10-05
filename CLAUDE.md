@@ -8,17 +8,15 @@ This repo handles **frontend refactoring only**. The backend FastAPI (`backend/`
 
 ## Running the frontend locally
 
-```bash
-# From the frontend/ directory
-python -m http.server 5500
-```
-
-Open `http://localhost:5500/<page>_vue.html`. The frontend makes API calls to the backend, which must be running separately:
+The frontend is served by FastAPI (`/workflow`, same origin as `/api`):
 
 ```bash
 # From repo root (activate AWA_W1 venv first)
 uvicorn backend.main:app --reload
 ```
+
+Open `http://127.0.0.1:8000/workflow/<page>.html` (legacy) or `http://127.0.0.1:8000/workflow/<page>_vue.html` (refactored).
+Do **not** use `python -m http.server 5500`: different origin, so API calls fail (CORS).
 
 API docs at `http://127.0.0.1:8000/docs`.
 
@@ -47,9 +45,9 @@ Centralisation et validation des demandes d'autorisation d'opérations bancaires
 1. Introduction (subsidiary submits)
 2. Risque_Local (local risk officer)
 3. DG_Local (local general director)
-4. Groupe_Region (regional group)
-5. Central (group central — AWA)
-6. GGR (final level — regional risk at AIG)
+4. Central (group central — AWA)
+5. Groupe_Region (regional department — AIG)
+6. GGR (final level — risk at AIG)
 
 `Entite` = business units (Salle des marchés, Corporate, etc.), **not** a geographic hierarchy.
 
@@ -62,7 +60,7 @@ Centralisation et validation des demandes d'autorisation d'opérations bancaires
 | 3 | Awaiting group central (AWA) |
 | 4 | Awaiting regional department (AIG) |
 | 5 | Awaiting GGR |
-| 6 | Approved at group central |
+| 6 | Approved (circuit complete, after GGR) |
 | 7–9 | Final / closed states |
 
 **Workflow routing** — what a user sees depends on `banque.sigle` + `entite.libelle`:

@@ -235,6 +235,53 @@ d'invitation sécurisé.
 
 *(Identifié lors de la création du compte de test local — 01/10/2026)*
 
+### Point 2 — Colonne `users.password` en clair
+
+Colonne users.password en clair : volontaire pour les tests, à supprimer avant
+mise en production.
+
+### Point 3 — Dépendances `requirements.txt`
+
+requirements.txt : psycopg absent et version de SQLAlchemy non fixée, une
+installation propre plante au démarrage. Ajouter psycopg[binary] ou fixer
+sqlalchemy<2.1.
+
+requirements.txt indique bcrypt==3.2.0 ; bcrypt 5.x casse le login. Garder
+cette version fixée.
+
+*(Identifié lors de la réinitialisation de la base locale — 02/10/2026)*
+
+### Point 4 — Historique incomplet
+
+`/demandes_cloturer/` ne renvoie que `id_event = 6` ; les demandes clôturées
+(7), supprimées (8) et rejetées (9) n'apparaissent dans aucun endpoint
+d'historique.
+
+### Point 5 — `POST /avis/` générique, sans contrôle
+
+`id_event = 8` (suppression) est posé depuis le frontend via le `POST /avis/`
+générique. Ce endpoint n'exige **aucune authentification** (pas de
+`get_current_user`) et ne vérifie pas le droit de l'utilisateur à poser
+l'`id_event` envoyé : n'importe qui peut faire avancer, approuver ou supprimer
+une demande.
+
+**À discuter avec l'équipe backend :** authentifier l'endpoint et contrôler,
+côté serveur, quel `id_event` chaque profil (banque / entité) peut poser.
+
+### Point 6 — Rejets aux niveaux AWA, AIG et GGR
+
+Gestion à clarifier : seul le rejet local (`id_event = 9`, DG Local) est
+identifié. Aucun statut de rejet n'existe pour les niveaux AWA, AIG et GGR.
+
+### Point 7 — Secrets dans le dépôt
+
+`backend/.env` est suivi par git dans un dépôt public ; `backend/email_utils.py`
+contient des identifiants SMTP en dur. Retirer `.env` du suivi
+(`git rm --cached`), passer les identifiants SMTP en variables d'environnement
+et changer les secrets exposés (ils restent dans l'historique git).
+
+*(Points 4 à 7 identifiés lors de la constitution du jeu de test — 05/10/2026)*
+
 ---
 
 ## Règle adoptée à partir de la brique demandes_validation

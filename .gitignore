@@ -2,3 +2,5 @@ __pycache__/
 __init__.py
 .venv
 venv/
+AWA_W1/
+*.pyc
