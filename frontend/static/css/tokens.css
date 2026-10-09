@@ -1,0 +1,58 @@
+/**
+ * tokens.css
+ *
+ * Variables CSS de la charte visuelle AWA.
+ * Ce fichier est la seule source de vérité pour les couleurs de marque.
+ * Tailwind est configuré pour pointer vers ces mêmes valeurs (via tailwind.config inline).
+ *
+ * Utilisation dans les composants Vue :
+ *   background-color: var(--color-brand)
+ *   color: var(--color-brand-dark)
+ *
+ * Utilisation dans les classes Tailwind (configurées dans chaque page) :
+ *   bg-brand, text-brand, border-brand, hover:bg-brand-dark
+ */
+
+:root {
+  /* ---- Couleur de marque orange AWA ---- */
+  --color-brand:        #ea580c;   /* orange-600 Tailwind, couleur primaire */
+  --color-brand-dark:   #c2410c;   /* orange-700, hover / états actifs       */
+  --color-brand-light:  #fff7ed;   /* orange-50,  fonds de badge / alert      */
+  --color-brand-border: #fed7aa;   /* orange-200, bordures légères            */
+
+  /* ---- Fond de page et cartes ---- */
+  --color-bg-page:      #f7f6f3;   /* fond général de l'application           */
+  --color-bg-card:      #ffffff;   /* fond des cartes blanches                */
+  --color-shadow-card:  0 1px 4px rgba(0, 0, 0, 0.08);  /* ombre légère carte */
+
+  /* ---- Textes ---- */
+  --color-text-primary:   #1a1a1a;  /* texte principal                        */
+  --color-text-secondary: #6b7280;  /* texte secondaire (gris-500)            */
+  --color-text-muted:     #9ca3af;  /* texte désactivé / placeholder          */
+
+  /* ---- Statuts de validation (couleurs distinctes par niveau) ---- */
+  --color-status-intro:    #2563eb;  /* Introduite : bleu-600                 */
+  --color-status-local:    #d97706;  /* Validation locale : ambre-600         */
+  --color-status-regional: #7c3aed;  /* Validation régionale GGR : violet-700 */
+  --color-status-central:  #ea580c;  /* Validation centrale AWA : brand       */
+  --color-status-validated:#16a34a;  /* Validée / Clôturée positivement        */
+  --color-status-rejected: #dc2626;  /* Rejetée / Avis défavorable            */
+  --color-status-pending:  #6b7280;  /* En attente                            */
+
+  /* ---- Sidebar ---- */
+  --color-sidebar-bg:      #1e293b;  /* fond sidebar foncé (slate-800)        */
+  --color-sidebar-text:    #cbd5e1;  /* texte menu inactif (slate-300)        */
+  --color-sidebar-active:  #ea580c;  /* lien actif : brand                    */
+  --color-sidebar-hover:   #334155;  /* survol item menu (slate-700)          */
+
+  /* ---- Typographie ---- */
+  --font-family-base: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-size-base:   14px;
+  --font-size-sm:     12px;
+  --font-size-lg:     16px;
+
+  /* ---- Rayons et espacements ---- */
+  --radius-card:  8px;
+  --radius-badge: 9999px;
+  --spacing-card: 16px;
+}
