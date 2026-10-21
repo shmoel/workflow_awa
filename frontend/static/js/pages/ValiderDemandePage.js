@@ -49,7 +49,7 @@ import {
   onUnmounted,
 } from "vue";
 
-import { apiGet, apiPostForm, downloadUrl } from "../services/api.js";
+import { apiGet, apiPostForm, downloadNote } from "../services/api.js";
 import { noteFilename } from "../components/demandes/DemandeForm.js";
 import { useCurrentUser }               from "../composables/useCurrentUser.js";
 import { useNotificationPolling }       from "../composables/useNotificationPolling.js";
@@ -107,10 +107,8 @@ export default defineComponent({
     const showSuccessModal   = ref(false);
 
     // ---- Lien PDF (split '\\' intentionnel — format stockage backend) ----
-    const pdfHref = computed(() => {
-      const name = noteFilename(demande.value?.note_analyse);
-      return name ? downloadUrl(encodeURIComponent(name)) : null;
-    });
+    // Nom du fichier de la note d'analyse (téléchargement authentifié)
+    const noteName = computed(() => noteFilename(demande.value?.note_analyse));
 
     // ---- Tableau « Informations de la demande » (valeurs brutes, comme le legacy) ----
     const infos = computed(() => {
@@ -247,7 +245,8 @@ export default defineComponent({
       selectedDecision,
       commentaire,
       alert,
-      pdfHref,
+      noteName,
+      downloadNote,
       infos,
       showConfirmModal,
       showDGModal,
@@ -312,7 +311,7 @@ export default defineComponent({
                                                 <td :class="SHEET.td">
                                                     <div :class="SHEET.cell">
                                                     <h6 :class="SHEET.value">
-                                                        <a v-if="pdfHref" :href="pdfHref" target="_blank" rel="noopener" :class="LINK">Télécharger</a>
+                                                        <a v-if="noteName" href="javascript:" :class="LINK" @click.prevent="downloadNote(noteName)">Télécharger</a>
                                                         <span v-else>Aucune note jointe</span>
                                                     </h6>
                                                     </div>

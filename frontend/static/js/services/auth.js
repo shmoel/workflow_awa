@@ -18,7 +18,7 @@
  *        il ne fait jamais de fetch() direct.
  */
 
-import { apiPost, apiGet } from "./api.js";
+import { apiPost, apiGet, SESSION_EXPIRED_KEY } from "./api.js";
 
 // ---------------------------------------------------------------------------
 // Clés localStorage (une seule source de vérité pour les noms de clés)
@@ -45,8 +45,10 @@ export function getToken() {
 
   const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
   if (expiry && Date.now() > parseInt(expiry, 10)) {
-    // Token expiré : nettoyage silencieux
+    // Token expiré : nettoyage, et message « session expirée » sur la page de
+    // connexion (comme un 401, conventions API v2 §7)
     _clearToken();
+    try { sessionStorage.setItem(SESSION_EXPIRED_KEY, "1"); } catch { /* stockage indisponible */ }
     return null;
   }
   return token;

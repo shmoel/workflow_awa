@@ -8,27 +8,31 @@ Chaque entrée indique : le fichier legacy concerné, la nature du bug,
 le fichier Vue où la correction est appliquée, et le statut de validation
 par le chef de projet.
 
-## État du projet (13/10/2026)
+## État du projet (21/10/2026)
 
 - **Migration terminée** : les 11 pages sont en Vue 3 (hébergé localement, modules ES6) ;
   le legacy n'existe plus que dans le tag git `pre-bascule-vue`.
 - **Visuel identique au legacy, en Tailwind** : depuis le 20/10/2026, le CSS
   legacy est remplacé par des classes Tailwind (Play CDN 3.4.17, copie locale
   de secours) ; rendu comparé au pixel près (voir « Passage à Tailwind »).
-- **Corrections** : CORRECTION-01 à 13, toutes validées.
+- **Corrections** : CORRECTION-01 à 15, toutes validées.
 - **Améliorations techniques (13/10/2026)** : documentation hors du dossier
   servi, bibliothèques hébergées localement, CSS allégé, session alignée
   sur 30 min.
-- **Restent ouverts** : 4 points « À confirmer » (frontend) et 12 points
+- **Conventions API v2** (21/10/2026) : contrat `docs/conventions-api-v2.md` ;
+  appliqué au frontend dans la mesure du possible, le reste attend le backend
+  (voir « Alignement sur les conventions API v2 »).
+- **Restent ouverts** : 4 points « À confirmer » (frontend) et 13 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
 ### Sommaire
-- CORRECTION-01 à 13 — corrections de comportement, page par page
+- CORRECTION-01 à 15 — corrections de comportement, page par page
 - Bascule finale (05/10/2026) — suppression du legacy, renommage des pages
 - Reprise du visuel legacy (08/10/2026)
 - Améliorations techniques (13/10/2026) — documentation, bibliothèques locales, CSS, session
 - Passage à Tailwind (20/10/2026) — Play CDN figé, secours local, rendu identique au legacy
+- Alignement sur les conventions API v2 (21/10/2026) — appliqué / reste à faire
 - À confirmer — choix fonctionnels en attente de décision
 - Points ouverts backend — à traiter par l'équipe backend
 
@@ -520,6 +524,50 @@ s'affiche. Seul écart relevé par les captures avant / après.
 
 ---
 
+## [CORRECTION-14] Session expirée : retour à la connexion sans explication
+
+| Champ        | Valeur |
+|---|---|
+| **Fichiers legacy concernés** | Toutes les pages connectées |
+| **Fichiers corrigés**         | `services/api.js` (401), `services/auth.js` (jeton périmé), `pages/LoginPage.js` |
+| **Statut**                    | ✅ **Validé** — décision du 21/10/2026 (conventions API v2 §5, §7) |
+
+### Description
+Sur un 401 ou un jeton périmé côté client, l'utilisateur était renvoyé vers
+`index.html` sans aucun message (CORRECTION-02).
+
+### Correction appliquée
+Le message « Votre session a expiré. Veuillez vous reconnecter. » s'affiche
+au-dessus du formulaire de connexion, et la page défile jusqu'à la section
+Connexion. Indicateur `sessionExpiree` en `sessionStorage`, effacé à
+l'affichage. Pas de message après une déconnexion volontaire.
+
+---
+
+## [CORRECTION-15] Messages d'erreur techniques affichés aux utilisateurs
+
+| Champ        | Valeur |
+|---|---|
+| **Fichiers legacy concernés** | Toutes les pages (messages d'erreur des tableaux, formulaires, chat) |
+| **Fichier corrigé**           | `services/api.js` (classe `ApiError`) |
+| **Statut**                    | ✅ **Validé** — décision du 21/10/2026 (conventions API v2 §5) |
+
+### Description
+Les messages d'erreur affichés reprenaient le texte technique de l'appel,
+par exemple « [API – GET /demandes_cloturer/] HTTP 500: Erreur lors de
+l'exécution de la requête SQL : (psycopg.errors.UndefinedColumn) … » : nom
+de route, code HTTP et erreur SQL visibles par l'utilisateur.
+
+### Correction appliquée
+Chaque erreur est une `ApiError` (`status`, `code`, `detail`, `champs`) dont
+le message suit le tableau du §5 : `detail` du serveur pour 400, 403, 409 et
+413 ; « Introuvable. » pour 404 ; un message par champ pour 422 (formats v1
+et v2) ; « Une erreur est survenue, réessayez. » pour 500 ; « Le serveur ne
+répond pas… » si le serveur est injoignable. Les détails techniques restent
+dans la console.
+
+---
+
 ## Bascule finale (05/10/2026)
 
 Sauvegarde : tag git **`pre-bascule-vue`** (commit `7547874`, poussé sur
@@ -781,6 +829,53 @@ Aucun changement visible par l'utilisateur.
 
 ---
 
+## Alignement sur les conventions API v2 (21/10/2026)
+
+Contrat : `docs/conventions-api-v2.md` (statut « proposition », à valider par
+le binôme back/front). Aucune route `/api/v2` n'existe encore : le frontend
+applique dès maintenant ce qui ne dépend pas du backend.
+
+### Appliqué
+| § | Règle | Mise en œuvre |
+|---|---|---|
+| 5 | Erreurs affichables, sans information technique | `ApiError` dans `services/api.js` (CORRECTION-15) ; lit les formats v1 `{ detail }` et v2 `{ code, detail, champs }` |
+| 5, 7 | 401 → effacer le token, connexion avec « session expirée » | `services/api.js`, `services/auth.js`, `LoginPage` (CORRECTION-14) |
+| 7 | Un seul module d'appels, URL relatives à l'origine, en-tête `Authorization` | déjà le cas (`services/api.js`) |
+| 8 | Téléchargement authentifié, jamais par un simple lien | `downloadNote()` : `fetch` avec le token → `blob` → nouvel onglet, adresse libérée ensuite (détail, valider, modifier) ; aspect inchangé |
+| 8 | Fichiers joints : `.pdf`, `.jpg`, `.jpeg`, `.png`, 5 Mo maximum | `checkAttachment()` dans `DemandeForm` (création et modification) ; le backend appliquait déjà ces règles, le frontend n'acceptait que le PDF |
+| 7 | Menus selon le rôle = confort d'interface | déjà le cas (la sécurité dépend du serveur) |
+
+Vérifié le 21/10/2026 (erreurs simulées dans le navigateur, sans écriture
+en base) : 24 vérifications, dont 500, 404, 422 (v1 et v2), 409, panne
+réseau, 401 et jeton périmé, téléchargement avec le token, fichiers PNG /
+JPG / JPEG acceptés, TXT et PDF > 5 Mo refusés. Recette fonctionnelle
+(27 parcours) inchangée. Aucun changement visuel hors messages d'erreur et
+texte d'aide du champ fichier.
+
+### Reste à faire (dépend du backend)
+| Sujet | § | Bloqué par | Côté frontend, le moment venu |
+|---|---|---|---|
+| Routes `/api/v2` (tableau du §12) | 3, 12 | aucune route v2 livrée | migrer écran par écran ; une page ne mélange pas v1 et v2 |
+| Session : token 35 min, 30 min d'inactivité, 10 h max, renouvellement, clé `derniereActivite` | 7 | `POST /api/refresh-token/` absent | suivi d'activité partagé entre onglets, renouvellement au plus une fois par minute ; aujourd'hui durée fixe de 30 min (sans renouvellement, une règle d'inactivité n'aurait aucun effet) |
+| Identité envoyée par le front : `id_user` (introduire, modifier), `domaine` (accueil), `id_valideur`, `id_niveauValidation` (introduire), paramètres de `valider_avis` (valider) | 3 | routes v1 qui les exigent | les retirer avec chaque route v2 (identité déduite du token) |
+| Listes paginées `{ items, total, page, taille }`, tri, filtres serveur, `vue=` | 4, 9 | réponses v1 `{ results }` non paginées | adapter `DemandesTable` / filtres (aujourd'hui filtrage côté client) |
+| Montants en chaîne décimale, date-heure ISO unique, statuts `{ code, libelle }` | 6 | réponses v1 | adapter l'affichage (`formatNumber`, colonnes Date / Heure, libellés) ; règle aussi le point ouvert 10 |
+| `actions_possibles` | 11 | réponses v1 | afficher les boutons selon ce champ au lieu des règles du menu |
+| Téléchargement par `GET /api/v2/demandes/{id}/note-analyse` | 8 | route v2 ; `/api/download/` sans authentification (point ouvert 13) | changer l'URL dans `downloadNote()` (le mécanisme est déjà en place) |
+| Erreurs 403 / 404 / 409 avec `code` stable | 5 | réponses v2 | tester `code` (jamais le texte) là où un comportement en dépend |
+
+### Remarques sur le document, à trancher par le binôme
+- §7 renvoie au comportement de `frontend/js/design.js` : le `design.js`
+  legacy (tag `pre-bascule-vue`) ne contient ni `derniereActivite` ni
+  renouvellement de token. Référence à corriger.
+- §1 désigne `/workflow` comme « l'ancien front » ; le frontend Vue 3 +
+  Tailwind est lui-même servi sous `/workflow`. Préciser l'adresse du
+  « nouveau front » visé.
+- §3 « pas de slash final » : les routes v1 en ont un ; règle à appliquer aux
+  seules routes v2.
+
+---
+
 ## À confirmer
 
 Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
@@ -1023,6 +1118,17 @@ divergent. Recommandation : adopter
 migration qui reproduit le schéma actuel.
 
 *(Points 9 à 12 identifiés lors de la revue technique du frontend — 13/10/2026)*
+
+### Point 13 — `GET /api/download/{fichier}` sans authentification
+
+La route de téléchargement des notes d'analyse ne vérifie pas le token :
+quiconque connaît (ou devine) le nom d'un fichier peut le télécharger. Le
+frontend envoie désormais le token (`downloadNote()`, conventions API v2
+§8) : la route peut l'exiger sans changement côté frontend. Cible v2 :
+`GET /api/v2/demandes/{id}/note-analyse` (le serveur vérifie que
+l'utilisateur peut voir la demande).
+
+*(Identifié lors de l'alignement sur les conventions API v2 — 21/10/2026)*
 
 ---
 

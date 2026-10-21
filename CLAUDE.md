@@ -46,7 +46,14 @@ API docs at `http://127.0.0.1:8000/docs`.
 - Migration complete (bascule finale du 05/10/2026): every page is Vue 3; the legacy HTML is only in git tag `pre-bascule-vue`
 - No `v-html`; if ever unavoidable, content must go through `escapeHtml()` first
 - Any visual change must keep the legacy look; compare with the legacy page from tag `pre-bascule-vue`
-- Links and downloads use Vue `:href` bindings, never `document.getElementById(...).href`
+- **API contract: `docs/conventions-api-v2.md`** (proposal shared with the backend team). What the frontend
+  already applies and what waits for the backend is tracked in `docs/CHANGELOG_REFACTORING.md`
+  (« Alignement sur les conventions API v2 »)
+- All API calls go through `services/api.js`. Errors are `ApiError` objects whose `message` is safe to show;
+  never display technical details (route, HTTP code, SQL) to users
+- Links use Vue `:href` bindings, never `document.getElementById(...).href`. File downloads go through
+  `downloadNote()` (authenticated fetch + blob), never a plain link (a link does not send the token)
+- Attachments: `.pdf`, `.jpg`, `.jpeg`, `.png`, 5 MB max (`checkAttachment()`), same rules as the backend
 - Record every behavior change in `docs/CHANGELOG_REFACTORING.md`
 - `frontend/` is served publicly under `/workflow`: put only browser files there (no .md, .txt, .sql,
   backups); documentation goes in `docs/`
@@ -93,6 +100,7 @@ Centralisation et validation des demandes d'autorisation d'opérations bancaires
 ```
 docs/
   CHANGELOG_REFACTORING.md         # Behavior changes vs legacy, open points (not served)
+  conventions-api-v2.md            # API v2 contract between backend and frontend (proposal)
   licences/                        # Licences of the vendored libraries (Vue, Tailwind, Bootstrap Icons, Poppins)
 frontend/                          # Served as-is under /workflow (browser files only)
   *.html                           # One shell per page: icon fonts, Tailwind (CDN + fallback + config),
@@ -119,7 +127,8 @@ frontend/                          # Served as-is under /workflow (browser files
     js/
       tailwind.config.js           # Shared Tailwind config: legacy colours, font sizes, breakpoints
       services/
-        api.js                     # fetch wrapper with Bearer token, 401 → index.html
+        api.js                     # fetch wrapper with Bearer token, ApiError (user-facing messages),
+                                   # 401 → index.html « session expirée », downloadNote(), checkAttachment()
         auth.js                    # login, logout (redirects to index.html), token storage
         chatSeen.js                # lastMsg_{id} — "Nouveau" chat badge (Accueil / Chat)
       composables/

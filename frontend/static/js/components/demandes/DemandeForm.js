@@ -14,8 +14,9 @@
  *   types        : Array   — lignes de GET /types_demandes/{entite}/ { demande_id, nom_demande }
  *   initial      : Object  — valeurs initiales { banque, type, client, montant, comm }
  *                            (modification : valeurs de la demande ; création : vide)
- *   noteRequired : Boolean — création : note obligatoire, PDF uniquement (legacy) ;
- *                            modification : note facultative, sans contrôle de type
+ *   noteRequired : Boolean — création : note obligatoire ; modification : facultative.
+ *                            Fichier joint contrôlé dans les deux cas : PDF, JPG ou PNG,
+ *                            5 Mo au maximum (conventions API v2 §8, comme le backend)
  *   existingNote : String  — note_analyse déjà enregistrée (lien « Consulter la note… »)
  *   submitLabel  : String  — libellé du bouton (« Soumettre » / « Modifier »)
  *   submitting   : Boolean — désactive le bouton pendant l'envoi
@@ -35,7 +36,7 @@ import {
   watch,
 } from "vue";
 
-import { downloadUrl } from "../../services/api.js";
+import { downloadNote, checkAttachment } from "../../services/api.js";
 import { BTN, FORM, TEXTAREA, LINK } from "../ui/classes.js";
 
 const EMPTY = { banque: "", type: "", client: "", montant: "", comm: "" };
@@ -49,15 +50,6 @@ const EMPTY = { banque: "", type: "", client: "", montant: "", comm: "" };
 export function noteFilename(raw) {
   if (!raw) return null;
   return String(raw).split(/[\\/]/).pop() || null;
-}
-
-/**
- * Vrai si le fichier est un PDF (type MIME ou extension), comme le legacy.
- * @param {File} file
- * @returns {boolean}
- */
-function isPdf(file) {
-  return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 }
 
 export default defineComponent({
@@ -105,10 +97,8 @@ export default defineComponent({
       { immediate: true }
     );
 
-    const existingNoteHref = computed(() => {
-      const name = noteFilename(props.existingNote);
-      return name ? downloadUrl(encodeURIComponent(name)) : null;
-    });
+    // Nom du fichier de la note déjà enregistrée (lien « Consulter la note… »)
+    const existingNoteName = computed(() => noteFilename(props.existingNote));
 
     function onFileChange(event) {
       fileError.value = "";
@@ -117,22 +107,21 @@ export default defineComponent({
 
     function onSubmit() {
       fileError.value = "";
-      if (props.noteRequired) {
-        if (!file.value) {
-          fileError.value = "Veuillez sélectionner un fichier pour la note d'analyse.";
-          return;
-        }
-        if (!isPdf(file.value)) {
-          fileError.value = "Veuillez sélectionner un fichier PDF uniquement.";
-          file.value = null;
-          if (fileInput.value) fileInput.value.value = "";
-          return;
-        }
+      if (props.noteRequired && !file.value) {
+        fileError.value = "Veuillez sélectionner un fichier pour la note d'analyse.";
+        return;
+      }
+      const error = file.value ? checkAttachment(file.value) : "";
+      if (error) {
+        fileError.value = error;
+        file.value = null;
+        if (fileInput.value) fileInput.value.value = "";
+        return;
       }
       emit("submit", { ...form.value, file: file.value });
     }
 
-    return { form, fileInput, fileError, existingNoteHref, onFileChange, onSubmit, BTN, FORM, TEXTAREA, LINK };
+    return { form, fileInput, fileError, existingNoteName, downloadNote, onFileChange, onSubmit, BTN, FORM, TEXTAREA, LINK };
   },
 
   template: /* html */ `
@@ -161,14 +150,14 @@ export default defineComponent({
                         <input :class="FORM.groupInput" type='number' step="any" id='df-montant' v-model="form.montant" placeholder='Spécifiez le montant svp' required>
                 </div>
         </div>
-        <p v-if="existingNoteHref" class="mb-4">
-            <a :href="existingNoteHref" target="_blank" rel="noopener" :class="LINK">Consulter la note préalablement enregistrée</a>
+        <p v-if="existingNoteName" class="mb-4">
+            <a href="javascript:" :class="LINK" @click.prevent="downloadNote(existingNoteName)">Consulter la note préalablement enregistrée</a>
         </p>
         <div :class="FORM.group">
             <label :class="FORM.labelS + ' w-full'" for="df-note">Note d'analyse</label>
             <input :class="FORM.file" type='file' id='df-note' ref="fileInput" @change="onFileChange"
-                   :required="noteRequired" :accept="noteRequired ? 'application/pdf' : null">
-            <small v-if="noteRequired" :class="FORM.help + ' text-muted'">Joindre le fichier (PDF uniquement).</small>
+                   :required="noteRequired" accept=".pdf,.jpg,.jpeg,.png">
+            <small v-if="noteRequired" :class="FORM.help + ' text-muted'">Joindre le fichier (PDF, JPG ou PNG, 5 Mo maximum).</small>
             <small v-if="fileError" :class="FORM.help + ' text-danger'" role="alert">{{ fileError }}</small>
         </div>
         <div :class="FORM.group">

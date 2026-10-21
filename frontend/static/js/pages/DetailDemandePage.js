@@ -29,7 +29,7 @@ import {
   onUnmounted,
 } from "vue";
 
-import { apiGet, downloadUrl }    from "../services/api.js";
+import { apiGet, downloadNote }   from "../services/api.js";
 import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
 
@@ -72,9 +72,6 @@ export default defineComponent({
       return String(raw).split(/[\\/]/).pop() || null;
     });
 
-    const noteHref = computed(() =>
-      noteFilename.value ? downloadUrl(encodeURIComponent(noteFilename.value)) : null
-    );
 
     const dateSoumission = computed(() => {
       const d = demande.value;
@@ -147,7 +144,7 @@ export default defineComponent({
       error,
       notFound,
       noteFilename,
-      noteHref,
+      downloadNote,
       dateSoumission,
       infos,
       BTN, SHEET, ALERT_DANGER, LINK,
@@ -171,7 +168,7 @@ export default defineComponent({
                         </div>
 
                         <template v-else-if="demande">
-                            <button v-if="noteHref" type="button" :class="BTN.outlinePrimary"><a :href="noteHref" target="_blank" rel="noopener" :class="LINK">Télécharger la note d'informations</a></button>
+                            <button v-if="noteFilename" type="button" :class="BTN.outlinePrimary"><a href="javascript:" :class="LINK" @click.prevent="downloadNote(noteFilename)">Télécharger la note d'informations</a></button>
                             <button v-else type="button" :class="BTN.outlinePrimary" disabled>Aucune note jointe</button>
 
                             <div class="p-6">

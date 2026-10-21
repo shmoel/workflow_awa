@@ -22,6 +22,10 @@
  *     hauteur de l'en-tête), lien actif selon la section visible, apparition
  *     en fondu des cartes
  *
+ * Message « Votre session a expiré » quand on arrive après un 401 ou un jeton
+ * périmé (CORRECTION-14, conventions API v2 §7) : affiché au-dessus du
+ * formulaire, la page défile jusqu'à la section Connexion.
+ *
  * Corrections (voir docs/CHANGELOG_REFACTORING.md, CORRECTION-07 et CORRECTION-12) :
  *   - Tous les niveaux sont redirigés vers l'accueil (le niveau 4 l'était vers
  *     admin_acceuil.html, inexistant)
@@ -39,6 +43,7 @@ import {
   onUnmounted,
 } from "vue";
 import { login } from "../services/auth.js";
+import { SESSION_EXPIRED_KEY } from "../services/api.js";
 
 /** Page d'arrivée après connexion, quel que soit le niveau (CORRECTION-07) */
 const HOME_PAGE = "acceuil.html";
@@ -191,6 +196,17 @@ export default defineComponent({
 
     onMounted(() => {
       window.addEventListener("scroll", onScroll);
+
+      // Arrivée après une session expirée : message + défilement vers la connexion
+      let expired = false;
+      try {
+        expired = sessionStorage.getItem(SESSION_EXPIRED_KEY) === "1";
+        sessionStorage.removeItem(SESSION_EXPIRED_KEY);
+      } catch { /* stockage indisponible */ }
+      if (expired) {
+        alert.value = { type: "danger", text: "Votre session a expiré. Veuillez vous reconnecter." };
+        setTimeout(() => scrollToId("connexion"), 300);
+      }
       observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
