@@ -1,90 +1,48 @@
 /**
- * components/demandes/DemandesTable.js  (v2 — réutilisable)
+ * components/demandes/DemandesTable.js
  *
- * Tableau générique de demandes.
+ * Tableau de demandes — balisage identique au legacy :
  *
- * Conçu pour servir sur :
- *   - acceuil.html                   (colonnes dashboard + badge chat)
- *   - consulter_demandes.html        (3 onglets distincts)
- *   - demandes_validation.html       (colonnes validateur AWA)
- *   - ggrg_demandes_validation.html  (colonnes validateur GGR Group)
+ *   table.table.table-hover.card-table
+ *     thead > tr > th[style="font-weight: bold;"]
+ *     tbody > tr > td.align-middle > (wrapper de la colonne) > valeur
  *
- * Responsabilités du composant :
- *   - Afficher un tableau structuré à partir d'un tableau de lignes déjà chargées
- *   - Gérer les états loading / error / vide
- *   - Rendre les colonnes déclarées via la prop `columns`
- *   - Exposer une slot `actions` par ligne pour les boutons (Détails, CHAT,
- *     Modifier, Supprimer, Evaluer, Clôturer…)
- *   - Exposer un slot `badge` par ligne (badge "Nouveau" dans la colonne banque)
- *
- * Ce composant NE fait PAS :
- *   - d'appels API (délégué à la page parente)
- *   - de filtrage (délégué à DemandeFilters.js + computed de la page)
- *   - de gestion d'onglets (délégué à la page parente)
+ * Les lignes legacy étaient générées en JavaScript (fillTable_*, generate*Rows)
+ * avec un wrapper différent selon la page et la colonne : chaque colonne
+ * déclare donc le sien (prop `columns`, champ `wrap`).
  *
  * Props :
- *   rows        : Array   — liste des lignes à afficher (déjà filtrées)
- *   columns     : Array<ColumnDef> — déclaration des colonnes
- *   loading     : Boolean — affiche le spinner si true
- *   error       : String|null — message d'erreur à afficher si non null
- *   ariaLabel   : String — label ARIA de la section (accessibilité)
+ *   rows          : Array — lignes (déjà filtrées par la page)
+ *   columns       : Array<ColumnDef>
+ *   actionHeaders : Number — nombre de <th> vides ajoutés pour les colonnes
+ *                   de boutons (le legacy en avait un par bouton)
+ *   error         : String|null — message affiché dans une ligne du tableau
  *
  * ColumnDef :
- *   {
- *     key      : string,   // champ de la ligne à afficher (ex: "banque")
- *     label    : string,   // en-tête de colonne
- *     format?  : Function, // fn(value, row) → string transformée (ex: formatNumber)
- *     slot?    : string,   // si défini, utilise le slot nommé au lieu d'afficher key
- *   }
+ *   key     : champ de la ligne
+ *   label   : en-tête
+ *   format? : fn(value, row) → texte
+ *   wrap?   : "cc-label" | "label" | "cc" | "media" | "self" | "inline" (défaut)
+ *     cc-label → <label class="custom-control custom-checkbox mb-0">v<br></label>
+ *     label    → <label>v<br></label>
+ *     cc       → <div><div class="custom-control custom-checkbox mb-0">v</div></div>
+ *     media    → <div><div class="media-body align-self-center ml-3">v</div></div>
+ *     self     → <div><div class="align-self-center ml-3">v</div></div>
+ *     inline   → <div><div class="d-inline-block align-middle">v</div></div>
+ *   button? : fn(row) → { cls, label, disabled? } — la cellule contient un
+ *             bouton (ex. « Arrêté » / « Terme ») au lieu d'un texte
  *
  * Slots :
- *   actions   — boutons d'action par ligne. Props de slot : { row }
- *   badge     — contenu optionnel après la valeur de la première colonne. Props : { row }
+ *   badge   — après la valeur de la 1re colonne (badge « Nouveau »). Props : { row }
+ *   actions — cellules de boutons de la ligne (des <ActionCell>). Props : { row }
  *
- * Exemple minimal (acceuil) :
- *
- *   const COLS = [
- *     { key: 'banque',            label: 'Banque' },
- *     { key: 'categorie_demande', label: 'Entité' },
- *     { key: 'type_demande',      label: 'Type de demande' },
- *     { key: 'nom_client',        label: 'Contrepartie' },
- *     { key: 'date_avis',         label: 'Date / Heure' },
- *     { key: 'description',       label: 'Niveau validation' },
- *   ];
- *
- *   <DemandesTable :rows="filteredRows" :columns="COLS" :loading="loading">
- *     <template #badge="{ row }">
- *       <span v-if="newMsgMap[row.id_demande]">Nouveau</span>
- *     </template>
- *     <template #actions="{ row }">
- *       <BtnAction @click="goToDetail(row.id_demande)">Détails</BtnAction>
- *       <BtnAction @click="openChat(row.id_demande)">CHAT</BtnAction>
- *     </template>
- *   </DemandesTable>
+ * Exporte aussi formatNumber() (formatNumber() legacy).
  */
 
 import { defineComponent } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
 
-// ---------------------------------------------------------------------------
-// Utilitaire escapeHtml — centralisé ici, partagé via export
-// ---------------------------------------------------------------------------
-
 /**
- * Sanitise une chaîne pour l'affichage HTML sécurisé.
- * Utilisé par les pages parentes pour préparer les données.
- * @param {any} str
- * @returns {string}
- */
-export function escapeHtml(str) {
-  if (str === null || str === undefined) return "";
-  const div = document.createElement("div");
-  div.textContent = String(str);
-  return div.innerHTML;
-}
-
-/**
- * Formate un nombre en locale française (ex: 1 500 000).
- * Correspond à formatNumber() du legacy.
+ * Formate un nombre en locale française (ex : 1 500 000), comme formatNumber() legacy.
  * @param {number|string} n
  * @returns {string}
  */
@@ -95,167 +53,65 @@ export function formatNumber(n) {
     : num.toLocaleString("fr-FR", { minimumFractionDigits: 0 });
 }
 
-// ---------------------------------------------------------------------------
-// Composant
-// ---------------------------------------------------------------------------
+const INNER_CLASS = {
+  cc:     "custom-control custom-checkbox mb-0",
+  media:  "media-body align-self-center ml-3",
+  self:   "align-self-center ml-3",
+  inline: "d-inline-block align-middle",
+};
 
 export default defineComponent({
   name: "DemandesTable",
 
   props: {
-    /** Lignes du tableau (déjà filtrées par la page parente) */
-    rows: {
-      type: Array,
-      default: () => [],
-    },
+    rows:          { type: Array,  default: () => [] },
+    columns:       { type: Array,  required: true },
+    actionHeaders: { type: Number, default: 0 },
+    error:         { type: String, default: null },
+  },
 
-    /**
-     * Définition des colonnes.
-     * @type {Array<{ key: string, label: string, format?: Function, slot?: string }>}
-     */
-    columns: {
-      type: Array,
-      required: true,
-    },
-
-    /** Affiche le spinner de chargement */
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-
-    /** Message d'erreur à afficher (null = pas d'erreur) */
-    error: {
-      type: String,
-      default: null,
-    },
-
-    /** Label ARIA pour la section */
-    ariaLabel: {
-      type: String,
-      default: "Tableau des demandes",
-    },
+  setup() {
+    function value(col, row) {
+      return col.format ? col.format(row[col.key], row) : (row[col.key] ?? "");
+    }
+    function innerClass(col) {
+      return INNER_CLASS[col.wrap] ?? INNER_CLASS.inline;
+    }
+    function isLabel(col) {
+      return col.wrap === "cc-label" || col.wrap === "label";
+    }
+    return { value, innerClass, isLabel };
   },
 
   template: /* html */ `
-    <div
-      class="overflow-x-auto w-full"
-      :aria-label="ariaLabel"
-    >
-
-      <!-- ---- État : chargement ---- -->
-      <div
-        v-if="loading"
-        class="flex items-center justify-center py-12 text-sm"
-        style="color: var(--color-text-secondary);"
-        aria-live="polite"
-      >
-        <svg class="animate-spin h-5 w-5 mr-2 flex-shrink-0"
-             style="color: var(--color-brand);"
-             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-             aria-hidden="true">
-          <circle class="opacity-25" cx="12" cy="12" r="10"
-                  stroke="currentColor" stroke-width="4"/>
-          <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8v8z"/>
-        </svg>
-        Chargement des demandes…
-      </div>
-
-      <!-- ---- État : erreur ---- -->
-      <div
-        v-else-if="error"
-        class="flex items-center justify-center py-10 text-sm gap-2"
-        style="color: var(--color-status-rejected);"
-        role="alert"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-        </svg>
-        Impossible de charger les données. Réessayez plus tard.
-      </div>
-
-      <!-- ---- État : tableau vide ---- -->
-      <div
-        v-else-if="rows.length === 0"
-        class="flex flex-col items-center justify-center py-12 text-sm"
-        style="color: var(--color-text-muted);"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-3 opacity-30" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor" stroke-width="1" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/>
-        </svg>
-        Aucune demande trouvée.
-      </div>
-
-      <!-- ---- Tableau ---- -->
-      <table
-        v-else
-        class="w-full text-sm border-collapse"
-        role="grid"
-      >
+    <table class="table table-hover card-table">
         <thead>
-          <tr style="background: var(--color-brand); color: #fff;">
-            <th
-              v-for="col in columns"
-              :key="col.key"
-              class="px-4 py-3 text-left font-bold whitespace-nowrap"
-              scope="col"
-            >
-              {{ col.label }}
-            </th>
-            <!-- Colonne actions si le slot est utilisé -->
-            <th
-              v-if="$slots.actions"
-              class="px-4 py-3"
-              scope="col"
-            >
-              <span class="sr-only">Actions</span>
-            </th>
-          </tr>
+            <tr>
+                <th v-for="col in columns" :key="col.key" style="font-weight: bold;">{{ col.label }}</th>
+                <th v-for="n in actionHeaders" :key="'a' + n" style="font-weight: bold;"> </th>
+            </tr>
         </thead>
-
         <tbody>
-          <tr
-            v-for="(row, index) in rows"
-            :key="row.id_demande ?? index"
-            :class="index % 2 === 1 ? 'bg-orange-50' : 'bg-white'"
-            class="border-b transition-colors"
-            style="border-color: var(--color-brand-border);"
-            onmouseover="this.style.background='#ffedd5';"
-            onmouseout="this.style.background='';"
-          >
-            <!-- Cellules de données -->
-            <td
-              v-for="(col, colIndex) in columns"
-              :key="col.key"
-              class="px-4 py-3 align-middle"
-            >
-              <!-- Première colonne : slot badge optionnel après la valeur -->
-              <template v-if="colIndex === 0">
-                {{ col.format ? col.format(row[col.key], row) : (row[col.key] ?? '—') }}
-                <slot name="badge" :row="row" />
-              </template>
-
-              <!-- Colonnes suivantes -->
-              <template v-else>
-                {{ col.format ? col.format(row[col.key], row) : (row[col.key] ?? '—') }}
-              </template>
-            </td>
-
-            <!-- Cellule actions (slot) -->
-            <td v-if="$slots.actions" class="px-4 py-3 align-middle">
-              <div class="flex items-center gap-2 flex-wrap">
+            <tr v-if="error">
+                <td :colspan="columns.length + actionHeaders" class="align-middle text-danger">
+                    Impossible de charger les données : {{ error }}
+                </td>
+            </tr>
+            <tr v-for="(row, i) in rows" :key="row.id_demande ?? i">
+                <td v-for="(col, c) in columns" :key="col.key" class="align-middle">
+                    <label v-if="isLabel(col)" :class="col.wrap === 'cc-label' ? 'custom-control custom-checkbox mb-0' : null">
+                        {{ value(col, row) }} <slot v-if="c === 0" name="badge" :row="row" /><br>
+                    </label>
+                    <div v-else>
+                        <div :class="innerClass(col)">
+                            <button v-if="col.button" type="button" :class="col.button(row).cls" :disabled="col.button(row).disabled || null">{{ col.button(row).label }}</button>
+                            <template v-else>{{ value(col, row) }} <slot v-if="c === 0" name="badge" :row="row" /></template>
+                        </div>
+                    </div>
+                </td>
                 <slot name="actions" :row="row" />
-              </div>
-            </td>
-          </tr>
+            </tr>
         </tbody>
-      </table>
-
-    </div>
+    </table>
   `,
 });

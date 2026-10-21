@@ -24,7 +24,10 @@ API docs at `http://127.0.0.1:8000/docs`.
 
 - **Vue 3 via CDN** — no Node.js, npm, Vite, Webpack, React, or any build tool
 - **ES6 native modules** — components live in separate `.js` files, imported with `type="module"`
-- **Tailwind CSS via CDN** — color tokens defined in `frontend/static/css/tokens.css`
+- **Legacy CSS, no Tailwind** — the UI must look exactly like the legacy pages (decision of 08/10/2026).
+  Each page `<head>` reuses its legacy stylesheets and inline `<style>` blocks; templates reproduce the
+  legacy markup (UIKit / Bootstrap 4 material classes). No legacy JavaScript (jQuery, Bootstrap JS): its
+  runtime behaviour is reimplemented in Vue, plus `frontend/static/css/app.css`
 - Page components in `frontend/static/js/pages/`, reusable components in `frontend/static/js/components/`
 
 ## Frontend rules
@@ -32,6 +35,7 @@ API docs at `http://127.0.0.1:8000/docs`.
 - `API_URL` toujours relative à `window.location.origin` — utiliser `` `${window.location.origin}/api` ``, jamais d'URL en dur (ni Render, ni `127.0.0.1`)
 - Migration complete (bascule finale du 05/10/2026): every page is Vue 3; the legacy HTML is only in git tag `pre-bascule-vue`
 - No `v-html`; if ever unavoidable, content must go through `escapeHtml()` first
+- Any visual change must keep the legacy look; compare with the legacy page from tag `pre-bascule-vue`
 - Links and downloads use Vue `:href` bindings, never `document.getElementById(...).href`
 - Record every behavior change in `frontend/CHANGELOG_REFACTORING.md`
 - Propose a plan before any significant change
@@ -74,9 +78,9 @@ Centralisation et validation des demandes d'autorisation d'opérations bancaires
 ```
 frontend/
   CHANGELOG_REFACTORING.md         # Behavior changes vs legacy, open points
-  *.html                           # One thin shell per page: Tailwind config + importmap,
-                                   # mounts static/js/pages/<Page>.js on #app
-    index.html                     #   LoginPage — login form only
+  *.html                           # One shell per page: legacy <head> (stylesheets + inline <style>),
+                                   # importmap, mounts static/js/pages/<Page>.js on #app
+    index.html                     #   LoginPage — legacy showcase page with login section
     acceuil.html                   #   AccueilPage — dashboard
     introduire_demandes.html       #   IntroduireDemandePage
     modifier_demande.html          #   ModifierDemandePage (?id_dmd=)
@@ -89,7 +93,9 @@ frontend/
     historique.html                #   HistoriquePage
   images/                          # sib_logo.PNG, avatar.png
   static/
-    css/tokens.css                 # Color tokens (CSS variables)
+    vendor/uikit/                  # Legacy CSS + icon fonts (bootstrap-material, shreerang-material, uikit)
+    css/design.css                 # Legacy design.css (modal shadow)
+    css/app.css                    # What legacy JS did at runtime: popup, modals, sidebar, scroll areas
     js/
       services/
         api.js                     # fetch wrapper with Bearer token, 401 → index.html
@@ -99,8 +105,10 @@ frontend/
         useCurrentUser.js          # profile + sidebar menu flags
         useNotificationPolling.js  # "Nouvelle demande à valider" popup
       components/
-        layout/                    # AppNavbar, AppSidebar, AppFooter
-        demandes/                  # StatCard, DemandeFilters, DemandesTable, AvisTimeline, DemandeForm
+        layout/                    # AppLayout (legacy layout-wrapper), AppSidebar, AppNavbar,
+                                   # AppFooter, NotificationPopup
+        demandes/                  # StatCard, DemandeFilters, DemandesTable (+ ActionCell),
+                                   # AvisTimeline, DemandeForm
         ui/                        # ConfirmModal, InfoModal
       pages/                       # One file per page: AccueilPage.js, etc.
 ```

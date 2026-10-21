@@ -42,9 +42,7 @@ import { markMessagesSeen }         from "../services/chatSeen.js";
 import { useCurrentUser }           from "../composables/useCurrentUser.js";
 import { useNotificationPolling }   from "../composables/useNotificationPolling.js";
 
-import AppSidebar from "../components/layout/AppSidebar.js";
-import AppNavbar  from "../components/layout/AppNavbar.js";
-import AppFooter  from "../components/layout/AppFooter.js";
+import AppLayout from "../components/layout/AppLayout.js";
 
 /**
  * Lit ?id_dmd dans l'URL. Retourne null s'il est absent ou n'est pas
@@ -59,7 +57,7 @@ function readDemandeId() {
 export default defineComponent({
   name: "ChatPage",
 
-  components: { AppSidebar, AppNavbar, AppFooter },
+  components: { AppLayout },
 
   setup() {
     const user      = useCurrentUser();
@@ -160,230 +158,91 @@ export default defineComponent({
   },
 
   template: /* html */ `
-    <div class="flex min-h-screen" style="background: var(--color-bg-page);">
+    <AppLayout :polling="polling" menu-label="Actions">
+            <div class="row">
 
-      <AppSidebar active-page="" />
+            </div>
+            <div class="row">
 
-      <div class="flex flex-col flex-1 min-w-0">
+            </div>
+            <div class="row">
+                <div class="col-xl-2"></div>
+                <div class="col-xl-8">
 
-        <AppNavbar page-title="Chat" />
+                    <div v-if="notFound" class="alert alert-danger mt-3" role="alert">
+                        Demande introuvable : l'identifiant est absent, invalide ou ne correspond à aucune demande.
+                        <a href="acceuil.html">Retour à l'accueil</a>
+                    </div>
 
-        <main class="flex-1 p-5" role="main" aria-label="Chat de la demande">
+                    <div v-else-if="error" class="alert alert-danger mt-3" role="alert">
+                        Erreur lors du chargement de la conversation : {{ error }}
+                    </div>
 
-          <p v-if="loading" class="text-sm" style="color: var(--color-text-secondary);" role="status">
-            Chargement de la conversation…
-          </p>
+                    <div v-else-if="demande" class="chat-container">
+                        <div class="chat-header">
+                            <h1>🏦 Chat Demandes Bancaires <span class="info-value">###DEM-{{ demande.categorie_demande }}-{{ demande.id_demande }}</span></h1>
+                        </div>
 
-          <section
-            v-else-if="notFound"
-            class="bg-white rounded-2xl shadow-sm border p-8 text-center max-w-3xl mx-auto"
-            style="border-color: var(--color-brand-border);"
-            role="alert"
-          >
-            <h2 class="text-lg font-bold mb-2" style="color: var(--color-brand);">Demande introuvable</h2>
-            <p class="text-sm mb-4" style="color: var(--color-text-secondary);">
-              L'identifiant de demande est absent, invalide ou ne correspond à aucune demande.
-            </p>
-            <a
-              href="acceuil.html"
-              class="inline-block px-5 py-2 rounded-full text-white text-sm font-semibold"
-              style="background: var(--color-brand); text-decoration: none;"
-            >Retour à l'accueil</a>
-          </section>
+                        <div class="request-header">
+                            <div class="request-info">
+                                <div class="info-item">
+                                    <span class="info-label">Banque</span>
+                                    <span class="info-value">{{ demande.banque_user }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Client</span>
+                                    <span class="info-value">{{ demande.nom_client }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Type de demande</span>
+                                    <span class="info-value">{{ demande.type_demande }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Montant</span>
+                                    <span class="info-value">{{ demande.montant }} XOF</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Statut</span>
+                                    <span class="request-status status-processing">{{ demande.description }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date d'introduction</span>
+                                    <span class="info-value">{{ demande.date_creation }}</span>
+                                </div>
+                            </div>
+                        </div>
 
-          <div
-            v-else-if="error"
-            class="rounded-xl border px-4 py-3 text-sm max-w-3xl mx-auto"
-            style="border-color: var(--color-status-rejected); color: var(--color-status-rejected); background: #fef2f2;"
-            role="alert"
-          >
-            Erreur lors du chargement de la conversation : {{ error }}
-          </div>
+                        <div class="chat-messages" ref="listEl">
+                            <div v-if="!messages.length" class="empty-state"></div>
+                            <div v-for="(msg, i) in messages" :key="i"
+                                 class="message" :class="isMine(msg) ? 'user-message' : 'bot-message'">
+                                <span class="message-avatar">{{ isMine(msg) ? 'V' : (msg.username || 'B').charAt(0) }}</span>
+                                <div class="sender">{{ isMine(msg) ? 'Vous' : (msg.username || 'BanqueBot') }}</div>
+                                <div>{{ msg.commentaire }}</div>
+                                <div class="timestamp">{{ msg.date_creation }} {{ msg.heure_creation }}</div>
+                            </div>
+                        </div>
 
-          <section
-            v-else
-            class="bg-white rounded-2xl shadow-sm border overflow-hidden max-w-3xl mx-auto flex flex-col"
-            style="border-color: var(--color-brand-border);"
-            aria-labelledby="chat-title"
-          >
-            <!-- En-tête orange -->
-            <header class="px-5 py-4 text-white" style="background: var(--color-brand);">
-              <h2 id="chat-title" class="text-lg font-bold m-0">
-                🏦 Chat Demandes Bancaires
-                <span class="font-semibold">###DEM-{{ demande.categorie_demande }}-{{ demande.id_demande }}</span>
-              </h2>
-            </header>
+                        <div class="chat-input">
+                            <input
+                                type="text"
+                                class="message-input"
+                                v-model="draft"
+                                placeholder="Répondre ..."
+                                @keydown.enter.prevent="send"
+                            >
+                            <button class="send-btn" :disabled="sending" @click="send">{{ sending ? 'Envoi...' : 'Envoyer' }}</button>
+                        </div>
+                        <div v-if="sendError" class="alert alert-danger m-3" role="alert">
+                            Erreur lors de l'envoi du message : {{ sendError }}
+                        </div>
+                    </div>
 
-            <!-- Informations de la demande -->
-            <dl
-              class="grid grid-cols-2 md:grid-cols-3 gap-4 px-5 py-4 text-sm m-0 border-b"
-              style="border-color: var(--color-brand-border); background: var(--color-brand-light);"
-            >
-              <div>
-                <dt class="text-xs uppercase tracking-wide" style="color: var(--color-text-secondary);">Banque</dt>
-                <dd class="m-0 font-semibold">{{ demande.banque_user || '—' }}</dd>
-              </div>
-              <div>
-                <dt class="text-xs uppercase tracking-wide" style="color: var(--color-text-secondary);">Client</dt>
-                <dd class="m-0 font-semibold">{{ demande.nom_client || '—' }}</dd>
-              </div>
-              <div>
-                <dt class="text-xs uppercase tracking-wide" style="color: var(--color-text-secondary);">Type de demande</dt>
-                <dd class="m-0 font-semibold">{{ demande.type_demande || '—' }}</dd>
-              </div>
-              <div>
-                <dt class="text-xs uppercase tracking-wide" style="color: var(--color-text-secondary);">Montant</dt>
-                <dd class="m-0 font-semibold">{{ demande.montant }} XOF</dd>
-              </div>
-              <div>
-                <dt class="text-xs uppercase tracking-wide" style="color: var(--color-text-secondary);">Statut</dt>
-                <dd class="m-0">
-                  <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold text-white"
-                        style="background: var(--color-brand);">{{ demande.description || '—' }}</span>
-                </dd>
-              </div>
-              <div>
-                <dt class="text-xs uppercase tracking-wide" style="color: var(--color-text-secondary);">Date d'introduction</dt>
-                <dd class="m-0 font-semibold">{{ demande.date_creation || '—' }}</dd>
-              </div>
-            </dl>
-
-            <!-- Messages -->
-            <ol
-              ref="listEl"
-              class="list-none m-0 px-5 py-4 space-y-3 overflow-y-auto"
-              style="max-height: 28rem; min-height: 12rem;"
-              aria-label="Messages"
-              aria-live="polite"
-            >
-              <li v-if="!messages.length" class="text-sm text-center py-8" style="color: var(--color-text-secondary);">
-                Aucun message pour cette demande.
-              </li>
-              <li
-                v-for="(msg, i) in messages"
-                :key="i"
-                class="flex gap-2"
-                :class="isMine(msg) ? 'flex-row-reverse' : ''"
-              >
-                <span
-                  class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                  :style="{ background: isMine(msg) ? 'var(--color-brand)' : 'var(--color-sidebar-bg)' }"
-                  aria-hidden="true"
-                >{{ isMine(msg) ? 'V' : (msg.username || '?').charAt(0) }}</span>
-                <div
-                  class="max-w-[75%] rounded-2xl px-4 py-2 text-sm"
-                  :style="isMine(msg)
-                    ? { background: 'var(--color-brand-light)', border: '1px solid var(--color-brand-border)' }
-                    : { background: 'var(--color-bg-page)' }"
-                >
-                  <p class="m-0 text-xs font-semibold mb-1">{{ isMine(msg) ? 'Vous' : msg.username }}</p>
-                  <p class="m-0 whitespace-pre-wrap break-words">{{ msg.commentaire }}</p>
-                  <p class="m-0 text-xs mt-1" style="color: var(--color-text-secondary);">
-                    {{ msg.date_creation }} {{ msg.heure_creation }}
-                  </p>
                 </div>
-              </li>
-            </ol>
+                <div class="col-xl-2"></div>
 
-            <!-- Saisie -->
-            <form
-              class="flex gap-2 px-5 py-4 border-t"
-              style="border-color: var(--color-brand-border);"
-              @submit.prevent="send"
-            >
-              <label for="chat-input" class="sr-only">Votre message</label>
-              <input
-                id="chat-input"
-                v-model="draft"
-                type="text"
-                placeholder="Répondre ..."
-                autocomplete="off"
-                class="flex-1 rounded-full border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
-                style="border-color: var(--color-brand-border);"
-              />
-              <button
-                type="submit"
-                :disabled="sending || !draft.trim()"
-                class="px-5 py-2 rounded-full text-white text-sm font-semibold disabled:opacity-60"
-                style="background: var(--color-brand);"
-              >{{ sending ? 'Envoi...' : 'Envoyer' }}</button>
-            </form>
-            <p
-              v-if="sendError"
-              class="px-5 pb-4 m-0 text-sm"
-              style="color: var(--color-status-rejected);"
-              role="alert"
-            >Erreur lors de l'envoi du message : {{ sendError }}</p>
-          </section>
-
-        </main>
-
-        <AppFooter />
-      </div>
-
-      <!-- ================================================================
-           Popup notification (polling — identique aux autres pages)
-           ================================================================ -->
-      <Transition name="fade">
-        <div
-          v-if="polling.show.value"
-          class="fixed inset-0 z-50 flex items-start justify-center"
-          style="background: rgba(0,0,0,0.35);"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="popup-title-chat"
-          @click.self="polling.dismiss()"
-        >
-          <div
-            class="bg-white rounded-2xl mt-28 mx-4 w-full max-w-lg border-2 p-8 shadow-2xl"
-            style="border-color: var(--color-brand);"
-          >
-            <h2
-              id="popup-title-chat"
-              class="text-xl font-bold text-center mb-4"
-              style="color: var(--color-brand);"
-            >
-              Nouvelle demande à valider&nbsp;!
-            </h2>
-            <div class="overflow-x-auto mb-5">
-              <table class="w-full text-sm border-collapse">
-                <thead>
-                  <tr style="background: var(--color-brand); color: #fff;">
-                    <th class="px-3 py-2 text-left font-semibold">Banque</th>
-                    <th class="px-3 py-2 text-left font-semibold">Entité</th>
-                    <th class="px-3 py-2 text-left font-semibold">Contrepartie</th>
-                    <th class="px-3 py-2 text-left font-semibold">Date</th>
-                    <th class="px-3 py-2 text-left font-semibold">Heure</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="d in polling.newDemandes.value"
-                    :key="d.id_avis"
-                    class="border-b"
-                    style="border-color: var(--color-brand-border);"
-                  >
-                    <td class="px-3 py-2">{{ d.banque || '—' }}</td>
-                    <td class="px-3 py-2">{{ d.categorie_demande || '—' }}</td>
-                    <td class="px-3 py-2">{{ d.nom_client || '—' }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">{{ d.date_avis || '—' }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">{{ d.heure_avis || '—' }}</td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
-            <div class="text-center">
-              <button
-                @click="polling.dismiss()"
-                class="px-8 py-2 rounded-full text-white font-bold"
-                style="background: var(--color-brand);"
-                autofocus
-              >OK</button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-
-    </div>
+            <div class="row"></div>
+    </AppLayout>
   `,
 });

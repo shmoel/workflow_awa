@@ -49,13 +49,14 @@ import {
   onUnmounted,
 } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
 
-import { apiGet, apiPostForm } from "../services/api.js";
+import { apiGet, apiPostForm, downloadUrl } from "../services/api.js";
+import { noteFilename } from "../components/demandes/DemandeForm.js";
 import { useCurrentUser }               from "../composables/useCurrentUser.js";
 import { useNotificationPolling }       from "../composables/useNotificationPolling.js";
 
-import AppSidebar  from "../components/layout/AppSidebar.js";
-import AppNavbar   from "../components/layout/AppNavbar.js";
-import AppFooter   from "../components/layout/AppFooter.js";
+import AppLayout from "../components/layout/AppLayout.js";
+import InfoModal from "../components/ui/InfoModal.js";
+import AvisTimeline from "../components/demandes/AvisTimeline.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
 
 // ---------------------------------------------------------------------------
@@ -72,12 +73,7 @@ function getDemandId() {
 export default defineComponent({
   name: "ValiderDemandePage",
 
-  components: {
-    AppSidebar,
-    AppNavbar,
-    AppFooter,
-    ConfirmModal,
-  },
+  components: { AppLayout, ConfirmModal, AvisTimeline, InfoModal },
 
   setup() {
     const user    = useCurrentUser();
@@ -111,9 +107,20 @@ export default defineComponent({
 
     // ---- Lien PDF (split '\\' intentionnel — format stockage backend) ----
     const pdfHref = computed(() => {
-      if (!demande.value?.note_analyse) return "#";
-      const filename = demande.value.note_analyse.split("\\").pop();
-      return `/api/download/${filename}`;
+      const name = noteFilename(demande.value?.note_analyse);
+      return name ? downloadUrl(encodeURIComponent(name)) : null;
+    });
+
+    // ---- Tableau « Informations de la demande » (valeurs brutes, comme le legacy) ----
+    const infos = computed(() => {
+      const d = demande.value;
+      return [
+        { label: "Type de demande", value: d?.type_demande ?? "" },
+        { label: "Banque",          value: d?.banque ?? "" },
+        { label: "Entité",          value: d?.categorie_demande ?? "" },
+        { label: "Contrepartie",    value: d?.nom_client ?? "" },
+        { label: "Montant (XOF)",   value: d?.montant ?? "" },
+      ];
     });
 
     // ---- Chargement ----
@@ -219,23 +226,6 @@ export default defineComponent({
       }
     }
 
-    // ---- Accordéon commentaires : état ouvert/fermé par index (vrai Vue) ----
-    // Remplace buildCommentaireHTML() + v-html.
-    // Chaque ligne a son propre booléen dans openStates[index].
-    // Pas de Bootstrap, pas de DOM manipulation.
-    const openStates = ref({});   // { [index]: boolean }
-
-    function toggleAccordion(index) {
-      openStates.value = {
-        ...openStates.value,
-        [index]: !openStates.value[index],
-      };
-    }
-
-    function isOpen(index) {
-      return !!openStates.value[index];
-    }
-
     // ---- Cycle de vie ----
     onMounted(async () => {
       await user.fetchUser();
@@ -257,6 +247,7 @@ export default defineComponent({
       commentaire,
       alert,
       pdfHref,
+      infos,
       showConfirmModal,
       showDGModal,
       showSuccessModal,
@@ -266,431 +257,134 @@ export default defineComponent({
       cancelSubmission_DG,
       DG_cancelBox,
       handleSuccess,
-      openStates,
-      toggleAccordion,
-      isOpen,
     };
   },
 
   template: /* html */ `
-    <div class="flex min-h-screen" style="background: var(--color-bg-page);">
-
-      <AppSidebar active-page="valid_dmd" />
-
-      <div class="flex flex-col flex-1 min-w-0">
-
-        <AppNavbar page-title="Validation de demandes" />
-
-        <main class="flex-1 p-5" role="main">
-
-          <!-- État chargement -->
-          <div
-            v-if="loadingDemande"
-            class="flex items-center justify-center py-20 text-sm"
-            style="color: var(--color-text-secondary);"
-            aria-live="polite"
-          >
-            <svg class="animate-spin h-5 w-5 mr-2" style="color: var(--color-brand);"
-                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-            </svg>
-            Chargement de la demande…
-          </div>
-
-          <!-- État erreur -->
-          <div
-            v-else-if="errorDemande"
-            class="p-6 rounded-xl text-sm text-center"
-            style="color: var(--color-status-rejected); background: #fef2f2;"
-            role="alert"
-          >
-            {{ errorDemande }}
-          </div>
-
-          <!-- Contenu principal -->
-          <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            <!-- ============================================================
-                 Colonne gauche : infos demande + formulaire avis
-                 ============================================================ -->
-            <div
-              class="bg-white rounded-2xl shadow-sm border p-6"
-              style="border-color: var(--color-brand-border); font-family: var(--font-family-base);"
-            >
-              <h6 class="font-bold text-base mb-4" style="color: var(--color-text-primary);">
-                Informations de la demande
-              </h6>
-
-              <!-- Alerte inline -->
-              <div
-                v-if="alert"
-                class="flex items-center gap-2 text-sm rounded-lg px-4 py-3 mb-4"
-                :style="alert.type === 'success'
-                  ? 'background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;'
-                  : 'background:#fef2f2; color:#dc2626; border:1px solid #fecaca;'"
-                role="alert"
-                aria-live="polite"
-              >
-                {{ alert.message }}
-              </div>
-
-              <!-- Tableau récapitulatif -->
-              <table class="w-full text-sm mb-5 border-collapse">
-                <tbody>
-                  <tr v-for="field in [
-                    { label: 'Type de demande', value: demande?.type_demande },
-                    { label: 'Banque',           value: demande?.banque },
-                    { label: 'Entité',           value: demande?.categorie_demande },
-                    { label: 'Contrepartie',     value: demande?.nom_client },
-                    { label: 'Montant (XOF)',    value: demande?.montant },
-                    { label: 'Date / heure',     value: demande?.date_time },
-                  ]" :key="field.label" class="border-b" style="border-color: var(--color-brand-border);">
-                    <td class="py-2 pr-4 font-semibold w-40" style="color: var(--color-text-primary);">
-                      {{ field.label }}
-                    </td>
-                    <td class="py-2" style="color: var(--color-text-secondary);">
-                      {{ field.value || '—' }}
-                    </td>
-                  </tr>
-                  <!-- Ligne note d'analyse avec lien téléchargement -->
-                  <tr class="border-b" style="border-color: var(--color-brand-border);">
-                    <td class="py-2 pr-4 font-semibold" style="color: var(--color-text-primary);">
-                      Note d'analyse
-                    </td>
-                    <td class="py-2">
-                      <a
-                        :href="pdfHref"
-                        target="_blank"
-                        class="font-semibold underline"
-                        style="color: var(--color-brand);"
-                      >
-                        Télécharger
-                      </a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <hr class="mb-5" style="border-color: var(--color-brand-border);" />
-
-              <!-- Formulaire avis -->
-              <form @submit.prevent="handleFormSubmit" id="avis_form">
-                <!-- Décision -->
-                <div class="mb-4">
-                  <label
-                    for="decision"
-                    class="block text-sm font-semibold mb-1"
-                    style="color: var(--color-text-primary);"
-                  >
-                    Décision
-                  </label>
-                  <select
-                    id="decision"
-                    v-model="selectedDecision"
-                    class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
-                    style="border-color: var(--color-brand-border); color: var(--color-text-primary);"
-                    required
-                  >
-                    <option
-                      v-for="d in decisions"
-                      :key="d.id"
-                      :value="String(d.id)"
-                    >
-                      {{ d.libelle }}
-                    </option>
-                  </select>
+    <AppLayout :polling="polling">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card d-flex w-100 mb-4">
+                    <div class="row no-gutters row-bordered row-border-light h-100">
+                        <div class="d-flex col-md-6 align-items-center">
+                            <div class="card-body">
+                                <h6 class="mb-3">Informations de la demande</h6>
+                                <div id="alert-container">
+                                    <div v-if="alert" :class="'alert alert-' + alert.type + ' alert-custom'">
+                                        <i :class="'bi bi-' + (alert.type === 'success' ? 'check-circle' : 'exclamation-triangle')"></i>
+                                        {{ alert.message }}
+                                    </div>
+                                    <div v-if="errorDemande" class="alert alert-danger alert-custom">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        Erreur lors du chargement de la demande : {{ errorDemande }}
+                                    </div>
+                                </div>
+                                <table class="table card-table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                            <tr v-for="info in infos" :key="info.label">
+                                                <td class='align-center'>
+                                                    <div class='media-body align-self-center ml-3'>
+                                                    <strong> {{ info.label }} </strong>
+                                                    </div>
+                                                </td>
+                                                <td class='align-center'>
+                                                    <div class='media-body align-self-center ml-3'>
+                                                    <h6 class='mb-0'> {{ info.value }} </h6>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class='align-center'>
+                                                    <div class='media-body align-self-center ml-3'>
+                                                    <strong> Note d'analyse </strong>
+                                                    </div>
+                                                </td>
+                                                <td class='align-center'>
+                                                    <div class='media-body align-self-center ml-3'>
+                                                    <h6 class='mb-0'>
+                                                        <a v-if="pdfHref" :href="pdfHref" target="_blank" rel="noopener">Télécharger</a>
+                                                        <span v-else>Aucune note jointe</span>
+                                                    </h6>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class='align-center'>
+                                                    <div class='media-body align-self-center ml-3'>
+                                                    <strong> Date/heure </strong>
+                                                    </div>
+                                                </td>
+                                                <td class='align-center'>
+                                                    <div class='media-body align-self-center ml-3'>
+                                                    <h6 class='mb-0'> {{ demande?.date_time }} </h6>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                    </tbody>
+                                </table>
+                                <hr>
+                                <form @submit="handleFormSubmit">
+                                    <div class="form-group">
+                                        <label class="form-label" for="decision"><strong>Décision </strong></label>
+                                        <select class="form-control" id="decision" v-model="selectedDecision" required>
+                                            <option v-for="d in decisions" :key="d.id" :value="String(d.id)">{{ d.libelle }}</option>
+                                        </select>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="comm"><strong>Commentaire</strong></label>
+                                        <textarea class='form-control' id='comm' v-model="commentaire"></textarea>
+                                    <div class="clearfix"></div>
+                                    </div>
+                                    <div style="text-align: center;"> <button id="valider_avis" type="submit" class="btn btn-primary">Valider</button></div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="d-flex col-md-6 align-items-center">
+                            <div class="container">
+                                    <div class="card-body">
+                                        <div id="detail_commentaire" class="col-xl-12">
+                                            <AvisTimeline :avis="commentaires" :open-last="false" />
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Commentaire -->
-                <div class="mb-5">
-                  <label
-                    for="comm"
-                    class="block text-sm font-semibold mb-1"
-                    style="color: var(--color-text-primary);"
-                  >
-                    Commentaire
-                  </label>
-                  <textarea
-                    id="comm"
-                    v-model="commentaire"
-                    rows="4"
-                    class="w-full rounded-lg border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-300"
-                    style="border-color: var(--color-brand-border); color: var(--color-text-primary);"
-                  ></textarea>
-                </div>
-
-                <!-- Bouton Valider -->
-                <div class="text-center">
-                  <button
-                    type="submit"
-                    class="px-8 py-2 rounded-full text-white font-bold text-sm transition-colors"
-                    style="background: var(--color-brand);"
-                    onmouseover="this.style.background='var(--color-brand-dark)';"
-                    onmouseout="this.style.background='var(--color-brand)';"
-                  >
-                    Valider
-                  </button>
-                </div>
-              </form>
             </div>
-
-            <!-- ============================================================
-                 Colonne droite : historique des commentaires
-                 ============================================================ -->
-            <div
-              class="bg-white rounded-2xl shadow-sm border p-6"
-              style="border-color: var(--color-brand-border); font-family: var(--font-family-base);"
-            >
-              <h6 class="font-bold text-base mb-4" style="color: var(--color-text-primary);">
-                Historique des validations
-              </h6>
-
-              <div
-                v-if="commentaires.length === 0"
-                class="text-sm text-center py-8"
-                style="color: var(--color-text-muted);"
-              >
-                Aucun commentaire enregistré.
-              </div>
-
-              <!-- Accordéon Vue natif — v-for + v-show, pas de v-html ni de Bootstrap -->
-              <div v-else>
-                <div
-                  v-for="(row, index) in commentaires"
-                  :key="index"
-                  class="border rounded-xl mb-3 overflow-hidden"
-                  style="border-color: var(--color-brand-border);"
-                >
-                  <!-- En-tête cliquable -->
-                  <button
-                    type="button"
-                    @click="toggleAccordion(index)"
-                    class="w-full flex justify-between items-center px-4 py-3 text-left text-sm font-semibold
-                           transition-colors focus:outline-none"
-                    style="background: var(--color-brand-light);"
-                    :aria-expanded="isOpen(index)"
-                    :aria-controls="'accordion-body-' + index"
-                  >
-                    <span>{{ row.statut_d }} : {{ row.decision }}</span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4 flex-shrink-0 transition-transform"
-                      :style="isOpen(index) ? 'transform: rotate(180deg);' : ''"
-                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                      aria-hidden="true"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                  </button>
-
-                  <!-- Corps (v-show = pas de re-render DOM, juste display:none) -->
-                  <div
-                    v-show="isOpen(index)"
-                    :id="'accordion-body-' + index"
-                    class="px-4 pb-4 pt-2 text-sm"
-                    style="color: var(--color-text-secondary);"
-                  >
-                    <table class="w-full text-sm border-collapse mb-3">
-                      <tbody>
-                        <tr
-                          v-for="field in [
-                            { label: 'Nom',         value: row.nom },
-                            { label: 'Prénom',      value: row.prenom },
-                            { label: 'Banque',      value: row.banque },
-                            { label: 'Entité',      value: row.entite },
-                            { label: 'Décision',    value: row.decision },
-                            { label: 'Date / heure',value: row.date_time },
-                          ]"
-                          :key="field.label"
-                          class="border-b"
-                          style="border-color: var(--color-brand-border);"
-                        >
-                          <td class="py-2 pr-4 font-semibold w-32"
-                              style="color: var(--color-text-primary);">
-                            {{ field.label }}
-                          </td>
-                          <td class="py-2">{{ field.value || '—' }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <label
-                      :for="'comm-hist-' + index"
-                      class="block text-xs font-semibold mb-1"
-                      style="color: var(--color-text-primary);"
-                    >Commentaire</label>
-                    <textarea
-                      :id="'comm-hist-' + index"
-                      :value="row.commentaire || ''"
-                      rows="3"
-                      class="w-full rounded-lg border px-3 py-2 text-sm resize-none"
-                      style="border-color: var(--color-brand-border);"
-                      disabled
-                      readonly
-                    ></textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </main>
-
-        <AppFooter />
-      </div>
-
-      <!-- ================================================================
-           Popup notification (polling)
-           ================================================================ -->
-      <Transition name="fade">
-        <div
-          v-if="polling.show.value"
-          class="fixed inset-0 z-50 flex items-start justify-center"
-          style="background: rgba(0,0,0,0.35);"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="popup-notif-val-dem"
-          @click.self="polling.dismiss()"
-        >
-          <div
-            class="bg-white rounded-2xl mt-28 mx-4 w-full max-w-lg border-2 p-8 shadow-2xl"
-            style="border-color: var(--color-brand);"
-          >
-            <h2
-              id="popup-notif-val-dem"
-              class="text-xl font-bold text-center mb-4"
-              style="color: var(--color-brand);"
-            >
-              Nouvelle demande à valider&nbsp;!
-            </h2>
-            <div class="overflow-x-auto mb-5">
-              <table class="w-full text-sm border-collapse">
-                <thead>
-                  <tr style="background: var(--color-brand); color: #fff;">
-                    <th class="px-3 py-2 text-left font-semibold">Banque</th>
-                    <th class="px-3 py-2 text-left font-semibold">Entité</th>
-                    <th class="px-3 py-2 text-left font-semibold">Contrepartie</th>
-                    <th class="px-3 py-2 text-left font-semibold">Date</th>
-                    <th class="px-3 py-2 text-left font-semibold">Heure</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="d in polling.newDemandes.value"
-                    :key="d.id_avis"
-                    class="border-b"
-                    style="border-color: var(--color-brand-border);"
-                  >
-                    <td class="px-3 py-2">{{ d.banque || '—' }}</td>
-                    <td class="px-3 py-2">{{ d.categorie_demande || '—' }}</td>
-                    <td class="px-3 py-2">{{ d.nom_client || '—' }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">{{ d.date_avis || '—' }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">{{ d.heure_avis || '—' }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="text-center">
-              <button
-                @click="polling.dismiss()"
-                class="px-8 py-2 rounded-full text-white font-bold"
-                style="background: var(--color-brand);"
-                onmouseover="this.style.background='var(--color-brand-dark)';"
-                onmouseout="this.style.background='var(--color-brand)';"
-                autofocus
-              >OK</button>
-            </div>
-          </div>
         </div>
-      </Transition>
 
-      <!-- ================================================================
-           Modale confirmation standard
-           "Voulez-vous vraiment soumettre le formulaire ?"
-           ================================================================ -->
-      <ConfirmModal
-        v-model:show="showConfirmModal"
-        title="Confirmation"
-        message="Voulez-vous vraiment soumettre le formulaire ?"
-        confirm-label="Confirmer"
-        cancel-label="Annuler"
-        confirm-variant="primary"
-        :with-comment="false"
-        @confirm="confirmSubmission"
-      />
-
-      <!-- ================================================================
-           Modale DG — avis défavorable
-           "Malgré votre avis Non favorable, voulez-vous que la demande
-            poursuive le processus OUI/NON ?"
-           Bouton × → DG_cancelBox() (retour liste sans soumettre)
-           ================================================================ -->
-      <Transition name="modal-fade">
-        <div
-          v-if="showDGModal"
-          class="fixed inset-0 z-50 flex items-center justify-center"
-          style="background: rgba(0,0,0,0.4);"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="dg-modal-title"
-        >
-          <div
-            class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 border-2 overflow-hidden relative"
-            style="border-color: var(--color-brand-border); font-family: var(--font-family-base);"
-          >
-            <!-- Bouton × (identique au legacy : retour sans soumettre) -->
-            <button
-              @click="DG_cancelBox"
-              class="absolute top-3 right-3 text-xl leading-none text-slate-400
-                     hover:text-slate-700 bg-transparent border-none cursor-pointer"
-              aria-label="Fermer sans soumettre"
-            >×</button>
-
-            <div class="px-6 py-4 border-b" style="border-color: var(--color-brand-border);">
-              <h5 id="dg-modal-title" class="font-bold text-base m-0"
-                  style="color: var(--color-text-primary);">
-                Confirmation
-              </h5>
-            </div>
-            <div class="px-6 py-4 text-sm" style="color: var(--color-text-secondary);">
-              Malgré votre avis Non favorable, voulez-vous que la demande poursuive le processus&nbsp;OUI/NON&nbsp;?
-            </div>
-            <div
-              class="px-6 py-4 flex justify-end gap-3 border-t"
-              style="border-color: var(--color-brand-border);"
-            >
-              <button
-                @click="cancelSubmission_DG"
-                class="px-5 py-2 rounded-full text-sm font-semibold border-2 transition-colors"
-                style="color: var(--color-text-secondary); border-color: #d1d5db; background: #fff;"
-                onmouseover="this.style.background='#f3f4f6';"
-                onmouseout="this.style.background='#fff';"
-              >NON</button>
-              <button
-                @click="confirmSubmission_DG"
-                class="px-5 py-2 rounded-full text-sm font-semibold border-2 transition-colors text-white"
-                style="background: var(--color-brand); border-color: var(--color-brand);"
-                onmouseover="this.style.background='var(--color-brand-dark)';"
-                onmouseout="this.style.background='var(--color-brand)';"
-              >OUI</button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-
-      <!-- ================================================================
-           Modale succès — "Votre avis a bien été enregistré !"
-           ================================================================ -->
-      <ConfirmModal
-        v-model:show="showSuccessModal"
-        title="Confirmation"
-        message="Votre avis a bien été enregistré !"
-        confirm-label="OK"
-        :with-comment="false"
-        @confirm="handleSuccess"
-        @cancel="handleSuccess"
-      />
-
-    </div>
+        <template #modals>
+            <ConfirmModal
+                v-model:show="showConfirmModal"
+                title="Confirmation"
+                message="Voulez-vous vraiment soumettre le formulaire ?"
+                @confirm="confirmSubmission"
+            />
+            <ConfirmModal
+                v-model:show="showDGModal"
+                title="Confirmation"
+                message="Malgré votre avis Non favorable, voulez-vous que la demande poursuive le processus OUI/NON ?"
+                confirm-label="OUI"
+                cancel-label="NON"
+                :closable="true"
+                @confirm="confirmSubmission_DG"
+                @cancel="cancelSubmission_DG"
+                @close="DG_cancelBox"
+            />
+            <InfoModal
+                :show="showSuccessModal"
+                title="Confirmation"
+                message="Votre avis bien été enregistré !"
+                @ok="handleSuccess"
+            />
+        </template>
+    </AppLayout>
   `,
 });

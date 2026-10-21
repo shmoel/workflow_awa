@@ -36,9 +36,7 @@ import {
 import { apiGet, apiPostForm } from "../services/api.js";
 import { useCurrentUser }      from "../composables/useCurrentUser.js";
 
-import AppSidebar   from "../components/layout/AppSidebar.js";
-import AppNavbar    from "../components/layout/AppNavbar.js";
-import AppFooter    from "../components/layout/AppFooter.js";
+import AppLayout from "../components/layout/AppLayout.js";
 import DemandeForm  from "../components/demandes/DemandeForm.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
 import InfoModal    from "../components/ui/InfoModal.js";
@@ -56,7 +54,7 @@ function readDemandeId() {
 export default defineComponent({
   name: "ModifierDemandePage",
 
-  components: { AppSidebar, AppNavbar, AppFooter, DemandeForm, ConfirmModal, InfoModal },
+  components: { AppLayout, DemandeForm, ConfirmModal, InfoModal },
 
   setup() {
     const user = useCurrentUser();
@@ -177,93 +175,60 @@ export default defineComponent({
   },
 
   template: /* html */ `
-    <div class="flex min-h-screen" style="background: var(--color-bg-page);">
+    <AppLayout>
+        <div class="container-fluid flex-grow-1 container-p-y">
 
-      <AppSidebar active-page="consult_dmd" />
+            <div class="container">
+              <div class="row">
+            <div class ="col-lg-2"></div>
+            <div class="card mb-4 col-md-8">
+                <h4 class="card-header" style="font-weight: bold;"> MODIFIER LA DEMANDE</h4>
+                <div class="card-body">
+                    <div v-if="notFound" class="alert alert-danger" role="alert">
+                        Demande introuvable : l'identifiant est absent, invalide ou ne correspond à aucune demande.
+                        <a href="consulter_demandes.html">Retour à mes demandes</a>
+                    </div>
+                    <template v-else-if="!loading">
+                        <div v-if="loadError || user.error.value" class="alert alert-danger" role="alert">
+                            Impossible de charger les données du formulaire. Veuillez réessayer.
+                            ({{ loadError || user.error.value }})
+                        </div>
+                        <div v-if="submitError" class="alert alert-danger" role="alert">
+                            Erreur lors de la modification : {{ submitError }}
+                        </div>
 
-      <div class="flex flex-col flex-1 min-w-0">
-
-        <AppNavbar page-title="Modifier la demande" />
-
-        <main class="flex-1 p-5" role="main" aria-label="Modifier la demande">
-
-          <p v-if="loading" class="text-sm" style="color: var(--color-text-secondary);" role="status">
-            Chargement de la demande…
-          </p>
-
-          <section
-            v-else-if="notFound"
-            class="bg-white rounded-2xl shadow-sm border p-8 text-center max-w-2xl mx-auto"
-            style="border-color: var(--color-brand-border);"
-            role="alert"
-          >
-            <h2 class="text-lg font-bold mb-2" style="color: var(--color-brand);">Demande introuvable</h2>
-            <p class="text-sm mb-4" style="color: var(--color-text-secondary);">
-              L'identifiant de demande est absent, invalide ou ne correspond à aucune demande.
-            </p>
-            <a
-              href="consulter_demandes.html"
-              class="inline-block px-5 py-2 rounded-full text-white text-sm font-semibold"
-              style="background: var(--color-brand); text-decoration: none;"
-            >Retour à mes demandes</a>
-          </section>
-
-          <section
-            v-else
-            class="bg-white rounded-2xl shadow-sm border p-6 max-w-2xl mx-auto"
-            style="border-color: var(--color-brand-border);"
-            aria-labelledby="modif-title"
-          >
-            <h2 id="modif-title" class="text-lg font-bold mb-4">MODIFIER LA DEMANDE</h2>
-
-            <div
-              v-if="loadError || user.error.value"
-              class="rounded-xl border px-4 py-3 text-sm mb-4"
-              style="border-color: var(--color-status-rejected); color: var(--color-status-rejected); background: #fef2f2;"
-              role="alert"
-            >
-              Impossible de charger les données du formulaire. Veuillez réessayer.
-              ({{ loadError || user.error.value }})
+                        <DemandeForm
+                            :banques="banques"
+                            :types="types"
+                            :initial="initial"
+                            :note-required="false"
+                            :existing-note="existingNote"
+                            submit-label="Modifier"
+                            :submitting="submitting"
+                            @submit="askConfirm"
+                        />
+                    </template>
+                </div>
             </div>
-
-            <div
-              v-if="submitError"
-              class="rounded-xl border px-4 py-3 text-sm mb-4"
-              style="border-color: var(--color-status-rejected); color: var(--color-status-rejected); background: #fef2f2;"
-              role="alert"
-            >
-              Erreur lors de la modification : {{ submitError }}
+            <div class ="col-lg-2"></div>
             </div>
+            </div>
+        </div>
 
-            <DemandeForm
-              :banques="banques"
-              :types="types"
-              :initial="initial"
-              :note-required="false"
-              :existing-note="existingNote"
-              submit-label="Modifier"
-              :submitting="submitting"
-              @submit="askConfirm"
+        <template #modals>
+            <ConfirmModal
+                v-model:show="showConfirm"
+                title="Confirmation"
+                message="Voulez-vous vraiment modifier cette demande ?"
+                @confirm="submit"
             />
-          </section>
-        </main>
-
-        <AppFooter />
-      </div>
-
-      <ConfirmModal
-        v-model:show="showConfirm"
-        title="Confirmation"
-        message="Voulez-vous vraiment modifier cette demande ?"
-        @confirm="submit"
-      />
-
-      <InfoModal
-        :show="showSuccess"
-        title="Validation"
-        message="Demande modifiée avec succès"
-        @ok="onSuccessOk"
-      />
-    </div>
+            <InfoModal
+                :show="showSuccess"
+                title="Validation"
+                message="Demande  modifiée avec succès"
+                @ok="onSuccessOk"
+            />
+        </template>
+    </AppLayout>
   `,
 });

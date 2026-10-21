@@ -6,7 +6,8 @@
  *   - modifier_demande.html    (modification)
  *
  * Remplace le <form id="intro_demande"> dupliqué dans les deux fichiers legacy
- * (banque, type, client, montant, note d'analyse, commentaire).
+ * (banque, type, client, montant, note d'analyse, commentaire), avec le même
+ * balisage Bootstrap (form-group, form-control, input-group « XOF »).
  *
  * Props :
  *   banques      : Array   — lignes de GET /banques/ { id, sigle, nom }
@@ -134,79 +135,53 @@ export default defineComponent({
   },
 
   template: /* html */ `
-    <form class="space-y-4" @submit.prevent="onSubmit">
-
-      <div>
-        <label for="df-banque" class="block text-sm font-bold mb-1">Banque</label>
-        <select id="df-banque" v-model="form.banque" required
-                class="w-full rounded-lg border px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-300"
-                style="border-color: var(--color-brand-border);">
-          <option v-for="b in banques" :key="b.id" :value="String(b.id)">{{ b.sigle }} - {{ b.nom }}</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="df-type" class="block text-sm font-bold mb-1">Type</label>
-        <select id="df-type" v-model="form.type" required
-                class="w-full rounded-lg border px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-300"
-                style="border-color: var(--color-brand-border);">
-          <option v-for="t in types" :key="t.demande_id" :value="String(t.demande_id)">{{ t.nom_demande }}</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="df-client" class="block text-sm font-bold mb-1">Client</label>
-        <input id="df-client" v-model="form.client" type="text" required
-               placeholder="Le nom du client svp"
-               class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
-               style="border-color: var(--color-brand-border);" />
-      </div>
-
-      <div>
-        <label for="df-montant" class="block text-sm font-bold mb-1">Montant</label>
-        <div class="flex">
-          <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 text-sm"
-                style="border-color: var(--color-brand-border); background: var(--color-bg-page);">XOF</span>
-          <input id="df-montant" v-model="form.montant" type="number" step="any" required
-                 placeholder="Spécifiez le montant svp"
-                 class="w-full rounded-r-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
-                 style="border-color: var(--color-brand-border);" />
+    <form @submit.prevent="onSubmit">
+        <div class="form-group">
+            <label style="font-weight: bold;" class="form-label" for="df-banque">Banque </label>
+            <select class="form-control" id="df-banque" v-model="form.banque" required>
+                <option v-for="b in banques" :key="b.id" :value="String(b.id)">{{ b.sigle }} - {{ b.nom }}</option>
+            </select>
+            <div class="clearfix"></div>
         </div>
-      </div>
-
-      <div>
-        <label for="df-note" class="block text-sm font-bold mb-1">Note d'analyse</label>
-        <p v-if="existingNoteHref" class="text-sm mb-2">
-          <a :href="existingNoteHref" target="_blank" rel="noopener" style="color: var(--color-brand);">
-            Consulter la note préalablement enregistrée
-          </a>
+        <div class="form-group">
+            <label style="font-weight: bold;" class="form-label" for="df-type">Type</label>
+            <select class="form-control" id="df-type" v-model="form.type" required>
+                <option v-for="t in types" :key="t.demande_id" :value="String(t.demande_id)">{{ t.nom_demande }}</option>
+            </select>
+            <div class="clearfix"></div>
+        </div>
+        <div class="form-group">
+            <label style="font-weight: bold;" for="df-client">Client</label>
+            <input class='form-control' type='text' id='df-client' v-model="form.client" placeholder='Le nom du client svp' required>
+            <div class="clearfix"></div>
+        </div>
+        <div class="form-group">
+            <label style="font-weight: bold;" for="df-montant">Montant :</label>
+                <div class="input-group">
+                    <div class="input-group-prepend"></div>
+                    <span class="input-group-text">XOF</span>
+                        <input class='form-control' type='number' step="any" id='df-montant' v-model="form.montant" placeholder='Spécifiez le montant svp' required>
+                </div>
+            <div class="clearfix"></div>
+        </div>
+        <p v-if="existingNoteHref">
+            <a :href="existingNoteHref" target="_blank" rel="noopener">Consulter la note préalablement enregistrée</a>
         </p>
-        <input id="df-note" ref="fileInput" type="file" @change="onFileChange"
-               :required="noteRequired"
-               :accept="noteRequired ? 'application/pdf' : null"
-               class="w-full text-sm" />
-        <p v-if="noteRequired" class="text-xs mt-1" style="color: var(--color-text-secondary);">
-          Joindre le fichier (PDF uniquement).
-        </p>
-        <p v-if="fileError" class="text-sm mt-1" style="color: var(--color-status-rejected);" role="alert">
-          {{ fileError }}
-        </p>
-      </div>
+        <div class="form-group">
+            <label style="font-weight: bold;" class="form-label w-100" for="df-note">Note d'analyse</label>
+            <input class='form-control' type='file' id='df-note' ref="fileInput" @change="onFileChange"
+                   :required="noteRequired" :accept="noteRequired ? 'application/pdf' : null">
+            <small v-if="noteRequired" class="form-text text-muted">Joindre le fichier (PDF uniquement).</small>
+            <small v-if="fileError" class="form-text text-danger" role="alert">{{ fileError }}</small>
+        </div>
+        <div class="form-group">
+            <label style="font-weight: bold;" for="df-comm">Commentaire</label>
 
-      <div>
-        <label for="df-comm" class="block text-sm font-bold mb-1">Commentaire</label>
-        <textarea id="df-comm" v-model="form.comm" rows="3"
-                  class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
-                  style="border-color: var(--color-brand-border);"></textarea>
-      </div>
+            <textarea class='form-control' id='df-comm' v-model="form.comm"></textarea>
 
-      <div class="text-center pt-2">
-        <button type="submit" :disabled="submitting"
-                class="px-8 py-2 rounded-full text-white text-sm font-bold disabled:opacity-60"
-                style="background: var(--color-brand);">
-          {{ submitting ? 'Envoi…' : submitLabel }}
-        </button>
-      </div>
+            <div class="clearfix"></div>
+        </div>
+        <div style="text-align: center;"> <button type="submit" class="btn btn-primary" :disabled="submitting">{{ submitting ? 'Envoi…' : submitLabel }}</button></div>
     </form>
   `,
 });

@@ -1,100 +1,81 @@
 /**
  * components/layout/AppNavbar.js
  *
- * Barre de navigation supérieure — composant Vue 3.
+ * Barre supérieure — balisage identique au legacy (navbar « bg-dark »,
+ * avatar + nom de l'utilisateur, menu déroulant avec « Déconnexion »).
  *
- * Reproduit à l'identique la navbar legacy :
- *   - Fond sombre (bg-dark du layout UIKit)
- *   - Nom de l'utilisateur connecté (id="user_id" dans le legacy)
- *   - Avatar rond
- *   - Bouton "Déconnexion"
+ * Classe « navbar-collapse collapse » (9 pages legacy sur 10 : nom à droite) ;
+ * l'accueil legacy avait une coquille (« navbar-collapSellapse ») qui plaçait
+ * le nom à gauche.
  *
- * Props :
- *   pageTitle : string  — titre de la page affiché dans la navbar (optionnel)
+ * Le menu déroulant était ouvert par Bootstrap JS (data-toggle="dropdown") :
+ * il est ouvert ici par Vue (classe "show"), et se ferme au clic en dehors.
  *
  * Dépendances :
- *   - useCurrentUser — lit user.fullName (déjà chargé par la page parente)
- *   - auth.js logout() — pour la déconnexion
+ *   - useCurrentUser — user.fullName (profil chargé par la page)
+ *   - auth.js logout() — déconnexion et retour à index.html (CORRECTION-01)
  */
 
-import { defineComponent } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  onUnmounted,
+} from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
 import { useCurrentUser } from "../../composables/useCurrentUser.js";
 import { logout } from "../../services/auth.js";
 
 export default defineComponent({
   name: "AppNavbar",
 
-  props: {
-    pageTitle: {
-      type: String,
-      default: "",
-    },
-  },
-
   setup() {
     const user = useCurrentUser();
-    return { user, logout };
+    const fullName = user.fullName;
+    const open = ref(false);
+    const root = ref(null);
+
+    function onDocumentClick(e) {
+      if (open.value && root.value && !root.value.contains(e.target)) open.value = false;
+    }
+
+    onMounted(() => document.addEventListener("click", onDocumentClick));
+    onUnmounted(() => document.removeEventListener("click", onDocumentClick));
+
+    return { fullName, open, root, logout };
   },
 
   template: /* html */ `
-    <header
-      class="flex items-center justify-between px-5 py-3 shadow-sm"
-      style="background:#1e293b; font-family: var(--font-family-base);"
-      role="banner"
-    >
-      <!-- Titre de page (optionnel) -->
-      <div class="text-white font-semibold text-base tracking-wide">
-        {{ pageTitle }}
-      </div>
+    <nav class="layout-navbar navbar navbar-expand-lg align-items-lg-center bg-dark container-p-x" id="layout-navbar">
 
-      <!-- Zone utilisateur droite -->
-      <div class="flex items-center gap-3">
+        <div class="navbar-collapse collapse" id="layout-navbar-collapse">
+            <div class="navbar-nav align-items-lg-center ml-auto">
 
-        <!-- Indicateur de chargement discret -->
-        <span
-          v-if="user.loading.value"
-          class="text-slate-400 text-sm animate-pulse"
-          aria-live="polite"
-        >
-          Chargement…
-        </span>
+                <div class="nav-item d-none d-lg-block text-big font-weight-light line-height-1 opacity-25 mr-3 ml-1">|</div>
+                <div ref="root" class="demo-navbar-user nav-item dropdown" :class="{ show: open }">
+                    <a class="nav-link dropdown-toggle" href="#" @click.prevent="open = !open">
+                        <span class="d-inline-flex flex-lg-row-reverse align-items-center align-middle">
+                            <img src="images/avatar.png" alt class="d-block ui-w-30 rounded-circle">
+                            <span id="user_id" class="px-1 mr-lg-2 ml-2 ml-lg-0">{{ fullName }}</span>
+                        </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" :class="{ show: open }">
+                        <a href="javascript:" class="dropdown-item">
+                            <i class="feather icon-user text-muted"></i> &nbsp; My profile</a>
+                        <a href="javascript:" class="dropdown-item">
+                            <i class="feather icon-mail text-muted"></i> &nbsp; Messages</a>
+                        <a href="javascript:" class="dropdown-item">
+                            <i class="feather icon-settings text-muted"></i> &nbsp; Account settings</a>
+                        <div class="dropdown-divider"></div>
 
-        <!-- Avatar + nom -->
-        <div v-else class="flex items-center gap-2">
-          <img
-            src="images/avatar.png"
-            alt="Avatar"
-            class="w-8 h-8 rounded-full object-cover border-2"
-            style="border-color: var(--color-brand);"
-            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%2212%22 cy=%228%22 r=%224%22 fill=%22%23cbd5e1%22/%3E%3Cellipse cx=%2212%22 cy=%2219%22 rx=%228%22 ry=%224%22 fill=%22%23cbd5e1%22/%3E%3C/svg%3E'"
-          />
-          <span
-            id="user_id"
-            class="text-white text-sm font-medium hidden sm:inline"
-            aria-label="Utilisateur connecté"
-          >
-            {{ user.fullName.value }}
-          </span>
+                          <a href="javascript:" class="dropdown-item" @click.prevent="logout">
+                            <i class="feather icon-power text-danger"></i> &nbsp;
+                            <input type="button" name="" value="Déconnexion">
+                          </a>
+
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <!-- Bouton déconnexion -->
-        <button
-          @click="logout"
-          class="flex items-center gap-1.5 text-sm font-medium rounded-lg px-3 py-1.5 transition-colors"
-          style="color: var(--color-brand); border: 1.5px solid var(--color-brand); background: transparent;"
-          onmouseover="this.style.background='var(--color-brand)';this.style.color='#fff';"
-          onmouseout="this.style.background='transparent';this.style.color='var(--color-brand)';"
-          aria-label="Se déconnecter"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
-          </svg>
-          <span class="hidden sm:inline">Déconnexion</span>
-        </button>
-
-      </div>
-    </header>
+    </nav>
   `,
 });

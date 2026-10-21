@@ -35,9 +35,8 @@ import { lastMsgKey, messageStamp, markMessagesSeen } from "../services/chatSeen
 import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
 
-import AppSidebar     from "../components/layout/AppSidebar.js";
-import AppNavbar      from "../components/layout/AppNavbar.js";
-import AppFooter      from "../components/layout/AppFooter.js";
+import AppLayout from "../components/layout/AppLayout.js";
+import ActionCell from "../components/demandes/ActionCell.js";
 import StatCard       from "../components/demandes/StatCard.js";
 import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
 import DemandeFilters from "../components/demandes/DemandeFilters.js";
@@ -46,12 +45,12 @@ import DemandeFilters from "../components/demandes/DemandeFilters.js";
 // Colonnes du tableau (ordre identique au legacy)
 // ---------------------------------------------------------------------------
 const COLUMNS = [
-  { key: "banque",            label: "Banque" },
-  { key: "categorie_demande", label: "Entité" },
-  { key: "type_demande",      label: "Type de demande" },
-  { key: "nom_client",        label: "Contrepartie" },
-  { key: "_date_heure",       label: "Date / Heure" },
-  { key: "description",       label: "Niveau validation" },
+  { key: "banque",            label: "Banque",            wrap: "cc-label" },
+  { key: "categorie_demande", label: "Entité",            wrap: "cc-label" },
+  { key: "type_demande",      label: "Type de demande",   wrap: "cc" },
+  { key: "nom_client",        label: "Contrepartie",      wrap: "cc" },
+  { key: "_date_heure",       label: "Date / Heure",      wrap: "cc" },
+  { key: "description",       label: "Niveau validation", wrap: "cc" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -62,7 +61,7 @@ const FILTER_FIELDS = [
   { key: "entite",       placeholder: "Filtrer par Entité" },
   { key: "type",         placeholder: "Filtrer par Type" },
   { key: "contrepartie", placeholder: "Filtrer par Contrepartie" },
-  { key: "date",         placeholder: "Filtrer par Date" },
+  { key: "date",         placeholder: "Filtrer par date " },
 ];
 
 const EMPTY_FILTERS = { banque: "", entite: "", type: "", contrepartie: "", date: "" };
@@ -72,7 +71,7 @@ const EMPTY_FILTERS = { banque: "", entite: "", type: "", contrepartie: "", date
 // ---------------------------------------------------------------------------
 const STAT_CARDS = [
   { title: "Validation GGR Local",  niveau: 1 },
-  { title: "Clôturées",             niveau: 6 },
+  { title: "Cloturées",             niveau: 6 },
   { title: "Validation FO Group",   niveau: 4 },
   { title: "Validation DG Local",   niveau: 2 },
   { title: "Validation AWA",        niveau: 3 },
@@ -86,14 +85,7 @@ const STAT_CARDS = [
 export default defineComponent({
   name: "AccueilPage",
 
-  components: {
-    AppSidebar,
-    AppNavbar,
-    AppFooter,
-    StatCard,
-    DemandesTable,
-    DemandeFilters,
-  },
+  components: { AppLayout, StatCard, DemandesTable, DemandeFilters, ActionCell },
 
   setup() {
     const user    = useCurrentUser();
@@ -151,7 +143,7 @@ export default defineComponent({
         const data = await apiGet(`/demandes_a_consulter/${domaine}`);
         const rows = (data.results ?? []).map((r) => ({
           ...r,
-          _date_heure: `${r.date_avis || ""} ${r.heure_avis || ""}`.trim(),
+          _date_heure: `${r.date_avis || "N/A"} | ${r.heure_avis || "N/A"}`,
         }));
         allDemandes.value = rows;
 
@@ -216,182 +208,61 @@ export default defineComponent({
   },
 
   template: /* html */ `
-    <div class="flex min-h-screen" style="background: var(--color-bg-page);">
+    <AppLayout :polling="polling">
+        <div class="container-fluid flex-grow-1 container-p-y">
+            <h4 class="font-weight-bold py-3 mb-0">Demandes</h4>
+            <div class="text-muted small mt-0 mb-4 d-block breadcrumb">
 
-      <AppSidebar active-page="accueil" />
-
-      <div class="flex flex-col flex-1 min-w-0">
-
-        <AppNavbar page-title="Demandes" />
-
-        <main class="flex-1 p-5 space-y-6" role="main" aria-label="Tableau de bord">
-
-          <!-- ---- Grille des 6 compteurs ---- -->
-          <section aria-label="Compteurs de demandes par niveau de validation">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <StatCard
-                v-for="card in statCards"
-                :key="card.niveau"
-                :title="card.title"
-                :niveau="card.niveau"
-              />
             </div>
-          </section>
-
-          <!-- ---- Tableau des demandes introduites ---- -->
-          <section
-            class="bg-white rounded-2xl shadow-sm border overflow-hidden"
-            style="border-color: var(--color-brand-border);"
-            aria-label="Demandes introduites"
-          >
-            <!-- En-tête : filtres + onglet -->
-            <div
-              class="flex flex-wrap items-end justify-between gap-3 px-4 pt-4 pb-0 border-b"
-              style="border-color: var(--color-brand-border);"
-            >
-              <div class="pb-3">
-                <DemandeFilters :fields="filterFields" v-model="filters" />
-              </div>
-              <!-- Onglet unique "Introduites" (identique au legacy) -->
-              <div class="pb-0">
-                <ul class="flex list-none m-0 p-0" role="tablist">
-                  <li role="presentation">
-                    <button
-                      role="tab"
-                      aria-selected="true"
-                      class="px-4 py-2 text-sm font-semibold border-b-2 focus:outline-none"
-                      style="color: var(--color-brand); border-color: var(--color-brand); background: transparent;"
-                    >
-                      Introduites
-                    </button>
-                  </li>
-                </ul>
-              </div>
+            <div class="row">
+                <div class="">
+                    <div class="row">
+                        <StatCard v-for="card in statCards" :key="card.niveau" :title="card.title" :niveau="card.niveau" />
+                    </div>
+                </div>
             </div>
 
-            <!-- Tableau via DemandesTable v2 -->
-            <DemandesTable
-              :rows="filteredRows"
-              :columns="columns"
-              :loading="loadingTable"
-              :error="errorTable"
-              aria-label="Tableau des demandes introduites"
-            >
-              <!-- Slot badge : "Nouveau" dans la colonne Banque -->
-              <template #badge="{ row }">
-                <span
-                  v-if="newMessageMap[row.id_demande]"
-                  class="inline-block ml-2 px-2 py-0.5 text-xs font-bold text-white rounded-full"
-                  style="background: var(--color-brand);"
-                  aria-label="Nouveau message"
-                >
-                  Nouveau
-                </span>
-              </template>
+            <div class="row">
 
-              <!-- Slot actions : Détails + CHAT -->
-              <template #actions="{ row }">
-                <button
-                  @click="goToDetail(row.id_demande)"
-                  class="text-xs font-semibold rounded-full px-3 py-1.5 border-2 transition-colors"
-                  style="color: var(--color-brand); border-color: var(--color-brand); background: #fff;"
-                  onmouseover="this.style.background='var(--color-brand)';this.style.color='#fff';"
-                  onmouseout="this.style.background='#fff';this.style.color='var(--color-brand)';"
-                  :aria-label="'Détails de la demande ' + row.id_demande"
-                >
-                  Détails
-                </button>
-                <button
-                  @click="handleChatClick(row.id_demande)"
-                  class="text-xs font-semibold rounded-full px-3 py-1.5 border-2 transition-colors relative"
-                  style="color: var(--color-brand); border-color: var(--color-brand); background: #fff;"
-                  onmouseover="this.style.background='var(--color-brand)';this.style.color='#fff';"
-                  onmouseout="this.style.background='#fff';this.style.color='var(--color-brand)';"
-                  :aria-label="'Chat pour la demande ' + row.id_demande"
-                >
-                  CHAT
-                  <span
-                    v-if="newMessageMap[row.id_demande]"
-                    class="inline-block w-2 h-2 rounded-full ml-1"
-                    style="background: var(--color-brand); box-shadow: 0 0 0 2px #fff;"
-                    aria-hidden="true"
-                  ></span>
-                </button>
-              </template>
-            </DemandesTable>
+                <div style="height: 310px" id="tasks-inner"></div>
 
-          </section>
+                <div class="col-xl-12">
+                    <div class="card mb-4">
 
-        </main>
+                        <div class="card-header with-elements pb-0">
+                            <DemandeFilters :fields="filterFields" v-model="filters" />
+                            <div class="card-header-elements ml-auto p-0">
+                                <ul class="nav nav-tabs">
+                                    <li class="nav-item" id="dmd-intro">
+                                        <a class="nav-link active" href="javascript:">Introduites</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
 
-        <AppFooter />
-      </div>
-
-      <!-- ================================================================
-           Popup notification (polling)
-           ================================================================ -->
-      <Transition name="fade">
-        <div
-          v-if="polling.show.value"
-          class="fixed inset-0 z-50 flex items-start justify-center"
-          style="background: rgba(0,0,0,0.35);"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="popup-title-accueil"
-          @click.self="polling.dismiss()"
-        >
-          <div
-            class="bg-white rounded-2xl mt-28 mx-4 w-full max-w-lg border-2 p-8 shadow-2xl"
-            style="border-color: var(--color-brand);"
-          >
-            <h2
-              id="popup-title-accueil"
-              class="text-xl font-bold text-center mb-4"
-              style="color: var(--color-brand);"
-            >
-              Nouvelle demande à valider&nbsp;!
-            </h2>
-            <div class="overflow-x-auto mb-5">
-              <table class="w-full text-sm border-collapse">
-                <thead>
-                  <tr style="background: var(--color-brand); color: #fff;">
-                    <th class="px-3 py-2 text-left font-semibold">Banque</th>
-                    <th class="px-3 py-2 text-left font-semibold">Entité</th>
-                    <th class="px-3 py-2 text-left font-semibold">Contrepartie</th>
-                    <th class="px-3 py-2 text-left font-semibold">Date</th>
-                    <th class="px-3 py-2 text-left font-semibold">Heure</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="d in polling.newDemandes.value"
-                    :key="d.id_avis"
-                    class="border-b"
-                    style="border-color: var(--color-brand-border);"
-                  >
-                    <td class="px-3 py-2">{{ d.banque || '—' }}</td>
-                    <td class="px-3 py-2">{{ d.categorie_demande || '—' }}</td>
-                    <td class="px-3 py-2">{{ d.nom_client || '—' }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">{{ d.date_avis || '—' }}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">{{ d.heure_avis || '—' }}</td>
-                  </tr>
-                </tbody>
-              </table>
+                        <div class="nav-tabs-top">
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="demande-intro">
+                                    <div style="height: 330px" id="tab-table-1">
+                                        <DemandesTable :rows="filteredRows" :columns="columns" :action-headers="2" :error="errorTable">
+                                            <template #badge="{ row }">
+                                                <span v-if="newMessageMap[row.id_demande]" style='background:#ea580c;color:#fff;padding:2px 8px;border-radius:8px;font-size:12px;margin-left:8px;'>Nouveau</span>
+                                            </template>
+                                            <template #actions="{ row }">
+                                                <ActionCell btn-class="btn btn-glow-info btn-info" label="Détails" @click="goToDetail(row.id_demande)" />
+                                                <ActionCell btn-class="btn btn-glow-info btn-info" label="CHAT" @click="handleChatClick(row.id_demande)" />
+                                            </template>
+                                        </DemandesTable>
+                                    </div>
+                                    <a href="javascript:" class="card-footer d-block text-center text-dark small font-weight-semibold"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="text-center">
-              <button
-                @click="polling.dismiss()"
-                class="px-8 py-2 rounded-full text-white font-bold"
-                style="background: var(--color-brand);"
-                onmouseover="this.style.background='var(--color-brand-dark)';"
-                onmouseout="this.style.background='var(--color-brand)';"
-                autofocus
-              >OK</button>
-            </div>
-          </div>
+
         </div>
-      </Transition>
-
-    </div>
+    </AppLayout>
   `,
 });

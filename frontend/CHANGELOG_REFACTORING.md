@@ -1,4 +1,4 @@
-# CHANGELOG — Refactoring frontend Vue 3 / Tailwind
+# CHANGELOG — Refactoring frontend Vue 3
 
 Ce fichier trace les **corrections de comportement fonctionnel** introduites
 pendant le refactoring, distinctes des changements purement techniques
@@ -7,6 +7,24 @@ pendant le refactoring, distinctes des changements purement techniques
 Chaque entrée indique : le fichier legacy concerné, la nature du bug,
 le fichier Vue où la correction est appliquée, et le statut de validation
 par le chef de projet.
+
+## État du projet (08/10/2026)
+
+- **Migration terminée** : les 11 pages sont en Vue 3 (CDN, modules ES6) ;
+  le legacy n'existe plus que dans le tag git `pre-bascule-vue`.
+- **Visuel identique au legacy** : CSS legacy d'origine, balisage legacy,
+  plus de Tailwind (voir « Reprise du visuel legacy »).
+- **Corrections** : CORRECTION-01 à 12, toutes validées.
+- **Restent ouverts** : 3 points « À confirmer » (frontend) et 8 points
+  backend, dont le point 5 (mots de passe exposés), critique avant la mise
+  en production, et le point 8 (adresses sans `.html`, cache des fichiers).
+
+### Sommaire
+- CORRECTION-01 à 12 — corrections de comportement, page par page
+- Bascule finale (05/10/2026) — suppression du legacy, renommage des pages
+- Reprise du visuel legacy (08/10/2026)
+- À confirmer — choix fonctionnels en attente de décision
+- Points ouverts backend — à traiter par l'équipe backend
 
 ---
 
@@ -18,6 +36,9 @@ par le chef de projet.
 | **Brique introduite**         | Brique 1 — `services/auth.js` |
 | **Fichier Vue corrigé**       | `frontend/static/js/services/auth.js` — fonction `logout()` |
 | **Statut**                    | ✅ **Validé** — décision du 27/09/2026 |
+
+### Description du bug legacy
+La fonction `logout()`, copiée dans chaque page, supprimait le token
 mais ne redirigeait pas :
 ```js
 // legacy (dans chaque fichier HTML)
@@ -114,11 +135,10 @@ Le header `Authorization` était placé directement dans les options `fetch()`
 au lieu d'être dans l'objet `headers: {}`. L'API `fetch` ignore les clés
 inconnues au niveau des options — le token n'était donc jamais envoyé.
 
-### Impact attendu
-Si l'endpoint `/cloturer_demande/` vérifie le token côté serveur (dépend
-de la configuration FastAPI), toutes les clôtures échouaient avec 401 ou
-étaient acceptées sans authentification selon la politique du middleware.
-**À confirmer par test sur la version legacy avant de valider cette correction.**
+### Impact
+La route `/cloturer_demande/{id}/` exige un token (`Depends(get_current_user)`) :
+dans le legacy, les clôtures échouaient donc avec une erreur 401. Avec la
+correction, le token est envoyé et la clôture aboutit.
 
 ### Correction appliquée
 ```js
@@ -282,10 +302,11 @@ d'une page 404. **Changement visible par l'utilisateur.**
 4. **`id_dmd` absent, invalide ou inconnu.** Le legacy envoyait les appels avec
    `null` et plantait. La page affiche « Demande introuvable » avec un lien
    vers l'accueil.
-5. **Carte récapitulative.** `GET /demande_particulier/{id}` renvoyait banque,
-   type, catégorie, contrepartie, montant et date, mais le legacy n'en
+5. **Récapitulatif de la demande.** `GET /demande_particulier/{id}` renvoyait
+   banque, type, catégorie, contrepartie, montant et date, mais le legacy n'en
    utilisait que `note_analyse`. Ces informations sont désormais affichées
-   en tête de page.
+   au-dessus des avis, dans un tableau au format legacy (même présentation
+   que « Informations de la demande » de valider_demande).
 
 ### Changements techniques (sans validation requise)
 
@@ -294,10 +315,10 @@ d'une page 404. **Changement visible par l'utilisateur.**
   non plus par `event_d` (deux avis du même type s'ouvraient ensemble).
 - Message d'erreur : le legacy référençait `donnee.detail` (variable
   inexistante), ce qui plantait l'affichage de l'erreur. Les erreurs passent
-  désormais par `apiGet()` et un bandeau.
+  désormais par `apiGet()` et un message `alert alert-danger`.
 - Les deux appels API sont lancés en parallèle.
-- Bouton « Retour » (page précédente, ou accueil si la page a été ouverte
-  directement).
+- Le bouton « Retour » ajouté lors de la migration a été retiré le 08/10/2026
+  (absent du legacy).
 - Code mort non repris : `showConfirmation()`, `confirmSubmission()`
   (`POST /valider_avis/{id}/process_ongoing/1`, sans header `Authorization`)
   et `confirmerEnvoi()`. Aucun élément de la page ne les déclenchait.
@@ -323,7 +344,8 @@ une demande sans note, et affiche la popup de notification.
 1. **Erreurs d'envoi invisibles.** `confirm_introduction()` levait des
    exceptions non interceptées (profil introuvable, réponse non JSON) :
    la modale se fermait et rien ne s'affichait. Les erreurs de chargement
-   et d'envoi s'affichent désormais dans un bandeau.
+   et d'envoi s'affichent désormais dans un message d'erreur
+   (`alert alert-danger`) au-dessus du formulaire.
 2. **Double soumission.** Le bouton reste actif pendant l'envoi dans le
    legacy ; il est désormais désactivé (« Envoi… »).
 3. **Erreurs de contrôle du fichier.** `alert()` remplacé par un message
@@ -372,7 +394,8 @@ Les erreurs sont désormais visibles.
 4. **`id_dmd` absent, invalide ou inconnu.** Le legacy envoyait les appels
    avec `null` et plantait. La page affiche « Demande introuvable » avec un
    lien vers « Consulter mes demandes ».
-5. **Erreurs d'envoi.** Affichées dans un bandeau (le legacy utilisait
+5. **Erreurs d'envoi.** Affichées dans un message d'erreur
+   (`alert alert-danger`) au-dessus du formulaire (le legacy utilisait
    `alert()` ou plantait sans message) ; bouton désactivé pendant l'envoi.
 
 ### Changements techniques (sans validation requise)
@@ -435,20 +458,20 @@ propres messages. **Changements visibles par l'utilisateur.**
 
 ---
 
-## [CORRECTION-12] Connexion : page sans vitrine, blocage après login
+## [CORRECTION-12] Connexion : blocage après login, mauvais identifiants
 
 | Champ        | Valeur |
 |---|---|
 | **Fichier legacy concerné**   | `index.html` (et `index_.html`, ancienne version) |
 | **Brique introduite**         | Brique index |
 | **Fichiers Vue corrigés**     | `frontend/static/js/pages/LoginPage.js`, `frontend/static/js/services/auth.js`, `frontend/static/js/services/api.js` |
-| **Statut**                    | ✅ **Validé** — décision du 05/10/2026 (formulaire seul, sans vitrine) |
+| **Statut**                    | ✅ **Validé** — décision du 05/10/2026 ; vitrine rétablie le 08/10/2026 |
 
 ### Corrections de comportement
 
-1. **Vitrine supprimée.** La page ne contient plus que le formulaire de
-   connexion aux couleurs AWA (logo, « WORKFLOW - AWA », « Accès Sécurisé »).
-   Hero, présentation, navigation par ancres et animations ne sont pas repris.
+1. **Vitrine.** Supprimée le 05/10/2026, puis **rétablie à l'identique le
+   08/10/2026** (voir « Reprise du visuel legacy ») : en-tête, hero, section
+   WorkFlow, connexion, pied de page.
 2. **Niveau 4** redirigé vers l'accueil (CORRECTION-07, appliquée ici).
 3. **Blocage après login.** Si `/users/me/` échouait, le legacy affichait
    « Connexion réussie ! » et ne redirigeait jamais. Un message d'erreur
@@ -461,13 +484,13 @@ propres messages. **Changements visibles par l'utilisateur.**
 - Logique de connexion déléguée à `auth.login()` (token et `tokenExpiry`
   stockés comme dans le legacy).
 - Attente artificielle de 2 s avant redirection supprimée.
-- Lien mort « Mot de passe oublié ? » (`href="#"`) non repris.
-- Bootstrap, Bootstrap Icons, AOS et les styles inline de la vitrine ne sont
-  plus chargés.
+- Lien « Mot de passe oublié ? » (`href="#"`, sans effet) : conservé pour
+  le visuel, comme dans le legacy.
+- Bootstrap 5, Bootstrap Icons, Poppins et le bloc `<style>` legacy sont
+  chargés tels quels ; le JavaScript Bootstrap n'est plus chargé.
 
 ### Impact fonctionnel
-Même parcours de connexion ; page plus simple. **Changement visible par
-l'utilisateur.**
+Même parcours de connexion. Les messages d'erreur s'affichent dans tous les cas.
 
 ---
 
@@ -491,6 +514,10 @@ Restaurer un fichier : `git checkout pre-bascule-vue -- frontend/<fichier>`.
   layout legacy, 20 Mo) et `images/image_impulsion.PNG` — le dossier
   `assets/` n'existe plus
 
+Le 08/10/2026, les feuilles de style et polices de `assets/assets_user/`
+ont été restaurées sous `static/vendor/uikit/` pour la reprise du visuel
+legacy (sans aucun JavaScript).
+
 ### Renommés (`git mv`)
 Chaque `*_vue.html` devient `*.html` (11 pages). Les URL des pages
 redeviennent celles du legacy : favoris et liens existants restent valides.
@@ -499,10 +526,100 @@ redeviennent celles du legacy : favoris et liens existants restent valides.
 - `grep` : aucune occurrence de `_vue.html` dans le code ni dans `CLAUDE.md` ;
   aucune référence aux pages ou dossiers supprimés (hors commentaires
   historiques).
-- Les 11 pages, `tokens.css`, les images et tous les modules
+- Les 11 pages, les feuilles de style, les images et tous les modules
   `static/js/**/*.js` répondent HTTP 200 via `/workflow/`.
 - Syntaxe JS (`node --check`) et compilation des templates Vue :
   aucune erreur.
+
+---
+
+## Reprise du visuel legacy (08/10/2026)
+
+### Contexte
+Les pages Vue utilisaient une mise en page Tailwind (sidebar sombre, cartes)
+différente du legacy. **Décision du 08/10/2026 :** les 11 pages reprennent
+exactement le visuel legacy, y compris la vitrine complète de la page de
+connexion (captures de référence fournies par le chef de projet).
+
+### Méthode
+- **CSS legacy d'origine** restauré depuis le tag `pre-bascule-vue`
+  (feuilles de style et polices uniquement, aucun JavaScript) :
+  `static/vendor/uikit/` (bootstrap-material, shreerang-material, uikit,
+  polices d'icônes, perfect-scrollbar.css, flot.css) et `static/css/design.css`.
+- **`<head>` de chaque page** généré à partir du `<head>` legacy de la même
+  page : mêmes feuilles de style, même ordre, mêmes blocs `<style>` inline,
+  même classe `<html>`. Les `<script>` legacy (jQuery, Bootstrap JS, UIKit,
+  amCharts…) sont retirés.
+- **Templates Vue** réécrits avec le balisage legacy (classes, structure,
+  libellés, styles inline). Tailwind et `tokens.css` sont supprimés.
+- Nouveaux composants : `layout/AppLayout.js` (squelette `layout-wrapper`),
+  `layout/NotificationPopup.js` (popup `#popup-nouvelle-demande`),
+  `demandes/ActionCell.js` (cellule de bouton). Les autres composants
+  partagés produisent désormais le balisage legacy.
+- **Comportements du JavaScript legacy repris en Vue** : repli du menu
+  (`layout-collapsed`, clé `localStorage.layoutCollapsed` du legacy),
+  sous-menu « Menu », menu déroulant utilisateur, onglets, modales Bootstrap,
+  accordéon des avis, popup. `static/css/app.css` contient les quelques
+  règles que ce JavaScript appliquait à l'exécution.
+- Comparaison par captures d'écran (Chrome headless), legacy et Vue côte à
+  côte, sur les 10 pages connectées (`testawa`, `testggr`, `introci`) : rendu
+  identique, hors écarts listés ci-dessous. Page de connexion : contrôlée
+  sur les captures de référence (vitrine complète, défilement, formulaire).
+  Aucune erreur JavaScript sur les 11 pages avec les 4 comptes de recette.
+
+### Écarts volontaires avec le legacy
+
+Reproduits page par page, comme dans le legacy (décision du 08/10/2026) :
+- Libellé du sous-menu : « Actions » sur demandes_validation et chat,
+  « Menu » ailleurs. Sur ces deux pages, « Statistiques » garde aussi
+  l'icône cadenas legacy.
+- Boutons « Arrêté » / « Terme » désactivés (grisés) sur demandes_validation
+  (relevé en comparant avec les fichiers legacy de production fournis par
+  le chef de projet).
+
+Harmonisations (le legacy variait d'une page à l'autre) :
+- Barre du haut : nom de l'utilisateur **à droite** sur toutes les pages
+  (9 pages legacy sur 10 ; l'accueil le plaçait à gauche à cause d'une
+  coquille de classe, `navbar-collapSellapse`).
+- Lien « Accueil » partout (« Acceuil » sur une page legacy).
+- Sous-menu : mêmes liens sur toutes les pages, filtrés selon le niveau
+  d'habilitation (logique de l'accueil legacy). Certaines pages legacy
+  omettaient « Historique » ou le lien de validation GGR, ce qui privait
+  certains profils de ces liens.
+
+Textes alignés sur les captures de référence (le tag `pre-bascule-vue` en
+diffère) : hero « WORK FLOW » (« WORK WORK » dans le tag), bouton d'en-tête
+« Se Connecter » (« Login » dans le tag).
+
+Conservés comme dans le legacy, à la demande du chef de projet (08/10/2026) :
+- Liens « Login », « Signup », « FAQ » du menu latéral : ils mènent toujours
+  à des pages inexistantes (404).
+
+Corrections :
+- Tableaux : en-têtes de colonnes de la page GGR alignés sur les données
+  (le legacy affichait « Entité » au-dessus des contreparties).
+- Corrections déjà validées conservées, au style legacy : badge « Nouveau »,
+  popup de notification, tableau récapitulatif et dernier avis ouvert sur la
+  page détail (CORRECTION-08), messages d'erreur (`alert alert-danger`),
+  « Aucune note jointe », « Demande introuvable », bouton désactivé pendant
+  l'envoi (CORRECTION-09 à 12).
+
+Retraits d'ajouts non legacy :
+- Filtres retirés de « Consulter mes demandes » et des deux pages de
+  validation : absents du legacy (ils restent sur l'accueil et l'historique,
+  comme dans le legacy).
+- Bouton « Retour » retiré de la page détail.
+
+Non reproduit (JavaScript legacy non chargé) :
+- Effet « ripple » au clic (material-ripple.js), barre de chargement Pace.
+  Le JavaScript de la vitrine (défilement doux, lien actif, en-tête au
+  défilement, menu mobile, apparition en fondu) est repris en Vue.
+- Barres de défilement PerfectScrollbar : remplacées par un défilement natif
+  à barre fine (même zone, même hauteur).
+
+### Impact fonctionnel
+Visuel identique au legacy. **Changement visible par l'utilisateur** par
+rapport aux pages Vue précédentes.
 
 ---
 
@@ -523,6 +640,10 @@ Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
    échoue, la demande existe sans avis et n'apparaît dans aucune liste.
    L'erreur est désormais affichée ; un endpoint unique côté backend
    éviterait ce cas.
+3. **Lien actif du menu (toutes les pages).** Comme dans le legacy, « Accueil »
+   reste en surbrillance sur toutes les pages et le sous-menu (« Menu » ou
+   « Actions ») est fermé au chargement. À trancher : mettre en surbrillance la page courante
+   et ouvrir le sous-menu qui la contient.
 
 ---
 
@@ -585,15 +706,82 @@ l'utilisateur connecté (pas de `response_model`). Le frontend n'en lit que
 
 Pour les comptes de filiale (`introci`, `dgci`), l'endpoint plante :
 `A value is required for bind parameter 'user_id'` (paramètre SQL non
-fourni). Le tableau de l'accueil affiche un bandeau d'erreur ; les cartes
-de compteurs restent affichées. Même comportement avec le legacy.
+fourni). Le tableau de l'accueil affiche une ligne « Impossible de charger
+les données » ; les cartes de compteurs restent affichées. Le legacy
+affichait un tableau vide.
 
 ### Point 7 — Historique AIG/GGR : `/demandes_cloturer/` en erreur 500
 
-Pour `testggr` (AIG, GGR) : `column a.heure_avis does not exist`. La page
-historique affiche un bandeau d'erreur. `testawa` n'est pas concerné.
+Pour `testggr` (AIG, GGR) : `column a.heure_avis does not exist`. Le tableau
+de l'historique affiche une ligne « Impossible de charger les données ».
+`testawa` n'est pas concerné.
 
 *(Points 6 et 7 identifiés lors de la recette de bascule — 05/10/2026)*
+
+### Point 8 — Adresses sans `.html` et cache des fichiers
+
+**Demande :** afficher `/workflow/acceuil` au lieu de `/workflow/acceuil.html`
+dans la barre d'adresse, comme sur les sites modernes.
+
+**Pourquoi le backend :** `app.mount("/workflow", StaticFiles(...))`
+(`backend/main.py`) ne sert que les noms de fichiers exacts :
+`/workflow/acceuil` répond 404. Masquer `.html` en JavaScript
+(`history.replaceState`) casserait le rechargement, les favoris et les liens
+copiés.
+
+**Code proposé** (à ajouter dans `backend/main.py`, **avant**
+`app.mount("/workflow", ...)`) :
+
+```python
+from pathlib import Path
+from fastapi import HTTPException, Request
+from fastapi.responses import FileResponse, RedirectResponse
+
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
+@app.get("/workflow/", include_in_schema=False)
+async def page_accueil_site():
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+@app.get("/workflow/{page}", include_in_schema=False)
+async def page_sans_extension(page: str, request: Request):
+    query = f"?{request.url.query}" if request.url.query else ""
+    # Anciennes adresses en .html : redirection vers l'adresse propre (favoris conservés)
+    if page.endswith(".html"):
+        return RedirectResponse(f"/workflow/{page[:-5]}{query}", status_code=301)
+    # Adresse propre : on sert le fichier .html correspondant
+    fichier = FRONTEND_DIR / f"{page}.html"
+    if not page.replace("_", "").isalnum() or not fichier.is_file():
+        raise HTTPException(status_code=404)
+    return FileResponse(fichier, headers={"Cache-Control": "no-cache"})
+```
+
+**Effets :**
+- `/workflow/acceuil` sert `acceuil.html` ; l'adresse affichée reste propre.
+- `/workflow/acceuil.html?id_dmd=3` redirige (301) vers
+  `/workflow/acceuil?id_dmd=3` : favoris et liens existants conservés.
+- Un seul segment d'adresse est capté : `static/…` et `images/…` restent
+  servis par le `mount`. Seuls lettres, chiffres et `_` sont acceptés
+  (pas de remontée de dossier).
+- `Cache-Control: no-cache` sur les pages.
+
+**Cache des modules JavaScript (lié) :** le serveur n'envoie aucun en-tête
+`Cache-Control` sur `static/`. Après une livraison, les navigateurs peuvent
+garder les anciens modules `static/js/…` avec les nouvelles pages HTML, et
+la page s'affiche sans mise en forme (constaté en recette le 08/10/2026).
+Proposition : envoyer aussi `Cache-Control: no-cache` sur `/workflow/static/`
+(par exemple via un middleware), pour que le navigateur revalide chaque
+fichier (réponse 304 si inchangé).
+
+**Côté frontend, une fois la route en place :** retirer `.html` de tous les
+liens internes (menu latéral, boutons Détails / CHAT / Modifier / Evaluer,
+redirections après connexion, déconnexion et session expirée), puis
+vérification par grep et captures. Les fichiers restent `*.html` sur le
+disque ; les chemins relatifs `static/…` et `images/…` restent valides.
+**Ne pas modifier les liens avant la mise en place de la route** (ils
+répondraient 404).
+
+*(Demandé par le chef de projet le 08/10/2026)*
 
 ---
 
@@ -603,3 +791,9 @@ historique affiche un bandeau d'erreur. `testawa` n'est pas concerné.
 > lisibilité) doit être soumise au chef de projet **avant** d'être appliquée.
 > Elle sera consignée ici avec statut "Validé" ou "Refusé — comportement
 > legacy conservé".
+
+**Assouplissement du 05/10/2026 :** pour la fin de la migration, les bugs
+évidents (plantages, variables non définies, succès affiché avant la
+vérification de la réponse, code mort) peuvent être corrigés sans validation
+préalable, puis consignés ici comme corrections validées (CORRECTION-09 à 12).
+Les vrais choix fonctionnels vont dans « À confirmer ».

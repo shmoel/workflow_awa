@@ -1,49 +1,33 @@
 /**
  * components/ui/ConfirmModal.js
  *
- * Modale de confirmation générique — composant Vue 3.
+ * Modale de confirmation — balisage Bootstrap identique aux modales legacy
+ * (#confirmationModal : modal-dialog-centered, modal-content modal-shadow,
+ * boutons « btn btn-secondary » / « btn btn-primary »). Affichée par Vue au
+ * lieu de Bootstrap JS.
  *
- * Conçu pour remplacer TOUTES les modales de confirmation du legacy :
- *   - consulter_demandes.html  : "Pourquoi voulez-vous supprimer votre demande ?"
- *                                avec textarea commentaire + bouton Confirmer
- *   - introduire_demandes.html : "Voulez-vous vraiment soumettre le formulaire ?"
- *   - valider_demande.html     : modal DG "avis défavorable, continuer quand même ?"
- *   - Toute future confirmation binaire (OK / Annuler)
+ * Utilisée par :
+ *   - introduire_demandes / modifier_demande : « Voulez-vous vraiment… ? »
+ *   - consulter_demandes : « Pourquoi voulez-vous supprimer votre demande ? »
+ *                          + commentaire
+ *   - ggrg_demandes_validation : « Voulez-vous vraiment cloturer… ? » + commentaire
+ *   - valider_demande : confirmation, et modale DG (OUI / NON + bouton ×)
  *
  * Props :
- *   show        : Boolean       — contrôle l'affichage (v-model:show)
- *   title       : String        — titre de la modale
- *   message     : String        — texte du corps (si pas de slot)
- *   confirmLabel: String        — libellé bouton de confirmation (défaut "Confirmer")
- *   cancelLabel : String        — libellé bouton d'annulation  (défaut "Annuler")
- *   confirmVariant: String      — "danger" | "primary" (défaut "primary")
- *   withComment : Boolean       — si true, affiche un textarea "Commentaire"
- *                                 (pattern consulter_demandes.html)
+ *   show               : Boolean — affichage (v-model:show)
+ *   title              : String  — titre (h5.modal-title)
+ *   message            : String  — corps (si pas de slot)
+ *   confirmLabel       : String  — défaut « Confirmer »
+ *   cancelLabel        : String  — défaut « Annuler »
+ *   withComment        : Boolean — textarea « Commentaire »
+ *   commentPlaceholder : String  — placeholder du textarea
+ *   closable           : Boolean — bouton × en haut à droite (modale DG legacy)
  *
  * Événements :
- *   update:show  — émis avec false quand on ferme la modale
- *   confirm      — émis au clic Confirmer, avec { comment } si withComment=true
- *   cancel       — émis au clic Annuler ou clic en dehors
- *
- * Exemple sans commentaire (soumission de formulaire) :
- *
- *   <ConfirmModal
- *     v-model:show="showModal"
- *     title="Confirmation"
- *     message="Voulez-vous vraiment soumettre le formulaire ?"
- *     @confirm="handleConfirm"
- *   />
- *
- * Exemple avec commentaire (suppression de demande) :
- *
- *   <ConfirmModal
- *     v-model:show="showDelete"
- *     title="Pourquoi voulez-vous supprimer votre demande ?"
- *     confirm-label="Confirmer"
- *     confirm-variant="danger"
- *     :with-comment="true"
- *     @confirm="({ comment }) => supprimerDemande(comment)"
- *   />
+ *   update:show — false à la fermeture
+ *   confirm     — { comment }
+ *   cancel      — bouton d'annulation
+ *   close       — bouton × (closable)
  */
 
 import {
@@ -56,55 +40,32 @@ export default defineComponent({
   name: "ConfirmModal",
 
   props: {
-    show: {
-      type: Boolean,
-      default: false,
-    },
-    title: {
-      type: String,
-      default: "Confirmation",
-    },
-    message: {
-      type: String,
-      default: "",
-    },
-    confirmLabel: {
-      type: String,
-      default: "Confirmer",
-    },
-    cancelLabel: {
-      type: String,
-      default: "Annuler",
-    },
-    /** "danger" = rouge (suppression), "primary" = brand orange (soumission) */
-    confirmVariant: {
-      type: String,
-      default: "primary",
-      validator: (v) => ["primary", "danger"].includes(v),
-    },
-    /** Affiche un textarea pour saisir un commentaire obligatoire */
-    withComment: {
-      type: Boolean,
-      default: false,
-    },
+    show:               { type: Boolean, default: false },
+    title:              { type: String,  default: "Confirmation" },
+    message:            { type: String,  default: "" },
+    confirmLabel:       { type: String,  default: "Confirmer" },
+    cancelLabel:        { type: String,  default: "Annuler" },
+    withComment:        { type: Boolean, default: false },
+    commentPlaceholder: { type: String,  default: "" },
+    closable:           { type: Boolean, default: false },
   },
 
-  emits: ["update:show", "confirm", "cancel"],
+  emits: ["update:show", "confirm", "cancel", "close"],
 
   setup(props, { emit }) {
     const comment = ref("");
 
     // Réinitialise le commentaire à chaque ouverture
-    watch(
-      () => props.show,
-      (val) => {
-        if (val) comment.value = "";
-      }
-    );
+    watch(() => props.show, (val) => { if (val) comment.value = ""; });
+
+    function cancel() {
+      emit("update:show", false);
+      emit("cancel");
+    }
 
     function close() {
       emit("update:show", false);
-      emit("cancel");
+      emit("close");
     }
 
     function confirm() {
@@ -112,118 +73,38 @@ export default defineComponent({
       emit("update:show", false);
     }
 
-    return { comment, close, confirm };
-  },
-
-  computed: {
-    confirmBtnStyle() {
-      return this.confirmVariant === "danger"
-        ? "background: var(--color-status-rejected); color: #fff; border-color: var(--color-status-rejected);"
-        : "background: var(--color-brand); color: #fff; border-color: var(--color-brand);";
-    },
-    confirmBtnHoverStyle() {
-      return this.confirmVariant === "danger"
-        ? "background: #b91c1c;"
-        : "background: var(--color-brand-dark);";
-    },
+    return { comment, cancel, close, confirm };
   },
 
   template: /* html */ `
-    <Transition name="modal-fade">
-      <div
-        v-if="show"
-        class="fixed inset-0 z-50 flex items-center justify-center"
-        style="background: rgba(0,0,0,0.4);"
-        role="dialog"
-        aria-modal="true"
-        :aria-labelledby="'modal-title-' + $.uid"
-        @click.self="close"
-      >
-        <div
-          class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 border-2 overflow-hidden"
-          style="border-color: var(--color-brand-border); font-family: var(--font-family-base);"
-        >
-          <!-- En-tête -->
-          <div
-            class="px-6 py-4 border-b"
-            style="border-color: var(--color-brand-border);"
-          >
-            <h5
-              :id="'modal-title-' + $.uid"
-              class="text-base font-bold m-0"
-              style="color: var(--color-text-primary);"
-            >
-              {{ title }}
-            </h5>
+    <template v-if="show">
+      <div class="modal fade show" tabindex="-1" role="dialog" aria-modal="true"
+           :aria-labelledby="'confirmationModalLabel-' + $.uid">
+          <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content modal-shadow">
+                  <button v-if="closable"
+                          style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:20px; cursor:pointer; color:#333"
+                          @click="close" aria-label="Fermer">×</button>
+                  <div class="modal-header">
+                      <h5 class="modal-title" :id="'confirmationModalLabel-' + $.uid">{{ title }}</h5>
+                  </div>
+                  <div class="modal-body">
+                      <slot>{{ message }}</slot>
+                      <template v-if="withComment">
+                          <label :for="'comm-' + $.uid"><strong>Commentaire</strong></label>
+                          <textarea class='form-control' :id="'comm-' + $.uid" v-model="comment"
+                                    :placeholder="commentPlaceholder || null"></textarea>
+                      </template>
+                  </div>
+                  <div class="clearfix"></div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" @click="cancel">{{ cancelLabel }}</button>
+                      <button type="button" class="btn btn-primary" @click="confirm">{{ confirmLabel }}</button>
+                  </div>
+              </div>
           </div>
-
-          <!-- Corps -->
-          <div class="px-6 py-4">
-            <!-- Slot ou texte simple -->
-            <slot>
-              <p
-                v-if="message"
-                class="text-sm m-0"
-                style="color: var(--color-text-secondary);"
-              >
-                {{ message }}
-              </p>
-            </slot>
-
-            <!-- Textarea commentaire (pattern suppression) -->
-            <div v-if="withComment" :class="message ? 'mt-4' : ''">
-              <label
-                for="modal-comment"
-                class="block text-sm font-semibold mb-1"
-                style="color: var(--color-text-primary);"
-              >
-                Commentaire
-              </label>
-              <textarea
-                id="modal-comment"
-                v-model="comment"
-                rows="3"
-                class="w-full rounded-lg border px-3 py-2 text-sm resize-none
-                       focus:outline-none focus:ring-2 focus:ring-orange-300"
-                style="border-color: var(--color-brand-border);
-                       color: var(--color-text-primary);
-                       font-family: var(--font-family-base);"
-                placeholder="Saisissez un commentaire…"
-              ></textarea>
-            </div>
-          </div>
-
-          <!-- Pied -->
-          <div
-            class="px-6 py-4 flex justify-end gap-3 border-t"
-            style="border-color: var(--color-brand-border);"
-          >
-            <!-- Annuler -->
-            <button
-              @click="close"
-              class="px-5 py-2 rounded-full text-sm font-semibold border-2 transition-colors"
-              style="color: var(--color-text-secondary);
-                     border-color: #d1d5db;
-                     background: #fff;"
-              onmouseover="this.style.background='#f3f4f6';"
-              onmouseout="this.style.background='#fff';"
-            >
-              {{ cancelLabel }}
-            </button>
-
-            <!-- Confirmer -->
-            <button
-              @click="confirm"
-              class="px-5 py-2 rounded-full text-sm font-semibold border-2 transition-colors"
-              :style="confirmBtnStyle"
-              @mouseover="$event.target.style.cssText = confirmBtnStyle + confirmBtnHoverStyle"
-              @mouseout="$event.target.style.cssText = confirmBtnStyle"
-            >
-              {{ confirmLabel }}
-            </button>
-          </div>
-        </div>
       </div>
-    </Transition>
+      <div class="modal-backdrop fade show"></div>
+    </template>
   `,
 });
