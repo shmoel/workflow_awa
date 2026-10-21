@@ -12,8 +12,9 @@ par le chef de projet.
 
 - **Migration terminée** : les 11 pages sont en Vue 3 (hébergé localement, modules ES6) ;
   le legacy n'existe plus que dans le tag git `pre-bascule-vue`.
-- **Visuel identique au legacy** : CSS legacy d'origine, balisage legacy,
-  plus de Tailwind (voir « Reprise du visuel legacy »).
+- **Visuel identique au legacy, en Tailwind** : depuis le 20/10/2026, le CSS
+  legacy est remplacé par des classes Tailwind (Play CDN 3.4.17, copie locale
+  de secours) ; rendu comparé au pixel près (voir « Passage à Tailwind »).
 - **Corrections** : CORRECTION-01 à 13, toutes validées.
 - **Améliorations techniques (13/10/2026)** : documentation hors du dossier
   servi, bibliothèques hébergées localement, CSS allégé, session alignée
@@ -27,6 +28,7 @@ par le chef de projet.
 - Bascule finale (05/10/2026) — suppression du legacy, renommage des pages
 - Reprise du visuel legacy (08/10/2026)
 - Améliorations techniques (13/10/2026) — documentation, bibliothèques locales, CSS, session
+- Passage à Tailwind (20/10/2026) — Play CDN figé, secours local, rendu identique au legacy
 - À confirmer — choix fonctionnels en attente de décision
 - Points ouverts backend — à traiter par l'équipe backend
 
@@ -718,6 +720,64 @@ et renvoyait vers la connexion (CORRECTION-02). `TOKEN_TTL_MS` passe à
 30 min : au-delà, la redirection vers `index.html` a lieu dès l'ouverture
 de la page. Durée de session inchangée pour l'utilisateur ; voir aussi le
 point ouvert backend 11.
+
+---
+
+## Passage à Tailwind (20/10/2026)
+
+### Décision
+Le CSS legacy (UIKit / Bootstrap 4 material, Bootstrap 5 pour la vitrine) est
+remplacé par **Tailwind CSS via le Play CDN, version figée 3.4.17**, en
+conservant à l'identique le design des pages legacy. Vue reste hébergé
+localement (3.5.43). Le CDN Tailwind est la seule ressource externe.
+
+### Méthode
+- Styles réels relevés dans Chrome sur le legacy (couleurs, tailles, marges,
+  polices, états au survol / focus), traduits en classes Tailwind.
+- Legacy et version Tailwind servis côte à côte (même backend), captures
+  comparées au pixel pour les 11 pages avec `testawa`, `testggr` et `introci`,
+  ainsi que les onglets, modales, menu replié, menu utilisateur, survols et
+  écrans de 1000, 800, 760, 560 et 400 px.
+- Résultat : 0,00 % de pixels différents sur toutes les pages, sauf
+  introduire_demandes (0,04 %) et valider_demande (0,01 %) : arrondis
+  sous-pixel et anticrénelage, invisibles. Aucune erreur JavaScript.
+
+### Fichiers
+- Ajoutés : `static/js/tailwind.config.js` (couleurs, tailles de texte,
+  points de rupture Bootstrap, animation du hero), `components/ui/classes.js`
+  (boutons, tableaux, onglets, modales, champs, messages),
+  `components/demandes/DemandesCard.js` et `TabsCard.js` (cartes communes),
+  `static/vendor/tailwindcss/tailwindcss-play-3.4.17.js` (secours local).
+- Supprimés : `static/css/` (`app.css`, `design.css`, `pages-*.css`),
+  `static/vendor/uikit/css/`, `static/vendor/bootstrap/` (Bootstrap 5) et les
+  blocs `<style>` inline (chat, vitrine). Polices d'icônes conservées.
+- `ConfirmModal` / `InfoModal` : prop `variant` (« design » = coins arrondis
+  et ombre des pages qui chargeaient `design.css` : validation GGR, modifier).
+
+### Effets propres au Play CDN
+- **Disponibilité** : si `cdn.tailwindcss.com` ne répond pas (constaté en
+  test), la copie locale du même script est chargée ; rendu identique.
+  Pour éviter une erreur JavaScript, `tailwind.config.js` ne s'applique que si
+  le script est présent.
+- **Défilement du chat** : le CSS est généré juste après l'insertion des
+  messages ; le défilement vers le dernier message attend désormais que la
+  zone ait sa hauteur fixe (ChatPage, `scrollToBottom`). Sans cela, le chat
+  restait en haut de la conversation.
+- **Transitions au chargement** : les éléments animés (flèches de
+  l'accordéon des avis, par exemple) jouent leur transition une fois à
+  l'ouverture de la page (≈ 0,3 s). Le legacy ne le faisait pas.
+- **Console** : avertissement « cdn.tailwindcss.com should not be used in
+  production », émis par le script Tailwind lui-même. Tailwind déconseille le
+  Play CDN en production ; alternative sans Node : Tailwind CLI autonome
+  générant un fichier CSS statique.
+
+### Fidélité volontaire
+Les défauts visuels du legacy sont reproduits (ex. message d'erreur
+`alert-danger` en texte blanc sur fond rose pâle, titre vide de
+modifier_demande, liens Login / Signup / FAQ du menu latéral).
+
+### Impact fonctionnel
+Aucun changement visible par l'utilisateur.
 
 ---
 

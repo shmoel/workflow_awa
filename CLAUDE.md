@@ -23,15 +23,21 @@ API docs at `http://127.0.0.1:8000/docs`.
 ## Technical constraints (strict)
 
 - **Vue 3 hosted locally** — `frontend/static/vendor/vue/vue.esm-browser.prod.js` (3.5.43, mapped to `"vue"` by
-  each page's importmap); modules import `from "vue"`. No CDN (unpkg, jsdelivr, Google Fonts…), no Node.js,
-  npm, Vite, Webpack, React, or any build tool
+  each page's importmap); modules import `from "vue"`. No Node.js, npm, Vite, Webpack, React, or any build tool
 - **ES6 native modules** — components live in separate `.js` files, imported with `type="module"`
-- **Legacy CSS, no Tailwind** — the UI must look exactly like the legacy pages (decision of 08/10/2026).
-  Each page `<head>` reuses its legacy stylesheets and `<style>` blocks (blocks shared by several pages live in
-  `static/css/pages-*.css`, linked at the block's original position; page-specific ones stay inline; unused
-  icon fonts are removed: check `font-family` and icon classes before re-adding one); templates reproduce the
-  legacy markup (UIKit / Bootstrap 4 material classes). No legacy JavaScript (jQuery, Bootstrap JS): its
-  runtime behaviour is reimplemented in Vue, plus `frontend/static/css/app.css`
+- **Tailwind via the Play CDN, version pinned to 3.4.17** (decision of 20/10/2026) — the only CDN allowed.
+  Every page `<head>` loads `https://cdn.tailwindcss.com/3.4.17`, then a local fallback of the same script
+  (`static/vendor/tailwindcss/tailwindcss-play-3.4.17.js`, written only if `window.tailwind` is missing), then
+  `static/js/tailwind.config.js`. Copy the `<head>` of an existing page; never use `cdn.tailwindcss.com` without a
+  version
+- **Legacy look, in Tailwind classes** — the UI must look exactly like the legacy pages (pixel comparison).
+  No CSS file of our own: styles are Tailwind classes in the templates. Shared values live in
+  `static/js/tailwind.config.js` (colours, Bootstrap breakpoints 576/768/992/1200/1400, legacy font sizes) and
+  shared class lists in `static/js/components/ui/classes.js` (buttons, tables, tabs, modals, form fields,
+  alerts). Caution: `text-base` is the legacy body size (14.304px) — use `text-[1rem]` for 16px (index.html).
+  The Play CDN builds CSS from the classes present in the DOM, so classes may be composed in JavaScript.
+  Only the icon fonts in use are loaded (feather, ionicons, bootstrap-icons): check icon classes before
+  re-adding one. No legacy JavaScript (jQuery, Bootstrap JS): its runtime behaviour is reimplemented in Vue
 - Page components in `frontend/static/js/pages/`, reusable components in `frontend/static/js/components/`
 
 ## Frontend rules
@@ -87,10 +93,11 @@ Centralisation et validation des demandes d'autorisation d'opérations bancaires
 ```
 docs/
   CHANGELOG_REFACTORING.md         # Behavior changes vs legacy, open points (not served)
-  licences/                        # Licences of the vendored libraries
+  licences/                        # Licences of the vendored libraries (Vue, Tailwind, Bootstrap Icons, Poppins)
 frontend/                          # Served as-is under /workflow (browser files only)
-  *.html                           # One shell per page: legacy <head> (stylesheets + inline <style>),
-                                   # importmap, mounts static/js/pages/<Page>.js on #app
+  *.html                           # One shell per page: icon fonts, Tailwind (CDN + fallback + config),
+                                   # importmap, <body> classes (background, font), mounts
+                                   # static/js/pages/<Page>.js on #app
     index.html                     #   LoginPage — legacy showcase page with login section
     acceuil.html                   #   AccueilPage — dashboard
     introduire_demandes.html       #   IntroduireDemandePage
@@ -105,16 +112,12 @@ frontend/                          # Served as-is under /workflow (browser files
   images/                          # sib_logo.PNG, avatar.png
   static/
     vendor/vue/                    # vue.esm-browser.prod.js 3.5.43 (npm package, licence in docs/licences/)
-    vendor/uikit/                  # Legacy CSS (bootstrap-material, shreerang-material, uikit) + the only
-                                   # icon fonts in use: feather, ionicons
+    vendor/tailwindcss/            # Play CDN script 3.4.17 — local fallback if the CDN does not answer
+    vendor/uikit/fonts/            # Icon fonts in use: feather, ionicons (legacy UIKit files)
     vendor/bootstrap-icons/        # Bootstrap Icons 1.11.1 (css + fonts)
-    vendor/bootstrap/              # Bootstrap 5.3.0 CSS (index.html only)
     vendor/poppins/                # Poppins font, local @font-face (index.html only)
-    css/design.css                 # Legacy design.css (modal shadow)
-    css/pages-demandes.css         # Legacy <style> shared by 7 pages (body, .chat-container)
-    css/pages-tableau-bord.css     # Legacy <style> shared by acceuil + historique (cards, tables…)
-    css/app.css                    # What legacy JS did at runtime: popup, modals, sidebar, scroll areas
     js/
+      tailwind.config.js           # Shared Tailwind config: legacy colours, font sizes, breakpoints
       services/
         api.js                     # fetch wrapper with Bearer token, 401 → index.html
         auth.js                    # login, logout (redirects to index.html), token storage
@@ -125,9 +128,11 @@ frontend/                          # Served as-is under /workflow (browser files
       components/
         layout/                    # AppLayout (legacy layout-wrapper), AppSidebar, AppNavbar,
                                    # AppFooter, NotificationPopup
-        demandes/                  # StatCard, DemandeFilters, DemandesTable (+ ActionCell),
+        demandes/                  # StatCard, DemandeFilters, DemandesTable (+ ActionCell, themes
+                                   # "dashboard" / "demandes"), DemandesCard, TabsCard,
                                    # AvisTimeline, DemandeForm
-        ui/                        # ConfirmModal, InfoModal
+        ui/                        # ConfirmModal, InfoModal (variant "material" / "design"),
+                                   # classes.js (shared Tailwind class lists)
       pages/                       # One file per page: AccueilPage.js, etc.
 ```
 
