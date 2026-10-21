@@ -45,6 +45,9 @@ API docs at `http://127.0.0.1:8000/docs`.
 - `frontend/` is served publicly under `/workflow`: put only browser files there (no .md, .txt, .sql,
   backups); documentation goes in `docs/`
 - Propose a plan before any significant change
+- The `.html` pages stay at the root of `frontend/` (their URLs and users' bookmarks depend on it). Any
+  reorganisation of the pages (sub-folders, URLs without `.html`) will be done together with backend open
+  point 8 (clean URLs, `docs/CHANGELOG_REFACTORING.md`), never before
 
 ## Domain: Workflow AWA (demandes CIB / CDCF)
 
