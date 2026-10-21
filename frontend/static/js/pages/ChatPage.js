@@ -43,6 +43,11 @@ import { useCurrentUser }           from "../composables/useCurrentUser.js";
 import { useNotificationPolling }   from "../composables/useNotificationPolling.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
+import { ALERT_DANGER, LINK } from "../components/ui/classes.js";
+
+// En-tête du chat : libellé gris en capitales, valeur en gras (ex-.info-label / .info-value)
+const INFO_LABEL = "text-[0.75rem] font-medium uppercase tracking-[0.05em] text-[#64748b]";
+const INFO_VALUE = "text-[0.875rem] font-semibold text-[#1e293b]";
 
 /**
  * Lit ?id_dmd dans l'URL. Retourne null s'il est absent ou n'est pas
@@ -80,6 +85,10 @@ export default defineComponent({
 
     async function scrollToBottom() {
       await nextTick();
+      // Le Play CDN Tailwind génère le CSS des nouveaux éléments après leur
+      // insertion : on attend deux images pour que la zone ait sa hauteur
+      // fixe (300 px) avant de défiler jusqu'au dernier message.
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       if (listEl.value) listEl.value.scrollTop = listEl.value.scrollHeight;
     }
 
@@ -154,95 +163,99 @@ export default defineComponent({
       listEl,
       isMine,
       send,
+      ALERT_DANGER, LINK, INFO_LABEL, INFO_VALUE,
     };
   },
 
   template: /* html */ `
     <AppLayout :polling="polling" menu-label="Actions">
-            <div class="row">
+            <div class="flex flex-wrap -mx-3 min-h-px">
 
             </div>
-            <div class="row">
+            <div class="flex flex-wrap -mx-3 min-h-px">
 
             </div>
-            <div class="row">
-                <div class="col-xl-2"></div>
-                <div class="col-xl-8">
+            <div class="flex flex-wrap -mx-3 min-h-px">
+                <div class="relative w-full xl:w-1/6 px-3"></div>
+                <div class="relative w-full xl:w-2/3 px-3">
 
-                    <div v-if="notFound" class="alert alert-danger mt-3" role="alert">
+                    <div v-if="notFound" :class="ALERT_DANGER" role="alert">
                         Demande introuvable : l'identifiant est absent, invalide ou ne correspond à aucune demande.
-                        <a href="acceuil.html">Retour à l'accueil</a>
+                        <a href="acceuil.html" :class="LINK">Retour à l'accueil</a>
                     </div>
 
-                    <div v-else-if="error" class="alert alert-danger mt-3" role="alert">
+                    <div v-else-if="error" :class="ALERT_DANGER" role="alert">
                         Erreur lors du chargement de la conversation : {{ error }}
                     </div>
 
-                    <div v-else-if="demande" class="chat-container">
-                        <div class="chat-header">
-                            <h1>🏦 Chat Demandes Bancaires <span class="info-value">###DEM-{{ demande.categorie_demande }}-{{ demande.id_demande }}</span></h1>
+                    <div v-else-if="demande">
+                        <div class="flex items-center justify-between p-4 text-white bg-[#ea580c] shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+                            <h1 class="mb-4 text-[1.25rem] font-semibold leading-[1.1]">🏦 Chat Demandes Bancaires <span class="text-[0.875rem] text-[#1e293b]">###DEM-{{ demande.categorie_demande }}-{{ demande.id_demande }}</span></h1>
                         </div>
 
-                        <div class="request-header">
-                            <div class="request-info">
-                                <div class="info-item">
-                                    <span class="info-label">Banque</span>
-                                    <span class="info-value">{{ demande.banque_user }}</span>
+                        <div class="p-4 bg-[#f8fafc] border-b border-[#e2e8f0]">
+                            <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mb-2">
+                                <div class="flex flex-col gap-1">
+                                    <span :class="INFO_LABEL">Banque</span>
+                                    <span :class="INFO_VALUE">{{ demande.banque_user }}</span>
                                 </div>
-                                <div class="info-item">
-                                    <span class="info-label">Client</span>
-                                    <span class="info-value">{{ demande.nom_client }}</span>
+                                <div class="flex flex-col gap-1">
+                                    <span :class="INFO_LABEL">Client</span>
+                                    <span :class="INFO_VALUE">{{ demande.nom_client }}</span>
                                 </div>
-                                <div class="info-item">
-                                    <span class="info-label">Type de demande</span>
-                                    <span class="info-value">{{ demande.type_demande }}</span>
+                                <div class="flex flex-col gap-1">
+                                    <span :class="INFO_LABEL">Type de demande</span>
+                                    <span :class="INFO_VALUE">{{ demande.type_demande }}</span>
                                 </div>
-                                <div class="info-item">
-                                    <span class="info-label">Montant</span>
-                                    <span class="info-value">{{ demande.montant }} XOF</span>
+                                <div class="flex flex-col gap-1">
+                                    <span :class="INFO_LABEL">Montant</span>
+                                    <span :class="INFO_VALUE">{{ demande.montant }} XOF</span>
                                 </div>
-                                <div class="info-item">
-                                    <span class="info-label">Statut</span>
-                                    <span class="request-status status-processing">{{ demande.description }}</span>
+                                <div class="flex flex-col gap-1">
+                                    <span :class="INFO_LABEL">Statut</span>
+                                    <span class="px-3 py-1 text-[0.75rem] font-medium uppercase text-[#1e40af] bg-[#dbeafe] rounded-full">{{ demande.description }}</span>
                                 </div>
-                                <div class="info-item">
-                                    <span class="info-label">Date d'introduction</span>
-                                    <span class="info-value">{{ demande.date_creation }}</span>
+                                <div class="flex flex-col gap-1">
+                                    <span :class="INFO_LABEL">Date d'introduction</span>
+                                    <span :class="INFO_VALUE">{{ demande.date_creation }}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="chat-messages" ref="listEl">
-                            <div v-if="!messages.length" class="empty-state"></div>
+                        <div class="h-[300px] p-4 overflow-auto bg-[#f1f5f9]" ref="listEl">
+                            <div v-if="!messages.length" class="mt-8 text-center italic text-[#64748b]"></div>
                             <div v-for="(msg, i) in messages" :key="i"
-                                 class="message" :class="isMine(msg) ? 'user-message' : 'bot-message'">
-                                <span class="message-avatar">{{ isMine(msg) ? 'V' : (msg.username || 'B').charAt(0) }}</span>
-                                <div class="sender">{{ isMine(msg) ? 'Vous' : (msg.username || 'BanqueBot') }}</div>
+                                 class="relative max-w-[80%] mb-[15px] px-[15px] py-3 rounded-[8px]"
+                                 :class="isMine(msg) ? 'ml-auto text-white bg-[#ea580c] rounded-br-none'
+                                                    : 'mr-auto text-[#333] bg-white border border-[#ddd] rounded-bl-none'">
+                                <span class="flex items-center justify-center shrink-0 w-8 h-8 text-[0.875rem] font-semibold text-white bg-[#ea580c] rounded-full">{{ isMine(msg) ? 'V' : (msg.username || 'B').charAt(0) }}</span>
+                                <div class="mb-[5px] text-[0.9em] font-bold text-[#333]">{{ isMine(msg) ? 'Vous' : (msg.username || 'BanqueBot') }}</div>
                                 <div>{{ msg.commentaire }}</div>
-                                <div class="timestamp">{{ msg.date_creation }} {{ msg.heure_creation }}</div>
+                                <div>{{ msg.date_creation }} {{ msg.heure_creation }}</div>
                             </div>
                         </div>
 
-                        <div class="chat-input">
+                        <div class="flex items-center gap-3 p-4 bg-white border-t border-[#e2e8f0]">
                             <input
                                 type="text"
-                                class="message-input"
+                                class="flex-1 px-4 py-3 text-[0.875rem] text-black bg-white border border-[#e2e8f0] rounded-[1.5rem] outline-none transition-[border-color] duration-200 placeholder:text-[#757575] focus:border-[#ea580c]"
                                 v-model="draft"
                                 placeholder="Répondre ..."
                                 @keydown.enter.prevent="send"
                             >
-                            <button class="send-btn" :disabled="sending" @click="send">{{ sending ? 'Envoi...' : 'Envoyer' }}</button>
+                            <button class="px-6 py-3 text-[0.875rem] font-medium text-white bg-[#ea580c] rounded-[1.5rem] cursor-pointer transition-[background-color] duration-200 hover:bg-[#c2410c] disabled:bg-[#9ca3af] disabled:cursor-not-allowed"
+                                    :disabled="sending" @click="send">{{ sending ? 'Envoi...' : 'Envoyer' }}</button>
                         </div>
-                        <div v-if="sendError" class="alert alert-danger m-3" role="alert">
+                        <div v-if="sendError" :class="ALERT_DANGER + ' mx-4'" role="alert">
                             Erreur lors de l'envoi du message : {{ sendError }}
                         </div>
                     </div>
 
                 </div>
-                <div class="col-xl-2"></div>
+                <div class="relative w-full xl:w-1/6 px-3"></div>
 
             </div>
-            <div class="row"></div>
+            <div class="flex flex-wrap -mx-3 min-h-px"></div>
     </AppLayout>
   `,
 });

@@ -32,7 +32,8 @@ import { useNotificationPolling } from "../composables/useNotificationPolling.js
 import AppLayout from "../components/layout/AppLayout.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable  from "../components/demandes/DemandesTable.js";
-import DemandeFilters from "../components/demandes/DemandeFilters.js";
+import DemandesCard   from "../components/demandes/DemandesCard.js";
+import { BTN }        from "../components/ui/classes.js";
 
 function goToDetail(id) {
   window.location.href = `detail_consulter_demande.html?id_dmd=${id}`;
@@ -69,7 +70,7 @@ const EMPTY_FILTERS = { banque: "", entite: "", type: "", contrepartie: "", date
 export default defineComponent({
   name: "HistoriquePage",
 
-  components: { AppLayout, DemandesTable, DemandeFilters, ActionCell },
+  components: { AppLayout, DemandesTable, DemandesCard, ActionCell },
 
   setup() {
     const user    = useCurrentUser();
@@ -133,47 +134,25 @@ export default defineComponent({
       filterFields: FILTER_FIELDS,
       columns:      COLUMNS,
       goToDetail,
+      BTN,
     };
   },
 
   template: /* html */ `
     <AppLayout :polling="polling">
-        <div class="container-fluid flex-grow-1 container-p-y">
+        <div class="flex-grow px-4 lg:px-8 py-6">
 
-            <div class="row">
+            <div class="flex flex-wrap -mx-3">
 
-                <div style="height: 310px" id="tasks-inner"></div>
+                <div class="h-[310px]" id="tasks-inner"></div>
 
-                <div class="col-xl-12">
-                    <div class="card mb-4">
-
-                        <div class="card-header with-elements pb-0">
-                            <DemandeFilters :fields="filterFields" v-model="filters" />
-                            <div class="card-header-elements ml-auto p-0">
-                                <ul class="nav nav-tabs">
-                                    <li class="nav-item" id="dmd-intro">
-                                        <a class="nav-link active" href="javascript:">Demandes Cloturees</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="nav-tabs-top">
-                            <div class="tab-content">
-                                <div class="tab-pane fade show active" id="demande-intro">
-                                    <div style="height: 330px" id="tab-table-1">
-                                        <DemandesTable :rows="filteredRows" :columns="columns" :action-headers="2" :error="errorTable">
-                                            <template #actions="{ row }">
-                                                <ActionCell btn-class="btn btn-glow-info btn-info" label="Détails" @click="goToDetail(row.id_demande)" />
-                                            </template>
-                                        </DemandesTable>
-                                    </div>
-                                    <a href="javascript:" class="card-footer d-block text-center text-dark small font-weight-semibold"></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <DemandesCard tab-label="Demandes Cloturees" :fields="filterFields" v-model="filters">
+                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="errorTable">
+                        <template #actions="{ row }">
+                            <ActionCell :btn-class="BTN.outlineBrand" label="Détails" @click="goToDetail(row.id_demande)" />
+                        </template>
+                    </DemandesTable>
+                </DemandesCard>
             </div>
 
         </div>

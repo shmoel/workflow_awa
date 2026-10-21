@@ -3,7 +3,7 @@
  *
  * Popup « Nouvelle demande à valider ! » — balisage et styles inline
  * identiques au legacy (#popup-nouvelle-demande, tableau généré par
- * showPopupDemandesList()). CSS dans static/css/app.css.
+ * showPopupDemandesList()). Styles en classes Tailwind (ex-CSS legacy de #popup-nouvelle-demande).
  *
  * Props :
  *   polling : objet renvoyé par useNotificationPolling() { show, newDemandes, dismiss }
@@ -29,9 +29,9 @@ export default defineComponent({
   },
 
   template: /* html */ `
-    <div v-if="show" id="popup-nouvelle-demande" style="display: block;">
-        <div class="popup-content">
-            <div class="popup-title">Nouvelle demande à valider !</div>
+    <div v-if="show" id="popup-nouvelle-demande" class="fixed inset-0 z-popup bg-[rgba(0,0,0,0.35)]">
+        <div class="max-w-[400px] mx-auto my-[120px] pt-8 px-6 pb-6 text-center bg-white border-2 border-brand rounded-[18px] shadow-[0_8px_32px_#ea580c33]">
+            <div class="mb-3 text-[1.4rem] font-bold text-brand">Nouvelle demande à valider !</div>
             <div id="popup-demande-details" style="margin-bottom:10px;">
                 <table style="width:100%;border-collapse:collapse;text-align:left;">
                     <thead>
@@ -54,7 +54,7 @@ export default defineComponent({
                     </tbody>
                 </table>
             </div>
-            <button class="popup-btn" @click="dismiss()">OK</button>
+            <button class="mt-[18px] px-7 py-2 text-[1.1rem] font-semibold text-white bg-brand rounded-[20px] shadow-[0_2px_8px_#ea580c22] cursor-pointer hover:bg-brand-hover" @click="dismiss()">OK</button>
         </div>
     </div>
   `,

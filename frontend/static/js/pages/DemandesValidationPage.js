@@ -43,6 +43,8 @@ import { useNotificationPolling }     from "../composables/useNotificationPollin
 import AppLayout from "../components/layout/AppLayout.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
+import TabsCard  from "../components/demandes/TabsCard.js";
+import { BTN }   from "../components/ui/classes.js";
 
 // ---------------------------------------------------------------------------
 // Navigation
@@ -83,18 +85,25 @@ const COLS_FIN = [
   { key: "date_val",          label: "Date / Heure" },
   { key: "_etat",             label: "Etat",
     button: (row) => row.max_event === 9
-      ? { cls: "btn btn-danger",  label: "Arrêté", disabled: true }
-      : { cls: "btn btn-default", label: "Terme",  disabled: true } },
+      ? { cls: BTN.danger,  label: "Arrêté", disabled: true }
+      : { cls: BTN.default, label: "Terme",  disabled: true } },
 ];
 
 // ---------------------------------------------------------------------------
 // Composant page
 // ---------------------------------------------------------------------------
 
+/** Onglets de la carte (identifiants de volet legacy) */
+const TABS = [
+  { key: "intro", label: "Demandes Introduites",            paneId: "demande-intro" },
+  { key: "valid", label: "Demandes en validation",          paneId: "demande-val" },
+  { key: "fin",   label: "Demandes en fin de de processus", paneId: "demande-fin-process" },
+];
+
 export default defineComponent({
   name: "DemandesValidationPage",
 
-  components: { AppLayout, DemandesTable, ActionCell },
+  components: { AppLayout, DemandesTable, TabsCard, ActionCell },
 
   setup() {
     const user    = useCurrentUser();
@@ -188,75 +197,44 @@ export default defineComponent({
       goToEvaluer,
       goToDetail,
       goToChat,
+      tabs: TABS,
+      BTN,
     };
   },
 
   template: /* html */ `
     <AppLayout :polling="polling" menu-label="Actions">
-        <div class="container-fluid flex-grow-1 container-p-y">
-            <h4 class="font-weight-bold py-3 mb-0">MES DEMANDES</h4>
+        <div class="flex-grow px-4 lg:px-8 py-6">
+            <h4 class="py-4 mb-0 text-h4 font-bold">MES DEMANDES</h4>
 
-            <div class="row">
+            <div class="flex flex-wrap -mx-3">
 
-                <div style="height: 310px" id="tasks-inner"></div>
+                <div class="h-[310px]" id="tasks-inner"></div>
 
-                <div class="col-xl-12">
-                    <div class="card mb-4">
-                        <div class="card-header with-elements pb-0">
-                            <h6 class="card-header-title mb-0"></h6>
-                            <div class="card-header-elements ml-auto p-0">
-                                <ul class="nav nav-tabs">
-                                    <li class="nav-item">
-                                        <a class="nav-link" :class="{ active: activeTab === 'intro' }" href="javascript:" @click="activeTab = 'intro'">Demandes Introduites</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" :class="{ active: activeTab === 'valid' }" href="javascript:" @click="activeTab = 'valid'">Demandes en validation</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" :class="{ active: activeTab === 'fin' }" href="javascript:" @click="activeTab = 'fin'">Demandes en fin de de processus</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="nav-tabs-top">
-                            <div class="tab-content">
-
-                                <div class="tab-pane fade" :class="{ 'show active': activeTab === 'intro' }" id="demande-intro">
-                                    <div style="height: 330px" id="tab-table-1">
-                                        <DemandesTable :rows="filteredIntro" :columns="colsIntroValid" :action-headers="1" :error="errorIntro">
-                                            <template #actions="{ row }">
-                                                <ActionCell btn-class="btn btn-info" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
-                                            </template>
-                                        </DemandesTable>
-                                    </div>
-                                    <a href="javascript:" class="card-footer d-block text-center text-dark small font-weight-semibold"></a>
-                                </div>
-                                <div class="tab-pane fade" :class="{ 'show active': activeTab === 'valid' }" id="demande-val">
-                                    <div style="height: 330px" id="tab-table-2">
-                                        <DemandesTable :rows="filteredValid" :columns="colsIntroValid" :action-headers="1" :error="errorValid">
-                                            <template #actions="{ row }">
-                                                <ActionCell btn-class="btn btn-dark" label="Détails" @click="goToDetail(row.id_demande)" />
-                                                <ActionCell btn-class="btn btn-glow-info btn-info" label="CHAT" @click="goToChat(row.id_demande)" />
-                                            </template>
-                                        </DemandesTable>
-                                    </div>
-                                    <a href="javascript:" class="card-footer d-block text-center text-dark small font-weight-semibold"></a>
-                                </div>
-                                <div class="tab-pane fade" :class="{ 'show active': activeTab === 'fin' }" id="demande-fin-process">
-                                    <div style="height: 330px" id="tab-table-3">
-                                        <DemandesTable :rows="filteredFin" :columns="colsFin" :error="errorFin">
-                                            <template #actions="{ row }">
-                                                <ActionCell btn-class="btn btn-dark" label="Détails" @click="goToDetail(row.id_demande)" />
-                                            </template>
-                                        </DemandesTable>
-                                    </div>
-                                    <a href="javascript:" class="card-footer d-block text-center text-dark small font-weight-semibold"></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <TabsCard :tabs="tabs" v-model="activeTab">
+                    <template #intro>
+                        <DemandesTable theme="demandes" :rows="filteredIntro" :columns="colsIntroValid" :action-headers="1" :error="errorIntro">
+                            <template #actions="{ row }">
+                                <ActionCell :btn-class="BTN.info" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
+                            </template>
+                        </DemandesTable>
+                    </template>
+                    <template #valid>
+                        <DemandesTable theme="demandes" :rows="filteredValid" :columns="colsIntroValid" :action-headers="1" :error="errorValid">
+                            <template #actions="{ row }">
+                                <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
+                                <ActionCell :btn-class="BTN.glowInfo" label="CHAT" @click="goToChat(row.id_demande)" />
+                            </template>
+                        </DemandesTable>
+                    </template>
+                    <template #fin>
+                        <DemandesTable theme="demandes" :rows="filteredFin" :columns="colsFin" :error="errorFin">
+                            <template #actions="{ row }">
+                                <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
+                            </template>
+                        </DemandesTable>
+                    </template>
+                </TabsCard>
             </div>
 
         </div>

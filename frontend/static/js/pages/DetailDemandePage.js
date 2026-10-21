@@ -36,6 +36,7 @@ import { useNotificationPolling } from "../composables/useNotificationPolling.js
 import AppLayout from "../components/layout/AppLayout.js";
 import AvisTimeline     from "../components/demandes/AvisTimeline.js";
 import { formatNumber } from "../components/demandes/DemandesTable.js";
+import { BTN, SHEET, ALERT_DANGER, LINK } from "../components/ui/classes.js";
 
 /**
  * Lit ?id_dmd dans l'URL. Retourne null s'il est absent ou n'est pas
@@ -149,53 +150,54 @@ export default defineComponent({
       noteHref,
       dateSoumission,
       infos,
+      BTN, SHEET, ALERT_DANGER, LINK,
     };
   },
 
   template: /* html */ `
     <AppLayout :polling="polling">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="row no-gutters row-bordered row-border-light h-100">
-                    <div class="container">
+        <div class="flex flex-wrap -mx-3">
+            <div class="relative w-full px-3">
+                <div class="flex flex-wrap h-full overflow-hidden">
+                    <div class="w-full px-8">
 
-                        <div v-if="notFound" class="alert alert-danger mt-3" role="alert">
+                        <div v-if="notFound" :class="ALERT_DANGER" role="alert">
                             Demande introuvable : l'identifiant est absent, invalide ou ne correspond à aucune demande.
-                            <a href="acceuil.html">Retour à l'accueil</a>
+                            <a href="acceuil.html" :class="LINK">Retour à l'accueil</a>
                         </div>
 
-                        <div v-else-if="error" class="alert alert-danger mt-3" role="alert">
+                        <div v-else-if="error" :class="ALERT_DANGER" role="alert">
                             Erreur lors du chargement de la demande : {{ error }}
                         </div>
 
                         <template v-else-if="demande">
-                            <button v-if="noteHref" type="button" class="btn btn-outline-primary"><a :href="noteHref" target="_blank" rel="noopener">Télécharger la note d'informations</a></button>
-                            <button v-else type="button" class="btn btn-outline-primary" disabled>Aucune note jointe</button>
+                            <button v-if="noteHref" type="button" :class="BTN.outlinePrimary"><a :href="noteHref" target="_blank" rel="noopener" :class="LINK">Télécharger la note d'informations</a></button>
+                            <button v-else type="button" :class="BTN.outlinePrimary" disabled>Aucune note jointe</button>
 
-                            <div class="card-body">
-                                <table class="table card-table">
+                            <div class="p-6">
+                                <table :class="SHEET.table">
                                     <thead>
                                         <tr>
-                                            <th></th>
-                                            <th></th>
+                                            <th :class="SHEET.th"></th>
+                                            <th :class="SHEET.th"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr v-for="info in infos" :key="info.label">
-                                            <td class='align-center'>
-                                                <div class='media-body align-self-center ml-3'>
-                                                <strong> {{ info.label }} </strong>
+                                            <td :class="SHEET.td">
+                                                <div :class="SHEET.cell">
+                                                <strong :class="SHEET.label"> {{ info.label }} </strong>
                                                 </div>
                                             </td>
-                                            <td class='align-center'>
-                                                <div class='media-body align-self-center ml-3'>
-                                                <h6 class='mb-0'> {{ info.value }} </h6>
+                                            <td :class="SHEET.td">
+                                                <div :class="SHEET.cell">
+                                                <h6 :class="SHEET.value"> {{ info.value }} </h6>
                                                 </div>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div id="detail_commentaire" class="col-xl-12">
+                                <div id="detail_commentaire" class="relative px-3">
                                     <AvisTimeline :avis="avis" />
                                 </div>
                             </div>

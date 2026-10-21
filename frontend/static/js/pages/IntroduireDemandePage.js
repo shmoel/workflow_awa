@@ -36,6 +36,7 @@ import AppLayout from "../components/layout/AppLayout.js";
 import DemandeForm  from "../components/demandes/DemandeForm.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
 import InfoModal    from "../components/ui/InfoModal.js";
+import { CARD, ALERT_DANGER_FORM, LINK } from "../components/ui/classes.js";
 
 export default defineComponent({
   name: "IntroduireDemandePage",
@@ -141,24 +142,25 @@ export default defineComponent({
       askConfirm,
       submit,
       onSuccessOk,
+      CARD, ALERT_DANGER_FORM, LINK,
     };
   },
 
   template: /* html */ `
     <AppLayout>
-        <div class="container-fluid flex-grow-1 container-p-y">
+        <div class="flex-grow px-4 lg:px-8 py-6">
 
-            <div class="container">
-              <div class="row">
-            <div class ="col-lg-2"></div>
-            <div class="card mb-4 col-md-8">
-                <h4 class="card-header" style="font-weight: bold;"> INTRODUIRE UNE DEMANDE</h4>
-                <div class="card-body">
-                    <div v-if="loadError || user.error.value" class="alert alert-danger" role="alert">
+            <div class="w-full px-8">
+              <div class="flex flex-wrap -mx-3">
+            <div class="relative w-full lg:w-1/6 px-3"></div>
+            <div :class="CARD.card + ' w-full md:w-2/3 mb-6 px-3'">
+                <h4 :class="CARD.header"> INTRODUIRE UNE DEMANDE</h4>
+                <div :class="CARD.body">
+                    <div v-if="loadError || user.error.value" :class="ALERT_DANGER_FORM" role="alert">
                         Impossible de charger les données du formulaire. Veuillez réessayer.
                         ({{ loadError || user.error.value }})
                     </div>
-                    <div v-if="submitError" class="alert alert-danger" role="alert">
+                    <div v-if="submitError" :class="ALERT_DANGER_FORM" role="alert">
                         Erreur lors de l'enregistrement de la demande : {{ submitError }}
                     </div>
 
@@ -172,7 +174,7 @@ export default defineComponent({
                     />
                 </div>
             </div>
-            <div class ="col-lg-2"></div>
+            <div class="relative w-full lg:w-1/6 px-3"></div>
             </div>
             </div>
         </div>

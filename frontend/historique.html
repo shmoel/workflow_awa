@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" class="material-style layout-fixed">
+<html lang="fr">
 <head>
     <title>Accueil</title>
     <meta charset="utf-8">
@@ -11,21 +11,18 @@
     <link rel="icon" type="image/x-icon" href="images/sib_logo.PNG">
     <link rel="stylesheet" href= "static/vendor/uikit/fonts/ionicons.css">
     <link rel="stylesheet" href= "static/vendor/uikit/fonts/feather.css">
-    <link rel="stylesheet" href= "static/vendor/uikit/css/bootstrap-material.css">
-    <link rel="stylesheet" href= "static/vendor/uikit/css/shreerang-material.css">
-    <link rel="stylesheet" href= "static/vendor/uikit/css/uikit.css">
-    <link rel="stylesheet" href="static/css/design.css">
-    <link rel="stylesheet" href="static/css/pages-tableau-bord.css">
 
-    <!-- Compléments au CSS legacy (popup, modales, menu) -->
-    <link rel="stylesheet" href="static/css/app.css">
+    <!-- Tailwind (Play CDN, version figée) ; copie locale du même script si le CDN ne répond pas -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script>window.tailwind || document.write('<script src="static/vendor/tailwindcss/tailwindcss-play-3.4.17.js"><\/script>');</script>
+    <script src="static/js/tailwind.config.js"></script>
 
     <script type="importmap">
     { "imports": { "vue": "./static/vendor/vue/vue.esm-browser.prod.js" } }
     </script>
 </head>
 
-<body>
+<body class="min-h-screen bg-[#f7f6f3] font-sans text-base text-ink antialiased [text-rendering:optimizeLegibility]">
     <div id="app"></div>
     <script type="module">
         import { createApp } from "vue";

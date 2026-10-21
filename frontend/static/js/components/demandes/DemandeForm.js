@@ -36,6 +36,7 @@ import {
 } from "vue";
 
 import { downloadUrl } from "../../services/api.js";
+import { BTN, FORM, TEXTAREA, LINK } from "../ui/classes.js";
 
 const EMPTY = { banque: "", type: "", client: "", montant: "", comm: "" };
 
@@ -131,57 +132,52 @@ export default defineComponent({
       emit("submit", { ...form.value, file: file.value });
     }
 
-    return { form, fileInput, fileError, existingNoteHref, onFileChange, onSubmit };
+    return { form, fileInput, fileError, existingNoteHref, onFileChange, onSubmit, BTN, FORM, TEXTAREA, LINK };
   },
 
   template: /* html */ `
     <form @submit.prevent="onSubmit">
-        <div class="form-group">
-            <label style="font-weight: bold;" class="form-label" for="df-banque">Banque </label>
-            <select class="form-control" id="df-banque" v-model="form.banque" required>
+        <div :class="FORM.group">
+            <label :class="FORM.labelS" for="df-banque">Banque </label>
+            <select :class="FORM.select" id="df-banque" v-model="form.banque" required>
                 <option v-for="b in banques" :key="b.id" :value="String(b.id)">{{ b.sigle }} - {{ b.nom }}</option>
             </select>
-            <div class="clearfix"></div>
         </div>
-        <div class="form-group">
-            <label style="font-weight: bold;" class="form-label" for="df-type">Type</label>
-            <select class="form-control" id="df-type" v-model="form.type" required>
+        <div :class="FORM.group">
+            <label :class="FORM.labelS" for="df-type">Type</label>
+            <select :class="FORM.select" id="df-type" v-model="form.type" required>
                 <option v-for="t in types" :key="t.demande_id" :value="String(t.demande_id)">{{ t.nom_demande }}</option>
             </select>
-            <div class="clearfix"></div>
         </div>
-        <div class="form-group">
-            <label style="font-weight: bold;" for="df-client">Client</label>
-            <input class='form-control' type='text' id='df-client' v-model="form.client" placeholder='Le nom du client svp' required>
-            <div class="clearfix"></div>
+        <div :class="FORM.group">
+            <label :class="FORM.label" for="df-client">Client</label>
+            <input :class="FORM.input" type='text' id='df-client' v-model="form.client" placeholder='Le nom du client svp' required>
         </div>
-        <div class="form-group">
-            <label style="font-weight: bold;" for="df-montant">Montant :</label>
-                <div class="input-group">
-                    <div class="input-group-prepend"></div>
-                    <span class="input-group-text">XOF</span>
-                        <input class='form-control' type='number' step="any" id='df-montant' v-model="form.montant" placeholder='Spécifiez le montant svp' required>
+        <div :class="FORM.group">
+            <label :class="FORM.label" for="df-montant">Montant :</label>
+                <div :class="FORM.inputGroup">
+                    <div class="flex"></div>
+                    <span :class="FORM.addon">XOF</span>
+                        <input :class="FORM.groupInput" type='number' step="any" id='df-montant' v-model="form.montant" placeholder='Spécifiez le montant svp' required>
                 </div>
-            <div class="clearfix"></div>
         </div>
-        <p v-if="existingNoteHref">
-            <a :href="existingNoteHref" target="_blank" rel="noopener">Consulter la note préalablement enregistrée</a>
+        <p v-if="existingNoteHref" class="mb-4">
+            <a :href="existingNoteHref" target="_blank" rel="noopener" :class="LINK">Consulter la note préalablement enregistrée</a>
         </p>
-        <div class="form-group">
-            <label style="font-weight: bold;" class="form-label w-100" for="df-note">Note d'analyse</label>
-            <input class='form-control' type='file' id='df-note' ref="fileInput" @change="onFileChange"
+        <div :class="FORM.group">
+            <label :class="FORM.labelS + ' w-full'" for="df-note">Note d'analyse</label>
+            <input :class="FORM.file" type='file' id='df-note' ref="fileInput" @change="onFileChange"
                    :required="noteRequired" :accept="noteRequired ? 'application/pdf' : null">
-            <small v-if="noteRequired" class="form-text text-muted">Joindre le fichier (PDF uniquement).</small>
-            <small v-if="fileError" class="form-text text-danger" role="alert">{{ fileError }}</small>
+            <small v-if="noteRequired" :class="FORM.help + ' text-muted'">Joindre le fichier (PDF uniquement).</small>
+            <small v-if="fileError" :class="FORM.help + ' text-danger'" role="alert">{{ fileError }}</small>
         </div>
-        <div class="form-group">
-            <label style="font-weight: bold;" for="df-comm">Commentaire</label>
+        <div :class="FORM.group">
+            <label :class="FORM.label" for="df-comm">Commentaire</label>
 
-            <textarea class='form-control' id='df-comm' v-model="form.comm"></textarea>
+            <textarea :class="TEXTAREA" id='df-comm' v-model="form.comm"></textarea>
 
-            <div class="clearfix"></div>
         </div>
-        <div style="text-align: center;"> <button type="submit" class="btn btn-primary" :disabled="submitting">{{ submitting ? 'Envoi…' : submitLabel }}</button></div>
+        <div class="text-center"> <button type="submit" :class="BTN.primary" :disabled="submitting">{{ submitting ? 'Envoi…' : submitLabel }}</button></div>
     </form>
   `,
 });

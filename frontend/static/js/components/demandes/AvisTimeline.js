@@ -1,7 +1,7 @@
 /**
  * components/demandes/AvisTimeline.js
  *
- * Historique des avis d'une demande, en accordéon — balisage identique au
+ * Historique des avis d'une demande, en accordéon (Tailwind) — reprend le
  * HTML généré par charger_details_commentaire() dans
  * detail_consulter_demande.html et valider_demande.html :
  *
@@ -29,6 +29,7 @@ import {
   ref,
   watch,
 } from "vue";
+import { SHEET } from "../ui/classes.js";
 
 const FIELDS = [
   { key: "nom",       label: "Nom" },
@@ -61,55 +62,57 @@ export default defineComponent({
       openIndex.value = openIndex.value === i ? null : i;
     }
 
-    return { openIndex, toggle, fields: FIELDS };
+    return { openIndex, toggle, fields: FIELDS, SHEET };
   },
 
   template: /* html */ `
-    <div v-for="(row, i) in avis" :key="i" class="bg-white ui-bordered mb-2">
-        <a href="javascript:" class="d-flex justify-content-between text-dark py-3 px-4"
-           :class="{ collapsed: openIndex !== i }"
+    <div v-for="(row, i) in avis" :key="i" class="mb-2 bg-white border border-line">
+        <a href="javascript:" class="flex justify-between px-6 py-4 text-ink hover:text-[#85bdf7]"
            :aria-expanded="openIndex === i ? 'true' : 'false'"
            @click.prevent="toggle(i)">
-            {{ row.statut_d }}                            : {{ row.decision }} <span class="collapse-icon"></span>
+            {{ row.statut_d }}                            : {{ row.decision }} <span class="relative block w-[14px] h-[14px]"><span
+                class="absolute top-[7px] left-[7px] -ml-1 w-2 h-2 border-l border-b border-[rgba(24,28,33,0.3)] transition-transform duration-300"
+                :class="openIndex === i ? 'rotate-[135deg]' : '-rotate-45'"></span></span>
         </a>
-        <div class="collapse text-muted" :class="{ show: openIndex === i }">
-            <div class="px-4 pb-3">
-                    <div class="table-responsive">
-                        <table class="table card-table">
+        <div v-show="openIndex === i" class="text-muted">
+            <div class="px-6 pb-4">
+                    <div class="block overflow-auto">
+                        <table :class="SHEET.table">
                             <thead>
                                 <tr>
-                                    <th></th>
-                                    <th></th>
+                                    <th :class="SHEET.th"></th>
+                                    <th :class="SHEET.th"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="f in fields" :key="f.key">
-                                    <td class="align-center">
-                                        <div class="media-body align-self-center ml-3">
-                                            <strong>{{ f.label }}</strong>
+                                    <td :class="SHEET.td">
+                                        <div :class="SHEET.cell">
+                                            <strong :class="SHEET.label">{{ f.label }}</strong>
                                         </div>
                                     </td>
-                                    <td class="align-center">
-                                        <div class="media-body align-self-center ml-3">
-                                            <h6 class="mb-0">{{ row[f.key] }}</h6>
+                                    <td :class="SHEET.td">
+                                        <div :class="SHEET.cell">
+                                            <h6 :class="SHEET.value">{{ row[f.key] }}</h6>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="align-center">
-                                        <div class="media-body align-self-center ml-3">
-                                            <strong>Commentaire</strong>
+                                    <td :class="SHEET.td">
+                                        <div :class="SHEET.cell">
+                                            <strong :class="SHEET.label">Commentaire</strong>
                                         </div>
                                     </td>
-                                    <td class="align-center">
-                                        <div class="media-body align-self-center ml-3">
+                                    <td :class="SHEET.td">
+                                        <div :class="SHEET.cell">
                                         </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                <textarea class="form-control media-body align-self-center ml-3" cols="100" disabled :value="row.commentaire ?? ''"></textarea>
+                <textarea class="block w-full min-h-[35px] ml-4 px-0 pt-2 pb-[7px] text-[13px] leading-[1.33] text-muted bg-transparent border-0 border-b border-dotted border-[rgba(24,28,33,0.3)] resize-y outline-none"
+                          cols="100" disabled :value="row.commentaire ?? ''"></textarea>
             </div>
         </div>
     </div>

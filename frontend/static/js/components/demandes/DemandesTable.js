@@ -1,11 +1,15 @@
 /**
  * components/demandes/DemandesTable.js
  *
- * Tableau de demandes — balisage identique au legacy :
+ * Tableau de demandes (Tailwind) — reprend les tableaux legacy :
  *
- *   table.table.table-hover.card-table
- *     thead > tr > th[style="font-weight: bold;"]
- *     tbody > tr > td.align-middle > (wrapper de la colonne) > valeur
+ *   table
+ *     thead > tr > th (en gras)
+ *     tbody > tr > td > (wrapper de la colonne) > valeur
+ *
+ * L'apparence dépend de la page (prop `theme`, voir components/ui/classes.js,
+ * TABLE) : « dashboard » = en-tête orange de l'accueil et de l'historique,
+ * « demandes » = tableau simple des autres pages.
  *
  * Les lignes legacy étaient générées en JavaScript (fillTable_*, generate*Rows)
  * avec un wrapper différent selon la page et la colonne : chaque colonne
@@ -17,29 +21,32 @@
  *   actionHeaders : Number — nombre de <th> vides ajoutés pour les colonnes
  *                   de boutons (le legacy en avait un par bouton)
  *   error         : String|null — message affiché dans une ligne du tableau
+ *   theme         : String — clé de TABLE (défaut « dashboard »)
  *
  * ColumnDef :
  *   key     : champ de la ligne
  *   label   : en-tête
  *   format? : fn(value, row) → texte
  *   wrap?   : "cc-label" | "label" | "cc" | "media" | "self" | "inline" (défaut)
- *     cc-label → <label class="custom-control custom-checkbox mb-0">v<br></label>
- *     label    → <label>v<br></label>
- *     cc       → <div><div class="custom-control custom-checkbox mb-0">v</div></div>
- *     media    → <div><div class="media-body align-self-center ml-3">v</div></div>
- *     self     → <div><div class="align-self-center ml-3">v</div></div>
- *     inline   → <div><div class="d-inline-block align-middle">v</div></div>
+ *     cc-label → <label (CELL.cc)>v<br></label>   (ex-custom-control : retrait de 43 px)
+ *     label    → <label (CELL.label)>v<br></label>
+ *     cc       → <div><div (CELL.cc)>v</div></div>
+ *     media    → <div><div (CELL.media)>v</div></div>
+ *     self     → <div><div (CELL.self)>v</div></div>
+ *     inline   → <div><div (CELL.inline)>v</div></div>
  *   button? : fn(row) → { cls, label, disabled? } — la cellule contient un
  *             bouton (ex. « Arrêté » / « Terme ») au lieu d'un texte
  *
  * Slots :
  *   badge   — après la valeur de la 1re colonne (badge « Nouveau »). Props : { row }
- *   actions — cellules de boutons de la ligne (des <ActionCell>). Props : { row }
+ *   actions — cellules de boutons de la ligne (des <ActionCell>, qui reçoivent
+ *             les classes de cellule du thème par provide/inject). Props : { row }
  *
  * Exporte aussi formatNumber() (formatNumber() legacy).
  */
 
-import { defineComponent } from "vue";
+import { defineComponent, provide } from "vue";
+import { TABLE, CELL } from "../ui/classes.js";
 
 /**
  * Formate un nombre en locale française (ex : 1 500 000), comme formatNumber() legacy.
@@ -53,13 +60,6 @@ export function formatNumber(n) {
     : num.toLocaleString("fr-FR", { minimumFractionDigits: 0 });
 }
 
-const INNER_CLASS = {
-  cc:     "custom-control custom-checkbox mb-0",
-  media:  "media-body align-self-center ml-3",
-  self:   "align-self-center ml-3",
-  inline: "d-inline-block align-middle",
-};
-
 export default defineComponent({
   name: "DemandesTable",
 
@@ -68,38 +68,42 @@ export default defineComponent({
     columns:       { type: Array,  required: true },
     actionHeaders: { type: Number, default: 0 },
     error:         { type: String, default: null },
+    theme:         { type: String, default: "dashboard" },
   },
 
-  setup() {
+  setup(props) {
+    const t = TABLE[props.theme];
+    provide("tdClass", t.td);
+
     function value(col, row) {
       return col.format ? col.format(row[col.key], row) : (row[col.key] ?? "");
     }
     function innerClass(col) {
-      return INNER_CLASS[col.wrap] ?? INNER_CLASS.inline;
+      return CELL[col.wrap] ?? CELL.inline;
     }
     function isLabel(col) {
       return col.wrap === "cc-label" || col.wrap === "label";
     }
-    return { value, innerClass, isLabel };
+    return { t, value, innerClass, isLabel, CELL };
   },
 
   template: /* html */ `
-    <table class="table table-hover card-table">
+    <table :class="t.table">
         <thead>
-            <tr>
-                <th v-for="col in columns" :key="col.key" style="font-weight: bold;">{{ col.label }}</th>
-                <th v-for="n in actionHeaders" :key="'a' + n" style="font-weight: bold;"> </th>
+            <tr :class="t.headRow">
+                <th v-for="col in columns" :key="col.key" :class="t.th">{{ col.label }}</th>
+                <th v-for="n in actionHeaders" :key="'a' + n" :class="t.th"> </th>
             </tr>
         </thead>
         <tbody>
             <tr v-if="error">
-                <td :colspan="columns.length + actionHeaders" class="align-middle text-danger">
+                <td :colspan="columns.length + actionHeaders" :class="t.td + ' text-danger'">
                     Impossible de charger les données : {{ error }}
                 </td>
             </tr>
-            <tr v-for="(row, i) in rows" :key="row.id_demande ?? i">
-                <td v-for="(col, c) in columns" :key="col.key" class="align-middle">
-                    <label v-if="isLabel(col)" :class="col.wrap === 'cc-label' ? 'custom-control custom-checkbox mb-0' : null">
+            <tr v-for="(row, i) in rows" :key="row.id_demande ?? i" :class="t.row">
+                <td v-for="(col, c) in columns" :key="col.key" :class="t.td">
+                    <label v-if="isLabel(col)" :class="col.wrap === 'cc-label' ? CELL.cc : CELL.label">
                         {{ value(col, row) }} <slot v-if="c === 0" name="badge" :row="row" /><br>
                     </label>
                     <div v-else>

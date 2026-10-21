@@ -18,7 +18,7 @@
  *   Niveau validation | [Détails] [CHAT]
  *
  * Utilise DemandesTable v2 (props rows/columns/slots).
- * Les filtres sont délégués à DemandeFilters.
+ * Les filtres et l'onglet sont dans DemandesCard (DemandeFilters).
  * Les StatCards sont autonomes (chargement interne).
  */
 
@@ -39,7 +39,8 @@ import AppLayout from "../components/layout/AppLayout.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import StatCard       from "../components/demandes/StatCard.js";
 import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
-import DemandeFilters from "../components/demandes/DemandeFilters.js";
+import DemandesCard   from "../components/demandes/DemandesCard.js";
+import { BTN }        from "../components/ui/classes.js";
 
 // ---------------------------------------------------------------------------
 // Colonnes du tableau (ordre identique au legacy)
@@ -85,7 +86,7 @@ const STAT_CARDS = [
 export default defineComponent({
   name: "AccueilPage",
 
-  components: { AppLayout, StatCard, DemandesTable, DemandeFilters, ActionCell },
+  components: { AppLayout, StatCard, DemandesTable, DemandesCard, ActionCell },
 
   setup() {
     const user    = useCurrentUser();
@@ -204,62 +205,38 @@ export default defineComponent({
       columns:       COLUMNS,
       handleChatClick,
       goToDetail,
+      BTN,
     };
   },
 
   template: /* html */ `
     <AppLayout :polling="polling">
-        <div class="container-fluid flex-grow-1 container-p-y">
-            <h4 class="font-weight-bold py-3 mb-0">Demandes</h4>
-            <div class="text-muted small mt-0 mb-4 d-block breadcrumb">
-
-            </div>
-            <div class="row">
-                <div class="">
-                    <div class="row">
+        <div class="flex-grow px-4 lg:px-8 py-6">
+            <h4 class="py-4 mb-0 text-h4 font-bold">Demandes</h4>
+            <div class="mb-6"></div>
+            <div class="flex flex-wrap -mx-3">
+                <div class="w-full">
+                    <div class="flex flex-wrap -mx-3">
                         <StatCard v-for="card in statCards" :key="card.niveau" :title="card.title" :niveau="card.niveau" />
                     </div>
                 </div>
             </div>
 
-            <div class="row">
+            <div class="flex flex-wrap -mx-3">
 
-                <div style="height: 310px" id="tasks-inner"></div>
+                <div class="h-[310px]" id="tasks-inner"></div>
 
-                <div class="col-xl-12">
-                    <div class="card mb-4">
-
-                        <div class="card-header with-elements pb-0">
-                            <DemandeFilters :fields="filterFields" v-model="filters" />
-                            <div class="card-header-elements ml-auto p-0">
-                                <ul class="nav nav-tabs">
-                                    <li class="nav-item" id="dmd-intro">
-                                        <a class="nav-link active" href="javascript:">Introduites</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="nav-tabs-top">
-                            <div class="tab-content">
-                                <div class="tab-pane fade show active" id="demande-intro">
-                                    <div style="height: 330px" id="tab-table-1">
-                                        <DemandesTable :rows="filteredRows" :columns="columns" :action-headers="2" :error="errorTable">
-                                            <template #badge="{ row }">
-                                                <span v-if="newMessageMap[row.id_demande]" style='background:#ea580c;color:#fff;padding:2px 8px;border-radius:8px;font-size:12px;margin-left:8px;'>Nouveau</span>
-                                            </template>
-                                            <template #actions="{ row }">
-                                                <ActionCell btn-class="btn btn-glow-info btn-info" label="Détails" @click="goToDetail(row.id_demande)" />
-                                                <ActionCell btn-class="btn btn-glow-info btn-info" label="CHAT" @click="handleChatClick(row.id_demande)" />
-                                            </template>
-                                        </DemandesTable>
-                                    </div>
-                                    <a href="javascript:" class="card-footer d-block text-center text-dark small font-weight-semibold"></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <DemandesCard tab-label="Introduites" :fields="filterFields" v-model="filters">
+                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="errorTable">
+                        <template #badge="{ row }">
+                            <span v-if="newMessageMap[row.id_demande]" style='background:#ea580c;color:#fff;padding:2px 8px;border-radius:8px;font-size:12px;margin-left:8px;'>Nouveau</span>
+                        </template>
+                        <template #actions="{ row }">
+                            <ActionCell :btn-class="BTN.outlineBrand" label="Détails" @click="goToDetail(row.id_demande)" />
+                            <ActionCell :btn-class="BTN.outlineBrand" label="CHAT" @click="handleChatClick(row.id_demande)" />
+                        </template>
+                    </DemandesTable>
+                </DemandesCard>
             </div>
 
         </div>

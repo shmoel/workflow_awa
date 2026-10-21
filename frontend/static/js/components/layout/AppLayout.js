@@ -1,39 +1,38 @@
 /**
  * components/layout/AppLayout.js
  *
- * Squelette commun des pages connectées — balisage identique au legacy :
+ * Squelette commun des pages connectées (Tailwind, reprend la mise en page
+ * legacy « layout-2 » d'UIKit) :
  *
- *   div.layout-wrapper.layout-2
- *     div.layout-inner
- *       AppSidebar                 (div#layout-sidenav)
- *       div.layout-container
- *         AppNavbar                (nav.layout-navbar)
- *         div.layout-content
- *           <slot />               (contenu de la page, ex. div.container-fluid)
- *           AppFooter              (nav.layout-footer)
- *     div.layout-overlay.layout-sidenav-toggle
- *   <slot name="modals" />         (modales Bootstrap de la page)
- *   NotificationPopup              (si la prop polling est fournie)
+ *   AppSidebar                 menu latéral fixe, 250 px (70 px replié)
+ *   colonne de contenu         décalée de la largeur du menu (écran ≥ 992 px)
+ *     AppNavbar                barre du haut
+ *     <slot />                 contenu de la page
+ *     AppFooter                pied de page, poussé en bas
+ *   <slot name="modals" />     modales de la page
+ *   NotificationPopup          si la prop polling est fournie
  *
  * Repli du menu (ex-layout-helpers.js + demo.js) :
- *   - écran ≥ 992 px : classe "layout-collapsed" sur <html>, mémorisée dans
- *     localStorage.layoutCollapsed (même clé que le legacy)
- *   - écran < 992 px : classe "layout-expanded" sur <html> (menu en surimpression),
- *     refermé par un clic sur l'overlay
+ *   - écran ≥ 992 px : menu replié à 70 px (icônes seules), mémorisé dans
+ *     localStorage.layoutCollapsed (même clé que le legacy). Au survol, le menu
+ *     replié se déploie à 250 px par-dessus le contenu, sans le décaler.
+ *   - écran < 992 px : menu masqué ; s'il est ouvert, il passe en surimpression
+ *     et un clic sur le voile le referme. Comme dans le legacy, aucun bouton
+ *     visible ne l'ouvre à cette taille.
  *
  * Props :
  *   polling   : objet useNotificationPolling() — affiche la popup si fourni
- *   menuLabel : libellé du sous-menu de la sidebar (« Menu » par défaut)
+ *   menuLabel : libellé du sous-menu du menu latéral (« Menu » par défaut)
  */
 
-import { defineComponent, onMounted } from "vue";
+import { defineComponent, ref, computed } from "vue";
 
 import AppSidebar        from "./AppSidebar.js";
 import AppNavbar         from "./AppNavbar.js";
 import AppFooter         from "./AppFooter.js";
 import NotificationPopup from "./NotificationPopup.js";
 
-const COLLAPSED_KEY    = "layoutCollapsed";
+const COLLAPSED_KEY     = "layoutCollapsed";
 const LAYOUT_BREAKPOINT = 992;
 
 function isSmallScreen() {
@@ -55,43 +54,43 @@ export default defineComponent({
   },
 
   setup() {
-    const html = document.documentElement;
+    const collapsed = ref(!isSmallScreen() && readCollapsed());
+    const expanded  = ref(false);   // menu ouvert en surimpression (< 992 px)
+    const hovered   = ref(false);   // survol du menu replié
+
+    // Menu affiché en icônes seules : replié et non survolé
+    const compact = computed(() => collapsed.value && !hovered.value);
 
     function toggleCollapse() {
       if (isSmallScreen()) {
-        html.classList.toggle("layout-expanded");
+        expanded.value = !expanded.value;
         return;
       }
-      const collapsed = html.classList.toggle("layout-collapsed");
-      try { localStorage.setItem(COLLAPSED_KEY, String(collapsed)); } catch { /* stockage indisponible */ }
+      collapsed.value = !collapsed.value;
+      hovered.value = false;
+      try { localStorage.setItem(COLLAPSED_KEY, String(collapsed.value)); } catch { /* stockage indisponible */ }
     }
 
-    function closeExpanded() {
-      html.classList.remove("layout-expanded");
-    }
-
-    onMounted(() => {
-      if (!isSmallScreen() && readCollapsed()) html.classList.add("layout-collapsed");
-    });
-
-    return { toggleCollapse, closeExpanded };
+    return { collapsed, expanded, hovered, compact, toggleCollapse };
   },
 
   template: /* html */ `
-    <div class="layout-wrapper layout-2">
-        <div class="layout-inner">
-            <AppSidebar :menu-label="menuLabel" @toggle-collapse="toggleCollapse" />
+    <div class="flex min-h-screen overflow-hidden">
+        <AppSidebar :menu-label="menuLabel" :compact="compact" :collapsed="collapsed" :expanded="expanded"
+                    @toggle-collapse="toggleCollapse" @hover="hovered = collapsed && $event" />
 
-            <div class="layout-container">
-                <AppNavbar />
+        <div class="flex flex-col flex-auto w-full min-w-0 min-h-screen transition-[padding] duration-200"
+             :class="collapsed ? 'lg:pl-[70px]' : 'lg:pl-[250px]'">
+            <AppNavbar />
 
-                <div class="layout-content">
-                    <slot />
-                    <AppFooter />
-                </div>
+            <div class="flex flex-col flex-auto justify-between">
+                <slot />
+                <AppFooter />
             </div>
         </div>
-        <div class="layout-overlay layout-sidenav-toggle" @click="closeExpanded"></div>
+
+        <div v-if="expanded" class="fixed inset-0 z-[1079] bg-[rgba(24,28,33,0.5)] lg:hidden"
+             @click="expanded = false"></div>
     </div>
 
     <slot name="modals" />

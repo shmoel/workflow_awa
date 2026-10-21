@@ -1,8 +1,8 @@
 /**
  * components/layout/AppFooter.js
  *
- * Pied de page — balisage identique au legacy (« © Attijariwestafrica »,
- * About Us / Help / Contact / Terms & Conditions).
+ * Pied de page (Tailwind) — reprend le pied de page legacy
+ * (« © Attijariwestafrica », About Us / Help / Contact / Terms & Conditions).
  */
 
 import { defineComponent } from "vue";
@@ -11,16 +11,16 @@ export default defineComponent({
   name: "AppFooter",
 
   template: /* html */ `
-    <nav class="layout-footer footer bg-white">
-        <div class="container-fluid d-flex flex-wrap justify-content-between text-center container-p-x pb-3">
-            <div class="pt-3">
-                <span class="footer-text font-weight-semibold">&copy; <a href="javascript:" class="footer-link">Attijariwestafrica</a></span>
+    <nav class="bg-white text-ink shadow-[0_-1px_0_0_rgba(24,28,33,0.04)]">
+        <div class="flex flex-wrap justify-between px-4 lg:px-8 pb-4 text-center">
+            <div class="pt-4">
+                <span class="font-medium text-[#666]">&copy; <a href="javascript:" class="inline-block text-ink">Attijariwestafrica</a></span>
             </div>
             <div>
-                <a href="javascript:" class="footer-link pt-3">About Us OKKKKKK</a>
-                <a href="javascript:" class="footer-link pt-3 ml-4">Help</a>
-                <a href="javascript:" class="footer-link pt-3 ml-4">Contact</a>
-                <a href="javascript:" class="footer-link pt-3 ml-4">Terms &amp; Conditions</a>
+                <a href="javascript:" class="inline-block pt-4 text-ink">About Us OKKKKKK</a>
+                <a href="javascript:" class="inline-block pt-4 ml-6 text-ink">Help</a>
+                <a href="javascript:" class="inline-block pt-4 ml-6 text-ink">Contact</a>
+                <a href="javascript:" class="inline-block pt-4 ml-6 text-ink">Terms &amp; Conditions</a>
             </div>
         </div>
     </nav>

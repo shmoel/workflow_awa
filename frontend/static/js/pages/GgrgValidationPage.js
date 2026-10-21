@@ -43,6 +43,8 @@ import InfoModal from "../components/ui/InfoModal.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
 import ConfirmModal   from "../components/ui/ConfirmModal.js";
+import TabsCard       from "../components/demandes/TabsCard.js";
+import { BTN }        from "../components/ui/classes.js";
 
 // ---------------------------------------------------------------------------
 // Navigation
@@ -80,10 +82,16 @@ const COLS_CLOTURER = [
 // Composant page
 // ---------------------------------------------------------------------------
 
+/** Onglets de la carte (identifiants de volet legacy) */
+const TABS = [
+  { key: "intro",    label: "Demandes Introduites",      paneId: "demande-intro" },
+  { key: "cloturer", label: "Demandes fin de processus", paneId: "demande-val" },
+];
+
 export default defineComponent({
   name: "GgrgValidationPage",
 
-  components: { AppLayout, DemandesTable, ConfirmModal, ActionCell, InfoModal },
+  components: { AppLayout, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal },
 
   setup() {
     const user    = useCurrentUser();
@@ -194,62 +202,37 @@ export default defineComponent({
       handleCloSuccess,
       goToEvaluer,
       goToDetail,
+      tabs: TABS,
+      BTN,
     };
   },
 
   template: /* html */ `
     <AppLayout :polling="polling">
-        <div class="container-fluid flex-grow-1 container-p-y">
-            <h4 class="font-weight-bold py-3 mb-0">MES DEMANDES</h4>
+        <div class="flex-grow px-4 lg:px-8 py-6">
+            <h4 class="py-4 mb-0 text-h4 font-bold">MES DEMANDES</h4>
 
-            <div class="row">
+            <div class="flex flex-wrap -mx-3">
 
-                <div style="height: 310px" id="tasks-inner"></div>
+                <div class="h-[310px]" id="tasks-inner"></div>
 
-                <div class="col-xl-12">
-                    <div class="card mb-4">
-                        <div class="card-header with-elements pb-0">
-                            <h6 class="card-header-title mb-0"></h6>
-                            <div class="card-header-elements ml-auto p-0">
-                                <ul class="nav nav-tabs">
-                                    <li class="nav-item">
-                                        <a class="nav-link" :class="{ active: activeTab === 'intro' }" href="javascript:" @click="activeTab = 'intro'">Demandes Introduites</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" :class="{ active: activeTab === 'cloturer' }" href="javascript:" @click="activeTab = 'cloturer'">Demandes fin de processus</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="nav-tabs-top">
-                            <div class="tab-content">
-
-                                <div class="tab-pane fade" :class="{ 'show active': activeTab === 'intro' }" id="demande-intro">
-                                    <div style="height: 330px" id="tab-table-1">
-                                        <DemandesTable :rows="filteredIntro" :columns="colsIntro" :action-headers="1" :error="errorIntro">
-                                            <template #actions="{ row }">
-                                                <ActionCell btn-class="btn btn-glow-info btn-info" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
-                                            </template>
-                                        </DemandesTable>
-                                    </div>
-                                    <a href="javascript:" class="card-footer d-block text-center text-dark small font-weight-semibold"></a>
-                                </div>
-                                <div class="tab-pane fade" :class="{ 'show active': activeTab === 'cloturer' }" id="demande-val">
-                                    <div style="height: 330px" id="tab-table-2">
-                                        <DemandesTable :rows="filteredCloturer" :columns="colsCloturer" :error="errorCloturer">
-                                            <template #actions="{ row }">
-                                                <ActionCell btn-class="btn btn-dark" label="Détails" @click="goToDetail(row.id_demande)" />
-                                                <ActionCell btn-class="btn btn-outline-primary" label="Cloturer" @click="openCloModal(row.id_demande)" />
-                                            </template>
-                                        </DemandesTable>
-                                    </div>
-                                    <a href="javascript:" class="card-footer d-block text-center text-dark small font-weight-semibold"></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <TabsCard :tabs="tabs" v-model="activeTab">
+                    <template #intro>
+                        <DemandesTable theme="demandes" :rows="filteredIntro" :columns="colsIntro" :action-headers="1" :error="errorIntro">
+                            <template #actions="{ row }">
+                                <ActionCell :btn-class="BTN.glowInfo" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
+                            </template>
+                        </DemandesTable>
+                    </template>
+                    <template #cloturer>
+                        <DemandesTable theme="demandes" :rows="filteredCloturer" :columns="colsCloturer" :error="errorCloturer">
+                            <template #actions="{ row }">
+                                <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
+                                <ActionCell :btn-class="BTN.outlinePrimary" label="Cloturer" @click="openCloModal(row.id_demande)" />
+                            </template>
+                        </DemandesTable>
+                    </template>
+                </TabsCard>
             </div>
 
         </div>
@@ -257,6 +240,7 @@ export default defineComponent({
         <template #modals>
             <ConfirmModal
                 v-model:show="showCloModal"
+                variant="design"
                 title="Voulez-vous vraiment cloturer cette demande  ?"
                 :with-comment="true"
                 comment-placeholder="Laisser un message"
@@ -264,6 +248,7 @@ export default defineComponent({
             />
             <InfoModal
                 :show="showSuccessModal"
+                variant="design"
                 title="Cloturer demande"
                 message="Demande  cloturée !"
                 @ok="handleCloSuccess"
