@@ -8,14 +8,17 @@ Chaque entrée indique : le fichier legacy concerné, la nature du bug,
 le fichier Vue où la correction est appliquée, et le statut de validation
 par le chef de projet.
 
-## État du projet (08/10/2026)
+## État du projet (13/10/2026)
 
 - **Migration terminée** : les 11 pages sont en Vue 3 (hébergé localement, modules ES6) ;
   le legacy n'existe plus que dans le tag git `pre-bascule-vue`.
 - **Visuel identique au legacy** : CSS legacy d'origine, balisage legacy,
   plus de Tailwind (voir « Reprise du visuel legacy »).
 - **Corrections** : CORRECTION-01 à 13, toutes validées.
-- **Restent ouverts** : 3 points « À confirmer » (frontend) et 8 points
+- **Améliorations techniques (13/10/2026)** : documentation hors du dossier
+  servi, bibliothèques hébergées localement, CSS allégé, session alignée
+  sur 30 min.
+- **Restent ouverts** : 4 points « À confirmer » (frontend) et 12 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
@@ -739,6 +742,12 @@ Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
    reste en surbrillance sur toutes les pages et le sous-menu (« Menu » ou
    « Actions ») est fermé au chargement. À trancher : mettre en surbrillance la page courante
    et ouvrir le sous-menu qui la contient.
+4. **Icône « Statistiques » du menu latéral (`bi-bar-chart`).** Elle est
+   invisible sur acceuil, chat, demandes_validation et historique : ces
+   pages ne chargent pas Bootstrap Icons, comme leur version legacy.
+   Laissée telle quelle (aucun changement visuel, 13/10/2026). À trancher :
+   charger `static/vendor/bootstrap-icons/bootstrap-icons.css` sur ces
+   4 pages pour afficher l'icône partout.
 
 ---
 
@@ -757,6 +766,15 @@ requirements.txt indique bcrypt==3.2.0 ; bcrypt 5.x casse le login. Garder
 cette version fixée.
 
 *(Identifié lors de la réinitialisation de la base locale — 02/10/2026)*
+
+**Mise à jour du 13/10/2026 :** `psycopg2-binary` figure désormais dans
+`requirements.txt`, mais seuls `bcrypt` et `passlib` ont une version
+figée. `fastapi`, `uvicorn`, `sqlalchemy`, `psycopg2-binary`, `pyjwt`,
+`starlette`, `python-dotenv`, `jinja2`, `python-multipart` et `gunicorn`
+s'installent dans leur dernière version : deux installations à des dates
+différentes n'ont pas le même code. Recommandation : figer toutes les
+versions (`==`), à partir de celles de l'environnement validé
+(`pip freeze`), et les mettre à jour volontairement.
 
 ### Point 2 — Historique incomplet
 
@@ -877,6 +895,74 @@ disque ; les chemins relatifs `static/…` et `images/…` restent valides.
 répondraient 404).
 
 *(Demandé par le chef de projet le 08/10/2026)*
+
+**Complément du 13/10/2026 :** Vue, Bootstrap Icons, Bootstrap et Poppins
+sont désormais servis depuis `/workflow/static/vendor/` (voir « Améliorations
+techniques », point 2) : l'absence de `Cache-Control` sur `/workflow/static/`
+les concerne aussi.
+
+### Point 9 — Routes mal formées et fonctions homonymes (`routes/route.py`)
+
+- `GET /poste/poste_id}` et `GET /decision/decision_id}` : accolade ouvrante
+  manquante. Le chemin est pris au pied de la lettre : ces routes sont
+  inaccessibles (`GET /api/poste/3` et `GET /api/decision/3` répondent 405,
+  vérifié le 13/10/2026). Corriger en
+  `/poste/{poste_id}` et `/decision/{decision_id}`.
+- Fonctions définies plusieurs fois sous le même nom : `create_demande`
+  (`POST /demandes/` et `POST /update_demandes/{demande_id}`), `read_poste`,
+  `update_poste`, `delete_avis` (avis, poste, décision),
+  `get_demandes_a_valider`, `get_demandes_fin_process`, `get_demandes_user`.
+  FastAPI enregistre chaque route au moment du décorateur, donc elles
+  fonctionnent, mais le nom Python ne désigne que la dernière définition :
+  identifiants d'opération en double dans `/docs`, code trompeur à la
+  lecture, risque d'erreur lors d'une modification. Donner un nom unique à
+  chaque fonction (par exemple `update_demande`, `read_decision`,
+  `delete_poste`).
+
+Le frontend n'utilise aucune de ces routes (seulement `GET /decisions/`, la liste).
+
+### Point 10 — Date / heure du dernier avis : `MAX(date)` et `MAX(heure)` séparés
+
+Une vingtaine de requêtes de `routes/route.py` calculent la date du dernier
+avis d'une demande par `(MAX(date) || ' ' || MAX(heure))`, ou renvoient
+`MAX(date)` et `MAX(heure)` dans deux colonnes. Les deux maximums sont
+calculés indépendamment : ils peuvent venir de **deux avis différents**.
+Exemple : avis du 03/10 à 16:45 puis avis du 05/10 à 09:10 → « 05/10
+16:45 », un moment où aucun avis n'a été donné. Les colonnes « Date /
+Heure » des tableaux et le tri par date sont touchés.
+
+Recommandation : prendre la date et l'heure **de l'avis le plus récent**, par
+exemple `MAX(date + heure)` (un seul horodatage), ou la ligne de l'avis
+sélectionnée par `DISTINCT ON (id_demande) … ORDER BY id_demande, date DESC,
+heure DESC`. Le frontend affiche les valeurs reçues sans les recombiner :
+aucune modification n'est nécessaire de son côté.
+
+### Point 11 — `auth.py` : paramètres du jeton dans le code
+
+- La clé de signature des jetons et l'algorithme sont écrits en dur dans
+  `backend/auth.py`, au lieu d'être lus depuis `backend/.env` (le projet
+  utilise déjà `python-dotenv`). La clé est donc identique sur tous les
+  environnements et visible par toute personne ayant accès au dépôt. La
+  lire depuis l'environnement, la changer, et refuser le démarrage si elle
+  est absente.
+- `ACCESS_TOKEN_EXPIRE_MINUTES = 60` dans `auth.py`, mais la route
+  `POST /login/` passe explicitement 30 minutes : la constante n'est jamais
+  utilisée pour le login, et deux valeurs coexistent. Définir une seule
+  durée, lue elle aussi depuis `.env`. Le frontend est aligné sur 30 min
+  (« Améliorations techniques », point 4) : prévenir l'équipe frontend si
+  la durée change.
+
+### Point 12 — Pas de migrations de base de données
+
+`backend/main.py` crée les tables au démarrage avec
+`Base.metadata.create_all()`. Cette fonction crée les tables manquantes
+mais ne modifie jamais une table existante (colonne ajoutée, renommée, type
+changé) : chaque base doit être corrigée à la main et les environnements
+divergent. Recommandation : adopter
+**Alembic** (migrations versionnées avec le code), avec une première
+migration qui reproduit le schéma actuel.
+
+*(Points 9 à 12 identifiés lors de la revue technique du frontend — 13/10/2026)*
 
 ---
 
