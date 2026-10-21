@@ -1,10 +1,11 @@
 /*
  * static/css/app.css
  *
- * Compléments au CSS legacy (static/vendor/uikit, static/css/design.css et
- * blocs <style> repris tels quels dans chaque page) : uniquement ce que le
- * JavaScript legacy (jQuery, Bootstrap JS, sidenav.js, perfect-scrollbar)
- * produisait à l'exécution, désormais géré par Vue.
+ * Compléments au CSS legacy (static/vendor/uikit, static/css/design.css,
+ * pages-demandes.css, pages-tableau-bord.css et blocs <style> propres à une
+ * page) : uniquement ce que le JavaScript legacy (jQuery, Bootstrap JS,
+ * sidenav.js, perfect-scrollbar) produisait à l'exécution, désormais géré
+ * par Vue, et le CSS du popup commun à toutes les pages.
  */
 
 /* ---- Popup « Nouvelle demande à valider » (CSS legacy, identique sur toutes

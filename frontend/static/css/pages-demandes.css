@@ -1,0 +1,23 @@
+/*
+ * static/css/pages-demandes.css
+ *
+ * Bloc <style> legacy identique dans 7 pages (consulter_demandes,
+ * demandes_validation, detail_consulter_demande, ggrg_demandes_validation,
+ * introduire_demandes, modifier_demande, valider_demande), repris tel quel.
+ * Chargé à l'emplacement de l'ancien bloc (après le CSS legacy, avant app.css).
+ */
+
+body {
+    background: linear-gradient(135deg, #f4f4f4 0%, #f4f4f4 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.chat-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    max-width: 800px;
+    margin: 20px auto;
+    border: 2px solid #ffffff;
+}

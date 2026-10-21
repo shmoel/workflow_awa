@@ -1,0 +1,160 @@
+/*
+ * static/css/pages-tableau-bord.css
+ *
+ * Blocs <style> legacy identiques dans acceuil.html et historique.html,
+ * repris tels quels et dans le même ordre (cartes, boutons, tableaux,
+ * badges, recherche, puis compteurs .compteur-demandes). Le CSS du popup
+ * #popup-nouvelle-demande, qui suivait, est dans app.css.
+ * Chargé à l'emplacement des anciens blocs (après le CSS legacy, avant app.css).
+ */
+
+body {
+    background: #f7f6f3;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.card.card-hover {
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(234,88,12,0.10);
+    border: 1.5px solid #f3e7de;
+    position: relative;
+    overflow: visible;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.card.card-hover:hover {
+    box-shadow: 0 8px 32px rgba(234,88,12,0.16);
+    transform: translateY(-2px) scale(1.01);
+}
+.card-title {
+    font-weight: 700;
+    color: #ea580c;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+.card-text {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #222;
+}
+.card-body::before {
+    content: '';
+    display: block;
+    width: 38px;
+    height: 38px;
+    background: #fff7f0;
+    border-radius: 50%;
+    position: absolute;
+    top: -18px;
+    left: 18px;
+    box-shadow: 0 2px 8px #ea580c22;
+}
+.btn-primary, .btn-info {
+    border-radius: 20px;
+    font-weight: 600;
+    padding: 7px 22px;
+    background: #fff;
+    color: #ea580c;
+    border: 2px solid #ea580c;
+    box-shadow: 0 1px 4px #ea580c11;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover, .btn-info:hover {
+    background: #ea580c;
+    color: #fff;
+    box-shadow: 0 4px 16px #ea580c33;
+}
+.table.card-table {
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 8px #ea580c11;
+}
+.table.card-table thead tr {
+    background: #ea580c;
+    color: #fff;
+    font-weight: 700;
+}
+.table.card-table tbody tr:nth-child(even) {
+    background: #fff7f0;
+}
+.table.card-table tbody tr:hover {
+    background: #ffe5cc;
+}
+.badge, .custom-badge {
+    background: #fff;
+    color: #ea580c;
+    border-radius: 50px;
+    font-size: 13px;
+    padding: 3px 12px;
+    margin-left: 8px;
+    font-weight: 700;
+    border: 1.5px solid #ea580c;
+    box-shadow: 0 1px 4px #ea580c22;
+    animation: badgeBounce 0.8s;
+    position: relative;
+    top: -2px;
+}
+@keyframes badgeBounce {
+    0% { transform: scale(0.7); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+.navbar-search-input input {
+    border-radius: 18px !important;
+    border: 2px solid #ea580c !important;
+    background: #fff !important;
+    font-weight: 600;
+    color: #ea580c;
+    box-shadow: 0 1px 4px #ea580c11;
+    margin-right: 10px;
+    padding: 7px 16px;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.navbar-search-input input:focus {
+    border: 2.5px solid #ea580c !important;
+    background: #fff7f0 !important;
+    box-shadow: 0 4px 16px #ea580c22;
+}
+@media (max-width: 900px) {
+    .card.card-hover, .card {
+        margin-bottom: 18px;
+    }
+    .table.card-table {
+        font-size: 0.97rem;
+    }
+}
+@media (max-width: 600px) {
+    .card-title, .card-text {
+        font-size: 1.1rem;
+    }
+    .table.card-table {
+        font-size: 0.85rem;
+    }
+    .navbar-search-input input {
+        font-size: 0.95rem;
+        padding: 6px 10px;
+    }
+}
+
+.compteur-demandes {
+    /* Typographie et alignement */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;              /* bold */
+    font-size: 2rem;               /* ≈ 32px – ajuste selon ton design */
+    line-height: 1.2;
+    text-align: center;
+    /* Dimensions et espacement */
+    display: inline-block;
+    min-width: 90px;               /* évite les sauts de layout quand le nombre change */
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0;
+    /* Couleurs et fond */
+    color: #198754;                /* vert success Bootstrap */
+    background-color: rgba(25, 135, 84, 0.08);   /* fond très léger */
+    border: 1px solid rgba(25, 135, 84, 0.25);
+    border-radius: 0.75rem;        /* coins arrondis modernes */
+    /* Effets subtils */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
+}

@@ -27,7 +27,9 @@ API docs at `http://127.0.0.1:8000/docs`.
   npm, Vite, Webpack, React, or any build tool
 - **ES6 native modules** — components live in separate `.js` files, imported with `type="module"`
 - **Legacy CSS, no Tailwind** — the UI must look exactly like the legacy pages (decision of 08/10/2026).
-  Each page `<head>` reuses its legacy stylesheets and inline `<style>` blocks; templates reproduce the
+  Each page `<head>` reuses its legacy stylesheets and `<style>` blocks (blocks shared by several pages live in
+  `static/css/pages-*.css`, linked at the block's original position; page-specific ones stay inline; unused
+  icon fonts are removed: check `font-family` and icon classes before re-adding one); templates reproduce the
   legacy markup (UIKit / Bootstrap 4 material classes). No legacy JavaScript (jQuery, Bootstrap JS): its
   runtime behaviour is reimplemented in Vue, plus `frontend/static/css/app.css`
 - Page components in `frontend/static/js/pages/`, reusable components in `frontend/static/js/components/`
@@ -100,11 +102,14 @@ frontend/                          # Served as-is under /workflow (browser files
   images/                          # sib_logo.PNG, avatar.png
   static/
     vendor/vue/                    # vue.esm-browser.prod.js 3.5.43 (npm package, licence in docs/licences/)
-    vendor/uikit/                  # Legacy CSS + icon fonts (bootstrap-material, shreerang-material, uikit)
+    vendor/uikit/                  # Legacy CSS (bootstrap-material, shreerang-material, uikit) + the only
+                                   # icon fonts in use: feather, ionicons
     vendor/bootstrap-icons/        # Bootstrap Icons 1.11.1 (css + fonts)
     vendor/bootstrap/              # Bootstrap 5.3.0 CSS (index.html only)
     vendor/poppins/                # Poppins font, local @font-face (index.html only)
     css/design.css                 # Legacy design.css (modal shadow)
+    css/pages-demandes.css         # Legacy <style> shared by 7 pages (body, .chat-container)
+    css/pages-tableau-bord.css     # Legacy <style> shared by acceuil + historique (cards, tables…)
     css/app.css                    # What legacy JS did at runtime: popup, modals, sidebar, scroll areas
     js/
       services/

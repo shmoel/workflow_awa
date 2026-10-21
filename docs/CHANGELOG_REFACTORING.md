@@ -678,6 +678,35 @@ Plus aucune ressource chargée depuis un CDN (unpkg, jsdelivr, Google Fonts) :
 - **Mise à jour de Vue :** remplacer `vue.esm-browser.prod.js` par celui
   du paquet npm de la nouvelle version, puis contrôler les 11 pages.
 
+### 3. CSS legacy allégé
+Recensement des classes d'icônes dans les templates et des `font-family`
+du CSS legacy :
+
+| Police / feuille | Utilisée | Pages |
+|---|---|---|
+| feather | oui | 9 pages connectées (menu latéral, barre du haut, filtres) |
+| ionicons | oui (`ion-md-menu`) | 9 pages connectées (bouton du menu latéral) |
+| bootstrap-icons | oui | menu latéral, index, valider_demande |
+| fontawesome, linearicons, open-iconic, pe-icon-7-stroke | non | — |
+| flot.css (graphiques) | non | — |
+| perfect-scrollbar.css (classes `.ps` posées par le JS legacy) | non | — |
+
+- Retirés : les balises `<link>` et les fichiers des 4 polices et 2 feuilles
+  inutilisées (`static/vendor/uikit/` : 4,1 Mo → 1,5 Mo). Seule la règle
+  `.ui-builder` (non utilisée) de `shreerang-material.css` citait Linearicons.
+- Blocs `<style>` dupliqués :
+  - CSS du popup `#popup-nouvelle-demande` (8 pages) : supprimé, déjà dans
+    `app.css` (sa règle `display:none` était écrasée par le
+    `style="display:block"` du composant) ;
+  - bloc `body` + `.chat-container` (7 pages) → `static/css/pages-demandes.css` ;
+  - blocs d'acceuil et historique (cartes, boutons, tableaux, badges,
+    recherche, `.compteur-demandes`) → `static/css/pages-tableau-bord.css`.
+  Ces deux feuilles ne sont pas dans `app.css`, chargé par toutes les pages
+  (le fond `body` diffère d'une page à l'autre) ; elles sont chargées à
+  l'emplacement exact des anciens blocs (même ordre de cascade).
+- Restent inline, car propres à une page : le bloc de `chat.html` et celui
+  de `index.html`.
+
 ---
 
 ## À confirmer
