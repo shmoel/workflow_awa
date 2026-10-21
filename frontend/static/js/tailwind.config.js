@@ -17,8 +17,9 @@
 
 if (window.tailwind) tailwind.config = {
   theme: {
-    // Points de rupture Bootstrap 4 (le legacy bascule le menu latéral à 992 px)
-    screens: { sm: "576px", md: "768px", lg: "992px", xl: "1200px" },
+    // Points de rupture Bootstrap (le legacy bascule le menu latéral à 992 px ;
+    // xxl = conteneurs Bootstrap 5 de la vitrine)
+    screens: { sm: "576px", md: "768px", lg: "992px", xl: "1200px", xxl: "1400px" },
     extend: {
       colors: {
         ink:     "#212529",                 // texte courant
@@ -43,6 +44,7 @@ if (window.tailwind) tailwind.config = {
         sans:   ['"Segoe UI"', "Tahoma", "Geneva", "Verdana", "sans-serif"],
         system: ["system-ui", "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "Roboto", "sans-serif"],
         apple:  ["-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "Roboto", "sans-serif"],  // chat
+        poppins: ["Poppins", "sans-serif"],                                                       // vitrine
       },
       fontSize: {
         // Interlignes relatifs, comme le legacy : ils suivent la taille du texte
@@ -51,6 +53,18 @@ if (window.tailwind) tailwind.config = {
         btn:  ["13px", "1.47"],             // boutons et onglets
         h4:   ["21.008px", "1.1"],
         h5:   ["16px", "1.1"],
+      },
+      // Vitrine : formes du hero qui flottent (ex-@keyframes float)
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0px) rotate(45deg)" },
+          "50%":      { transform: "translateY(-15px) rotate(45deg)" },
+        },
+      },
+      animation: {
+        float:         "float 6s ease-in-out infinite",
+        "float-slow":  "float 8s ease-in-out infinite reverse",
+        "spin-btn":    "spin 0.75s linear infinite",   // ex-.spinner-border
       },
       zIndex: {
         navbar:  "1075",
