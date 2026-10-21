@@ -623,6 +623,21 @@ rapport aux pages Vue précédentes.
 
 ---
 
+## Améliorations techniques (13/10/2026)
+
+Sans changement visuel ni fonctionnel, sauf mention contraire. Contrôle par
+captures d'écran avant / après (Chrome headless) des 11 pages avec
+`testawa`, `testggr` et `introci`.
+
+### 1. Documentation hors du dossier servi
+`frontend/` est servi tel quel sous `/workflow` : ce fichier était donc
+public (`/workflow/CHANGELOG_REFACTORING.md`). Il est déplacé (`git mv`)
+dans `docs/CHANGELOG_REFACTORING.md` ; l'ancienne adresse répond 404. Aucun
+autre fichier non destiné au navigateur (.md, .txt, .sql, sauvegardes)
+n'est présent dans `frontend/`.
+
+---
+
 ## À confirmer
 
 Choix fonctionnels tranchés au plus près du legacy pendant la migration ;

@@ -8,7 +8,7 @@
  *   GET /demande_particulier/{id}  → carte récapitulative + note d'analyse
  *   GET /commentaires_demande/{id} → historique des avis (AvisTimeline)
  *
- * Corrections par rapport au legacy (voir CHANGELOG_REFACTORING.md, CORRECTION-08) :
+ * Corrections par rapport au legacy (voir docs/CHANGELOG_REFACTORING.md, CORRECTION-08) :
  *   - Popup de notification affichée (bloc HTML commenté dans le legacy,
  *     le script plantait à la détection d'une nouvelle demande)
  *   - « Aucune note jointe » si note_analyse est vide (le legacy plantait)

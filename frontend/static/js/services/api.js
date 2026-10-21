@@ -57,7 +57,7 @@ function _authHeadersOnly() {
  *   - Cette approche remplace la vérification tokenExpiry côté client, qui
  *     utilisait une durée fixe (1h) ne correspondant pas à l'expiration réelle
  *     du token backend (30 min). Le serveur fait autorité.
- *   Décision validée : CORRECTION-02 (voir CHANGELOG_REFACTORING.md)
+ *   Décision validée : CORRECTION-02 (voir docs/CHANGELOG_REFACTORING.md)
  *
  * Exception : POST /login/ passe redirectOn401 = false — un 401 y signifie
  * « identifiants incorrects » et la page de connexion affiche l'erreur.

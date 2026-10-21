@@ -22,7 +22,7 @@
  *     hauteur de l'en-tête), lien actif selon la section visible, apparition
  *     en fondu des cartes
  *
- * Corrections (voir CHANGELOG_REFACTORING.md, CORRECTION-07 et CORRECTION-12) :
+ * Corrections (voir docs/CHANGELOG_REFACTORING.md, CORRECTION-07 et CORRECTION-12) :
  *   - Tous les niveaux sont redirigés vers l'accueil (le niveau 4 l'était vers
  *     admin_acceuil.html, inexistant)
  *   - Message d'erreur si le profil est illisible après le login (le legacy

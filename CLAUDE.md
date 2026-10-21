@@ -37,7 +37,9 @@ API docs at `http://127.0.0.1:8000/docs`.
 - No `v-html`; if ever unavoidable, content must go through `escapeHtml()` first
 - Any visual change must keep the legacy look; compare with the legacy page from tag `pre-bascule-vue`
 - Links and downloads use Vue `:href` bindings, never `document.getElementById(...).href`
-- Record every behavior change in `frontend/CHANGELOG_REFACTORING.md`
+- Record every behavior change in `docs/CHANGELOG_REFACTORING.md`
+- `frontend/` is served publicly under `/workflow`: put only browser files there (no .md, .txt, .sql,
+  backups); documentation goes in `docs/`
 - Propose a plan before any significant change
 
 ## Domain: Workflow AWA (demandes CIB / CDCF)
@@ -76,8 +78,9 @@ Centralisation et validation des demandes d'autorisation d'opérations bancaires
 ## Frontend architecture
 
 ```
-frontend/
-  CHANGELOG_REFACTORING.md         # Behavior changes vs legacy, open points
+docs/
+  CHANGELOG_REFACTORING.md         # Behavior changes vs legacy, open points (not served)
+frontend/                          # Served as-is under /workflow (browser files only)
   *.html                           # One shell per page: legacy <head> (stylesheets + inline <style>),
                                    # importmap, mounts static/js/pages/<Page>.js on #app
     index.html                     #   LoginPage — legacy showcase page with login section

@@ -16,7 +16,7 @@
  *   - Confirmation « Voulez-vous vraiment modifier cette demande ? »
  *   - Modale « Demande modifiée avec succès », OK redirige vers consulter_demandes.html
  *
- * Corrections (voir CHANGELOG_REFACTORING.md, CORRECTION-10) :
+ * Corrections (voir docs/CHANGELOG_REFACTORING.md, CORRECTION-10) :
  *   - Banque présélectionnée par son id (le legacy utilisait
  *     selectedIndex = id_banque - 1 : mauvaise banque si les id ne se suivent pas)
  *   - Lien de la note : nom de fichier extrait du chemin complet stocké par

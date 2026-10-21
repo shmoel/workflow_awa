@@ -15,7 +15,7 @@
  *   - Modale « Demande Bien enregistrée ! », OK recharge la page
  *   - Pas de polling de notification (absent du legacy)
  *
- * Corrections (voir CHANGELOG_REFACTORING.md, CORRECTION-09) :
+ * Corrections (voir docs/CHANGELOG_REFACTORING.md, CORRECTION-09) :
  *   - Erreur de chargement des listes ou d'envoi affichée dans un bandeau
  *     (le legacy levait des exceptions non interceptées : rien ne s'affichait)
  *   - Bouton désactivé pendant l'envoi (double soumission possible)

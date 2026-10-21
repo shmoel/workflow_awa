@@ -15,7 +15,7 @@
  *   - Envoi par le bouton ou la touche Entrée
  *   - Popup de notification (polling)
  *
- * Corrections (voir CHANGELOG_REFACTORING.md, CORRECTION-11) :
+ * Corrections (voir docs/CHANGELOG_REFACTORING.md, CORRECTION-11) :
  *   - Le message n'est affiché qu'après la réponse OK de /commenter/ (le
  *     legacy l'affichait même en cas d'erreur HTTP)
  *   - Badge « Nouveau » de l'accueil : le dernier message est marqué vu au
