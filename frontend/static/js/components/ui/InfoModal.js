@@ -15,7 +15,7 @@
  *   ok — clic OK (la page décide de la suite : rechargement, redirection)
  */
 
-import { defineComponent } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "InfoModal",

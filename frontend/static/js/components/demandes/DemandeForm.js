@@ -33,7 +33,7 @@ import {
   ref,
   computed,
   watch,
-} from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+} from "vue";
 
 import { downloadUrl } from "../../services/api.js";
 

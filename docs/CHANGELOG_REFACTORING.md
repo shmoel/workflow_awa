@@ -10,19 +10,20 @@ par le chef de projet.
 
 ## État du projet (08/10/2026)
 
-- **Migration terminée** : les 11 pages sont en Vue 3 (CDN, modules ES6) ;
+- **Migration terminée** : les 11 pages sont en Vue 3 (hébergé localement, modules ES6) ;
   le legacy n'existe plus que dans le tag git `pre-bascule-vue`.
 - **Visuel identique au legacy** : CSS legacy d'origine, balisage legacy,
   plus de Tailwind (voir « Reprise du visuel legacy »).
-- **Corrections** : CORRECTION-01 à 12, toutes validées.
+- **Corrections** : CORRECTION-01 à 13, toutes validées.
 - **Restent ouverts** : 3 points « À confirmer » (frontend) et 8 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
 ### Sommaire
-- CORRECTION-01 à 12 — corrections de comportement, page par page
+- CORRECTION-01 à 13 — corrections de comportement, page par page
 - Bascule finale (05/10/2026) — suppression du legacy, renommage des pages
 - Reprise du visuel legacy (08/10/2026)
+- Améliorations techniques (13/10/2026) — documentation, bibliothèques locales, CSS, session
 - À confirmer — choix fonctionnels en attente de décision
 - Points ouverts backend — à traiter par l'équipe backend
 
@@ -494,6 +495,26 @@ Même parcours de connexion. Les messages d'erreur s'affichent dans tous les cas
 
 ---
 
+## [CORRECTION-13] Icône X (Twitter) absente du pied de page de la vitrine
+
+| Champ        | Valeur |
+|---|---|
+| **Fichier legacy concerné**   | `index.html` |
+| **Introduite par**            | Hébergement local des bibliothèques (13/10/2026, point 2) |
+| **Fichier corrigé**           | `frontend/index.html` (feuille `static/vendor/bootstrap-icons/`) |
+| **Statut**                    | ✅ **Validé** — décision du 13/10/2026 |
+
+### Description du bug legacy
+Décalage de versions : `index.html` chargeait Bootstrap Icons **1.10.0**,
+les autres pages la 1.11.1. L'icône `bi-twitter-x` n'existe qu'à partir de
+la 1.11.0 : le premier rond des réseaux sociaux du pied de page était vide.
+
+### Correction appliquée
+Une seule version locale, 1.11.1, pour toutes les pages : l'icône X
+s'affiche. Seul écart relevé par les captures avant / après.
+
+---
+
 ## Bascule finale (05/10/2026)
 
 Sauvegarde : tag git **`pre-bascule-vue`** (commit `7547874`, poussé sur
@@ -635,6 +656,27 @@ public (`/workflow/CHANGELOG_REFACTORING.md`). Il est déplacé (`git mv`)
 dans `docs/CHANGELOG_REFACTORING.md` ; l'ancienne adresse répond 404. Aucun
 autre fichier non destiné au navigateur (.md, .txt, .sql, sauvegardes)
 n'est présent dans `frontend/`.
+
+### 2. Bibliothèques hébergées localement, versions figées
+Plus aucune ressource chargée depuis un CDN (unpkg, jsdelivr, Google Fonts) :
+
+| Bibliothèque | Avant | Après (`frontend/static/vendor/`) |
+|---|---|---|
+| Vue | `unpkg.com/vue@3` (version non figée, build de développement) | `vue/vue.esm-browser.prod.js` — **3.5.43** (version servie par `vue@3` au 13/10/2026), build de production |
+| Bootstrap Icons | jsdelivr, 1.11.1 (8 pages) et 1.10.0 (index) | `bootstrap-icons/` — **1.11.1** partout (voir CORRECTION-13) |
+| Bootstrap (index) | jsdelivr, 5.3.0 | `bootstrap/bootstrap.min.css` — 5.3.0 |
+| Poppins (index) | Google Fonts | `poppins/poppins.css` + 15 fichiers woff2 (même `@font-face`, chemins relatifs) |
+
+- Les paquets npm ont été vérifiés (empreinte sha512 du registre npm).
+  Licences : `docs/licences/` (hors du dossier servi).
+- Importmap des 11 pages : `"vue": "./static/vendor/vue/vue.esm-browser.prod.js"`.
+  Les 26 modules importent désormais `from "vue"` (import nu résolu par
+  l'importmap) au lieu de l'URL unpkg.
+- Le build de production n'affiche plus les avertissements de
+  développement de Vue dans la console ; le compilateur de templates reste
+  inclus.
+- **Mise à jour de Vue :** remplacer `vue.esm-browser.prod.js` par celui
+  du paquet npm de la nouvelle version, puis contrôler les 11 pages.
 
 ---
 

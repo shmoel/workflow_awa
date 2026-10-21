@@ -16,7 +16,7 @@
  *                     5 = GGR Group, 6 = Clôturées
  */
 
-import { defineComponent, ref, onMounted } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import { defineComponent, ref, onMounted } from "vue";
 import { apiGet } from "../../services/api.js";
 
 /** Le nombre peut arriver sous plusieurs clés selon l'endpoint (legacy) */

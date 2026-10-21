@@ -47,7 +47,7 @@ import {
   computed,
   onMounted,
   onUnmounted,
-} from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+} from "vue";
 
 import { apiGet, apiPostForm, downloadUrl } from "../services/api.js";
 import { noteFilename } from "../components/demandes/DemandeForm.js";

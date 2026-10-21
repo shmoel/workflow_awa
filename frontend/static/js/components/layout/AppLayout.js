@@ -26,7 +26,7 @@
  *   menuLabel : libellé du sous-menu de la sidebar (« Menu » par défaut)
  */
 
-import { defineComponent, onMounted } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import { defineComponent, onMounted } from "vue";
 
 import AppSidebar        from "./AppSidebar.js";
 import AppNavbar         from "./AppNavbar.js";

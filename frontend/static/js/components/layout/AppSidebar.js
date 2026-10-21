@@ -21,7 +21,7 @@
  *               (sidenav-icon feather icon-lock) au lieu de bi-bar-chart.
  */
 
-import { defineComponent, ref, computed } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import { defineComponent, ref, computed } from "vue";
 import { useCurrentUser } from "../../composables/useCurrentUser.js";
 
 export default defineComponent({

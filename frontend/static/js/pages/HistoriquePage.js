@@ -23,7 +23,7 @@ import {
   computed,
   onMounted,
   onUnmounted,
-} from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+} from "vue";
 
 import { apiGet }                 from "../services/api.js";
 import { useCurrentUser }         from "../composables/useCurrentUser.js";

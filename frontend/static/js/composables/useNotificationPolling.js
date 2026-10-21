@@ -26,7 +26,7 @@
  *   <tr v-for="d in polling.newDemandes.value"> ... </tr>
  */
 
-import { ref } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import { ref } from "vue";
 import { apiGet } from "../services/api.js";
 import { getToken } from "../services/auth.js";
 

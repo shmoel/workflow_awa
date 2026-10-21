@@ -34,7 +34,7 @@ import {
   defineComponent,
   ref,
   watch,
-} from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+} from "vue";
 
 export default defineComponent({
   name: "ConfirmModal",

@@ -21,7 +21,7 @@ import {
   ref,
   onMounted,
   onUnmounted,
-} from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+} from "vue";
 import { useCurrentUser } from "../../composables/useCurrentUser.js";
 import { logout } from "../../services/auth.js";
 

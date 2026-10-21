@@ -37,7 +37,7 @@ import {
   ref,
   onMounted,
   onUnmounted,
-} from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+} from "vue";
 import { login } from "../services/auth.js";
 
 /** Page d'arrivée après connexion, quel que soit le niveau (CORRECTION-07) */

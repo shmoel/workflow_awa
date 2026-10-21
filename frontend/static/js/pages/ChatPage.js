@@ -35,7 +35,7 @@ import {
   nextTick,
   onMounted,
   onUnmounted,
-} from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+} from "vue";
 
 import { apiGet, apiPostForm }      from "../services/api.js";
 import { markMessagesSeen }         from "../services/chatSeen.js";

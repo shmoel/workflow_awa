@@ -28,7 +28,7 @@
  *   <li v-if="user.menu.intro_dmd"> ... </li>
  */
 
-import { ref, computed } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import { ref, computed } from "vue";
 import { apiGet } from "../services/api.js";
 import { isAuthenticated } from "../services/auth.js";
 

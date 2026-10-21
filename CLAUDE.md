@@ -22,7 +22,9 @@ API docs at `http://127.0.0.1:8000/docs`.
 
 ## Technical constraints (strict)
 
-- **Vue 3 via CDN** — no Node.js, npm, Vite, Webpack, React, or any build tool
+- **Vue 3 hosted locally** — `frontend/static/vendor/vue/vue.esm-browser.prod.js` (3.5.43, mapped to `"vue"` by
+  each page's importmap); modules import `from "vue"`. No CDN (unpkg, jsdelivr, Google Fonts…), no Node.js,
+  npm, Vite, Webpack, React, or any build tool
 - **ES6 native modules** — components live in separate `.js` files, imported with `type="module"`
 - **Legacy CSS, no Tailwind** — the UI must look exactly like the legacy pages (decision of 08/10/2026).
   Each page `<head>` reuses its legacy stylesheets and inline `<style>` blocks; templates reproduce the
@@ -80,6 +82,7 @@ Centralisation et validation des demandes d'autorisation d'opérations bancaires
 ```
 docs/
   CHANGELOG_REFACTORING.md         # Behavior changes vs legacy, open points (not served)
+  licences/                        # Licences of the vendored libraries
 frontend/                          # Served as-is under /workflow (browser files only)
   *.html                           # One shell per page: legacy <head> (stylesheets + inline <style>),
                                    # importmap, mounts static/js/pages/<Page>.js on #app
@@ -96,7 +99,11 @@ frontend/                          # Served as-is under /workflow (browser files
     historique.html                #   HistoriquePage
   images/                          # sib_logo.PNG, avatar.png
   static/
+    vendor/vue/                    # vue.esm-browser.prod.js 3.5.43 (npm package, licence in docs/licences/)
     vendor/uikit/                  # Legacy CSS + icon fonts (bootstrap-material, shreerang-material, uikit)
+    vendor/bootstrap-icons/        # Bootstrap Icons 1.11.1 (css + fonts)
+    vendor/bootstrap/              # Bootstrap 5.3.0 CSS (index.html only)
+    vendor/poppins/                # Poppins font, local @font-face (index.html only)
     css/design.css                 # Legacy design.css (modal shadow)
     css/app.css                    # What legacy JS did at runtime: popup, modals, sidebar, scroll areas
     js/

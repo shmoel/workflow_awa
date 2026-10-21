@@ -39,7 +39,7 @@
  * Exporte aussi formatNumber() (formatNumber() legacy).
  */
 
-import { defineComponent } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import { defineComponent } from "vue";
 
 /**
  * Formate un nombre en locale française (ex : 1 500 000), comme formatNumber() legacy.

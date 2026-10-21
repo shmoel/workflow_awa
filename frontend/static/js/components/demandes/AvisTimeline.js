@@ -28,7 +28,7 @@ import {
   defineComponent,
   ref,
   watch,
-} from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+} from "vue";
 
 const FIELDS = [
   { key: "nom",       label: "Nom" },

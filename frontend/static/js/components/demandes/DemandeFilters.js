@@ -16,7 +16,7 @@
  * Événement : update:modelValue — nouvel objet de filtres à chaque frappe
  */
 
-import { defineComponent } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "DemandeFilters",
