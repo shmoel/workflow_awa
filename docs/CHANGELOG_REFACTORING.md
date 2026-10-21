@@ -707,6 +707,15 @@ du CSS legacy :
 - Restent inline, car propres à une page : le bloc de `chat.html` et celui
   de `index.html`.
 
+### 4. Durée de session alignée sur le serveur (changement de comportement)
+Le jeton émis par `POST /login/` expire au bout de **30 min** ; le client
+le considérait valide **1 h** (`TOKEN_TTL_MS`, `services/auth.js`). Entre
+30 min et 1 h, les pages s'ouvraient puis chaque appel API recevait un 401
+et renvoyait vers la connexion (CORRECTION-02). `TOKEN_TTL_MS` passe à
+30 min : au-delà, la redirection vers `index.html` a lieu dès l'ouverture
+de la page. Durée de session inchangée pour l'utilisateur ; voir aussi le
+point ouvert backend 11.
+
 ---
 
 ## À confirmer

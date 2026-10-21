@@ -26,8 +26,8 @@ import { apiPost, apiGet } from "./api.js";
 
 const TOKEN_KEY = "token";
 const TOKEN_EXPIRY_KEY = "tokenExpiry";
-/** Durée de vie du token côté client : 1 heure (ms) */
-const TOKEN_TTL_MS = 3_600_000;
+/** Durée de vie du token côté client : 30 min (ms), comme le jeton émis par POST /login/ */
+const TOKEN_TTL_MS = 1_800_000;
 
 // ---------------------------------------------------------------------------
 // Gestion du token
