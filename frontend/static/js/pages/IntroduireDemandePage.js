@@ -166,6 +166,7 @@ export default defineComponent({
 
                     <DemandeForm
                         :banques="banques"
+                        :user-banque="user.banque.value"
                         :types="types"
                         :note-required="true"
                         submit-label="Soumettre"

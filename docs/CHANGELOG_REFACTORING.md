@@ -15,7 +15,7 @@ par le chef de projet.
 - **Visuel identique au legacy, en Tailwind** : depuis le 20/10/2026, le CSS
   legacy est remplacé par des classes Tailwind (Play CDN 3.4.17, copie locale
   de secours) ; rendu comparé au pixel près (voir « Passage à Tailwind »).
-- **Corrections** : CORRECTION-01 à 16, toutes validées.
+- **Corrections** : CORRECTION-01 à 17, toutes validées.
 - **Améliorations techniques (13/10/2026)** : documentation hors du dossier
   servi, bibliothèques hébergées localement, CSS allégé, session alignée
   sur 30 min.
@@ -27,7 +27,7 @@ par le chef de projet.
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
 ### Sommaire
-- CORRECTION-01 à 16 — corrections de comportement, page par page
+- CORRECTION-01 à 17 — corrections de comportement, page par page
 - Bascule finale (05/10/2026) — suppression du legacy, renommage des pages
 - Reprise du visuel legacy (08/10/2026)
 - Améliorations techniques (13/10/2026) — documentation, bibliothèques locales, CSS, session
@@ -594,6 +594,42 @@ directes (repli), aucune erreur JavaScript.
 ### Impact fonctionnel
 Ajout visible : la flèche décale le contenu de ces quatre pages d'environ
 48 px vers le bas.
+
+---
+
+## [CORRECTION-17] Demande enregistrée pour une autre banque que celle de l'auteur
+
+| Champ        | Valeur |
+|---|---|
+| **Fichiers legacy concernés** | `introduire_demandes.html`, `modifier_demande.html` |
+| **Fichiers corrigés**         | `components/demandes/DemandeForm.js` (prop `userBanque`), `IntroduireDemandePage.js`, `ModifierDemandePage.js` |
+| **Statut**                    | ✅ **Validé** — décision du 22/10/2026 (banque fixée, sans choix possible) |
+
+### Description
+Le champ « Banque » listait toutes les banques et présélectionnait la
+première (AWA), comme le legacy. Une demande saisie sans changer ce choix
+partait sur AWA : le validateur local de la filiale (qui ne voit que les
+demandes de sa banque) ne la recevait jamais et elle restait bloquée à
+l'étape 1. Constaté le 22/10/2026 : demande 23 de `introci` (BKCI)
+enregistrée pour AWA, demande 20 pour BKSN.
+
+### Correction appliquée
+Le champ « Banque » est fixé sur la banque de l'utilisateur (profil
+`GET /users-joined/`, sigle rapproché de `GET /banques/`), en création comme
+en modification, et n'est plus modifiable (liste désactivée, toujours
+affichée). Conforme aux conventions API v2 §3 (la banque est déduite du
+token) et au document officiel (« la filiale saisit sa demande »). Modifier
+une demande déjà enregistrée pour une autre banque la rattache à celle de
+l'auteur. Si la banque du profil est absente de la liste, l'envoi est
+bloqué avec un message.
+
+Vérifié le 22/10/2026 : `introci` → BKCI (création et demande 23),
+`introsn` → BKSN, aucune erreur JavaScript.
+
+### Impact fonctionnel
+Un utilisateur ne peut plus saisir une demande pour une autre banque que la
+sienne. Le serveur ne le contrôle pas encore (point ouvert backend 14 :
+`POST /demandes/` accepte toujours le paramètre `banque`).
 
 ---
 

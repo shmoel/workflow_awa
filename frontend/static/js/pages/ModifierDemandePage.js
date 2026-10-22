@@ -203,6 +203,7 @@ export default defineComponent({
 
                         <DemandeForm
                             :banques="banques"
+                            :user-banque="user.banque.value"
                             :types="types"
                             :initial="initial"
                             :note-required="false"

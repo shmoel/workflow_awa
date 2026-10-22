@@ -11,6 +11,9 @@
  *
  * Props :
  *   banques      : Array   — lignes de GET /banques/ { id, sigle, nom }
+ *   userBanque   : String  — sigle de la banque de l'utilisateur : le champ
+ *                            « Banque » est fixé sur elle, non modifiable
+ *                            (conventions API v2 §3, CORRECTION-17)
  *   types        : Array   — lignes de GET /types_demandes/{entite}/ { demande_id, nom_demande }
  *   initial      : Object  — valeurs initiales { banque, type, client, montant, comm }
  *                            (modification : valeurs de la demande ; création : vide)
@@ -57,6 +60,7 @@ export default defineComponent({
 
   props: {
     banques:      { type: Array,   default: () => [] },
+    userBanque:   { type: String,  default: "" },
     types:        { type: Array,   default: () => [] },
     initial:      { type: Object,  default: () => ({}) },
     noteRequired: { type: Boolean, default: true },
@@ -72,6 +76,7 @@ export default defineComponent({
     const file      = ref(null);
     const fileInput = ref(null);
     const fileError = ref("");
+    const banqueError = ref("");
 
     // Valeurs initiales (demande chargée en modification)
     watch(
@@ -80,15 +85,20 @@ export default defineComponent({
       { immediate: true, deep: true }
     );
 
-    // Première option sélectionnée par défaut quand les listes arrivent
-    // (legacy : selectedIndex = 0), sauf si une valeur est déjà choisie
+    // Banque fixée sur celle de l'utilisateur, en création comme en
+    // modification (legacy : première option, AWA, présélectionnée et
+    // modifiable → demandes envoyées à une autre banque que la sienne)
     watch(
-      () => props.banques,
-      (list) => {
-        if (!form.value.banque && list.length) form.value.banque = String(list[0].id);
+      () => [props.banques, props.userBanque, props.initial],
+      () => {
+        if (!props.userBanque || !props.banques.length) return;
+        const b = props.banques.find((x) => x.sigle === props.userBanque);
+        form.value.banque = b ? String(b.id) : "";
+        banqueError.value = b ? "" : "Votre banque est introuvable dans la liste des banques.";
       },
       { immediate: true }
     );
+    // Première option du type sélectionnée par défaut (legacy : selectedIndex = 0)
     watch(
       () => props.types,
       (list) => {
@@ -107,6 +117,10 @@ export default defineComponent({
 
     function onSubmit() {
       fileError.value = "";
+      if (!form.value.banque) {
+        banqueError.value = banqueError.value || "Banque non définie.";
+        return;
+      }
       if (props.noteRequired && !file.value) {
         fileError.value = "Veuillez sélectionner un fichier pour la note d'analyse.";
         return;
@@ -121,16 +135,17 @@ export default defineComponent({
       emit("submit", { ...form.value, file: file.value });
     }
 
-    return { form, fileInput, fileError, existingNoteName, downloadNote, onFileChange, onSubmit, BTN, FORM, TEXTAREA, LINK };
+    return { form, fileInput, fileError, banqueError, existingNoteName, downloadNote, onFileChange, onSubmit, BTN, FORM, TEXTAREA, LINK };
   },
 
   template: /* html */ `
     <form @submit.prevent="onSubmit">
         <div :class="FORM.group">
             <label :class="FORM.labelS" for="df-banque">Banque </label>
-            <select :class="FORM.select" id="df-banque" v-model="form.banque" required>
+            <select :class="FORM.select + ' disabled:opacity-100 disabled:cursor-default'" id="df-banque" v-model="form.banque" disabled>
                 <option v-for="b in banques" :key="b.id" :value="String(b.id)">{{ b.sigle }} - {{ b.nom }}</option>
             </select>
+            <small v-if="banqueError" :class="FORM.help + ' text-danger'" role="alert">{{ banqueError }}</small>
         </div>
         <div :class="FORM.group">
             <label :class="FORM.labelS" for="df-type">Type</label>
