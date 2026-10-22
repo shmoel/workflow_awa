@@ -16,6 +16,15 @@
 -- Comptes secondaires (section 7, même mot de passe test1234) :
 --   introci, risqueci, dgci (filiale BKCI), introsn (filiale BKSN),
 --   testggr (banque AIG, entité GGR)
+--
+-- Niveaux d'habilitation (document officiel Resume_Plateforme_Workflow_AWA,
+-- §2 « Les niveaux d'habilitation ») :
+--   Niveau 1 = consultation (Accueil, Statistiques)
+--   Niveau 2 = saisie (Introduire, Consulter mes demandes)      : introci, introsn
+--   Niveau 3 = validation (Valider des demandes, Historique)    : risqueci, dgci
+--              (validation locale), testawa (AWA), testggr (AIG / GGR)
+-- Corrigé le 22/10/2026 : introci / introsn étaient au Niveau 1 et
+-- risqueci / dgci au Niveau 2 (voir dev/fix_niveaux_comptes_2026-10-22.sql).
 -- ============================================================
 
 
@@ -48,7 +57,7 @@ SELECT setval('banque_id_seq', 1);
 -- ============================================================
 
 INSERT INTO niveauhab (id, code, description)
-  VALUES (1, 'Niveau 3', 'Validateur central — accès complet (historique visible)');
+  VALUES (1, 'Niveau 3', 'Validation — valider des demandes, historique');
 
 INSERT INTO entite (id, libelle, description)
   VALUES (1, 'Salle des marchés', 'Salle des marchés');
@@ -251,8 +260,8 @@ INSERT INTO banque (id, sigle, nom, id_loc, id_type_instit) VALUES
   (4, 'BKSN', 'Filiale Senegal',           2, 2);
 
 INSERT INTO niveauhab (id, code, description) VALUES
-  (2, 'Niveau 1', 'Saisie — introduction des demandes'),
-  (3, 'Niveau 2', 'Validateur local');
+  (2, 'Niveau 1', 'Consultation — accueil et statistiques'),
+  (3, 'Niveau 2', 'Saisie — introduire et consulter ses demandes');
 
 INSERT INTO entite (id, libelle, description) VALUES
   (2, 'Corporate', 'Corporate'),
@@ -266,10 +275,10 @@ INSERT INTO poste (id, libelle) VALUES
 -- Même hash que testawa (mot de passe test1234)
 INSERT INTO users (id, username, nom, prenom, hashed_password, password,
                    email, id_banque, id_niv_hab, id_entite, id_poste) VALUES
-  (2, 'introci',  'Intro',  'CI',  '$2b$12$E4nzqOrwpxSGBVzhJNYn6ed6D008VggXdDeLvwBA79zq.bB0Lws3q', 'test1234', 'introci@awa.test',  3, 2, 2, 2),
-  (3, 'risqueci', 'Risque', 'CI',  '$2b$12$E4nzqOrwpxSGBVzhJNYn6ed6D008VggXdDeLvwBA79zq.bB0Lws3q', 'test1234', 'risqueci@awa.test', 3, 3, 1, 3),
-  (4, 'dgci',     'DG',     'CI',  '$2b$12$E4nzqOrwpxSGBVzhJNYn6ed6D008VggXdDeLvwBA79zq.bB0Lws3q', 'test1234', 'dgci@awa.test',     3, 3, 2, 4),
-  (5, 'introsn',  'Intro',  'SN',  '$2b$12$E4nzqOrwpxSGBVzhJNYn6ed6D008VggXdDeLvwBA79zq.bB0Lws3q', 'test1234', 'introsn@awa.test',  4, 2, 1, 2),
+  (2, 'introci',  'Intro',  'CI',  '$2b$12$E4nzqOrwpxSGBVzhJNYn6ed6D008VggXdDeLvwBA79zq.bB0Lws3q', 'test1234', 'introci@awa.test',  3, 3, 2, 2),
+  (3, 'risqueci', 'Risque', 'CI',  '$2b$12$E4nzqOrwpxSGBVzhJNYn6ed6D008VggXdDeLvwBA79zq.bB0Lws3q', 'test1234', 'risqueci@awa.test', 3, 1, 1, 3),
+  (4, 'dgci',     'DG',     'CI',  '$2b$12$E4nzqOrwpxSGBVzhJNYn6ed6D008VggXdDeLvwBA79zq.bB0Lws3q', 'test1234', 'dgci@awa.test',     3, 1, 2, 4),
+  (5, 'introsn',  'Intro',  'SN',  '$2b$12$E4nzqOrwpxSGBVzhJNYn6ed6D008VggXdDeLvwBA79zq.bB0Lws3q', 'test1234', 'introsn@awa.test',  4, 3, 1, 2),
   (6, 'testggr',  'Test',   'GGR', '$2b$12$E4nzqOrwpxSGBVzhJNYn6ed6D008VggXdDeLvwBA79zq.bB0Lws3q', 'test1234', 'testggr@awa.test',  2, 1, 3, 3);
 
 -- Domaines filiales : libellé = categoriedemande.libelle (filtre de l'accueil filiale).

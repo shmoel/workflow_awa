@@ -22,7 +22,7 @@ par le chef de projet.
 - **Conventions API v2** (21/10/2026) : contrat `docs/conventions-api-v2.md` ;
   appliqué au frontend dans la mesure du possible, le reste attend le backend
   (voir « Alignement sur les conventions API v2 »).
-- **Restent ouverts** : 4 points « À confirmer » (frontend) et 13 points
+- **Restent ouverts** : 3 points « À confirmer » (frontend ; le n°1 est résolu) et 13 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
@@ -873,7 +873,7 @@ applique dès maintenant ce qui ne dépend pas du backend.
 | 5, 7 | 401 → effacer le token, connexion avec « session expirée » | `services/api.js`, `services/auth.js`, `LoginPage` (CORRECTION-14) |
 | 7 | Un seul module d'appels, URL relatives à l'origine, en-tête `Authorization` | déjà le cas (`services/api.js`) |
 | 8 | Téléchargement authentifié, jamais par un simple lien | `downloadNote()` : `fetch` avec le token → `blob` → nouvel onglet, adresse libérée ensuite (détail, valider, modifier) ; aspect inchangé |
-| 8 | Fichiers joints : `.pdf`, `.jpg`, `.jpeg`, `.png`, 5 Mo maximum | `checkAttachment()` dans `DemandeForm` (création et modification) ; le backend appliquait déjà ces règles, le frontend n'acceptait que le PDF |
+| 8 | Fichiers joints : `.pdf`, `.jpg`, `.jpeg`, `.png`, 5 Mo maximum | `checkAttachment()` dans `DemandeForm` (création et modification) ; le backend appliquait déjà ces règles, le frontend n'acceptait que le PDF. Maintenu le 22/10/2026, bien que le résumé officiel (`Resume_Plateforme_Workflow_AWA`) indique encore « PDF » : document à mettre à jour |
 | 7 | Menus selon le rôle = confort d'interface | déjà le cas (la sécurité dépend du serveur) |
 
 Vérifié le 21/10/2026 (erreurs simulées dans le navigateur, sans écriture
@@ -912,13 +912,20 @@ texte d'aide du champ fichier.
 Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
 à valider par le chef de projet.
 
-1. **Comptes du seed et menus (introduire_demandes).** Le menu reprend la
-   logique legacy : « Introduire demande » visible pour le **Niveau 2**,
-   masqué pour le Niveau 1. Or le seed attribue le Niveau 1 (« Saisie —
-   introduction des demandes ») à `introci` / `introsn` et le Niveau 2
-   (« Validateur local ») à `risqueci` / `dgci`. `introci` n'a donc pas le
-   lien dans le menu (la page reste accessible par son URL). Legacy conservé ;
-   à trancher : corriger le seed ou la logique de menu.
+1. ✅ **Résolu le 22/10/2026 — Comptes du jeu de test et menus.** Le document
+   officiel `Resume_Plateforme_Workflow_AWA` (§2) confirme la logique du menu :
+   **Niveau 1** = consultation (Accueil, Statistiques), **Niveau 2** = saisie
+   (Introduire, Consulter mes demandes), **Niveau 3** = validation (Valider des
+   demandes — version GGR pour AIG / GGR —, Historique), y compris la
+   validation locale des filiales. C'est le jeu de test qui était faux : il
+   décrivait le Niveau 1 comme « Saisie » et le Niveau 2 comme « Validateur
+   local », et plaçait `introci` / `introsn` au Niveau 1, `risqueci` / `dgci`
+   au Niveau 2. Corrigé : `introci` / `introsn` au Niveau 2, `risqueci` /
+   `dgci` au Niveau 3, libellés des niveaux alignés sur le document
+   (`dev/seed_test_data.sql` ; base locale mise à jour par
+   `dev/fix_niveaux_comptes_2026-10-22.sql`). La validation locale (risque
+   local, DG local, fenêtre « OUI/NON » du DG) est désormais testable avec
+   `risqueci` et `dgci`. Aucun changement du code de l'application.
 2. **Demande sans avis initial (introduire_demandes).** Comme dans le legacy,
    la demande puis l'avis initial sont créés en deux appels. Si le second
    échoue, la demande existe sans avis et n'apparaît dans aucune liste.
@@ -1008,6 +1015,22 @@ Pour les comptes de filiale (`introci`, `dgci`), l'endpoint plante :
 fourni). Le tableau de l'accueil affiche une ligne « Impossible de charger
 les données » ; les cartes de compteurs restent affichées. Le legacy
 affichait un tableau vide.
+
+**Cause (analysée le 22/10/2026) :** dans `backend/routes/route.py`, route
+`GET /demandes_a_consulter/{domaine_user}`, branche des filiales (banque
+autre que AWA / AIG), la requête SQL utilise le paramètre `:user_id`
+(sous-requête `WHERE id_valideur = :user_id`), mais le dictionnaire de
+paramètres ne fournit que `id_banque`, `id_user` et `domaine`.
+
+**Correctif proposé (une ligne, à appliquer par l'équipe backend)** :
+
+```python
+params = {"id_banque": user.id_banque, "id_user": user.id, "user_id": user.id, "domaine": domaine_user}
+```
+
+Décision du 22/10/2026 : le backend n'est pas modifié depuis ce dépôt ;
+l'erreur reste affichée provisoirement (le frontend ne la masque pas).
+Cible v2 : `GET /api/v2/demandes?vue=a-consulter` (conventions API v2 §12).
 
 ### Point 7 — Historique AIG/GGR : `/demandes_cloturer/` en erreur 500
 
