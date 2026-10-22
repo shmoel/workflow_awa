@@ -22,7 +22,7 @@ par le chef de projet.
 - **Conventions API v2** (21/10/2026) : contrat `docs/conventions-api-v2.md` ;
   appliqué au frontend dans la mesure du possible, le reste attend le backend
   (voir « Alignement sur les conventions API v2 »).
-- **Restent ouverts** : 3 points « À confirmer » (frontend ; le n°1 est résolu) et 13 points
+- **Restent ouverts** : 3 points « À confirmer » (frontend ; le n°1 est résolu) et 14 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
@@ -1183,6 +1183,27 @@ frontend envoie désormais le token (`downloadNote()`, conventions API v2
 l'utilisateur peut voir la demande).
 
 *(Identifié lors de l'alignement sur les conventions API v2 — 21/10/2026)*
+
+### Point 14 — Niveau d'habilitation non vérifié par le serveur
+
+Le menu masque les pages selon le niveau (Niveau 1 = consultation,
+Niveau 2 = saisie, Niveau 3 = validation ; document officiel
+`Resume_Plateforme_Workflow_AWA` §2), mais le serveur ne vérifie pas ce
+niveau. Constaté le 22/10/2026 : `GET /demandes_a_valider/` renvoie
+2 demandes « à valider » à `introci` (Niveau 2, saisie), comme à `risqueci`
+(Niveau 3) ; la route ne filtre que par banque et entité. Un utilisateur
+peut donc ouvrir les pages par leur adresse et appeler l'API au-delà de son
+niveau.
+
+À traiter côté backend : contrôler le niveau (et la banque / l'étape) dans
+les routes de lecture **et d'action** (`/valider_avis/…`,
+`/cloturer_demande/…`, `/demandes/`, `/update_demandes/…`), avec `403`
+pour une action interdite et `404` pour une ressource hors périmètre
+(conventions API v2 §5 et §7 : le menu n'est qu'un confort d'interface).
+Lié à la décision D3 (matrice des droits) et à `GET /api/v2/moi`
+(permissions de l'utilisateur).
+
+*(Identifié lors de la vérification des comptes de test — 22/10/2026)*
 
 ---
 
