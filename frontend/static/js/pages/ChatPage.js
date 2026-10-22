@@ -43,6 +43,7 @@ import { useCurrentUser }           from "../composables/useCurrentUser.js";
 import { useNotificationPolling }   from "../composables/useNotificationPolling.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
+import BackArrow from "../components/ui/BackArrow.js";
 import { ALERT_DANGER, LINK } from "../components/ui/classes.js";
 
 // En-tête du chat : libellé gris en capitales, valeur en gras (ex-.info-label / .info-value)
@@ -62,7 +63,7 @@ function readDemandeId() {
 export default defineComponent({
   name: "ChatPage",
 
-  components: { AppLayout },
+  components: { AppLayout, BackArrow },
 
   setup() {
     const user      = useCurrentUser();
@@ -178,6 +179,7 @@ export default defineComponent({
             <div class="flex flex-wrap -mx-3 min-h-px">
                 <div class="relative w-full xl:w-1/6 px-3"></div>
                 <div class="relative w-full xl:w-2/3 px-3">
+                    <BackArrow fallback="acceuil.html" />
 
                     <div v-if="notFound" :class="ALERT_DANGER" role="alert">
                         Demande introuvable : l'identifiant est absent, invalide ou ne correspond à aucune demande.

@@ -37,6 +37,7 @@ import { apiGet, apiPostForm } from "../services/api.js";
 import { useCurrentUser }      from "../composables/useCurrentUser.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
+import BackArrow from "../components/ui/BackArrow.js";
 import DemandeForm  from "../components/demandes/DemandeForm.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
 import InfoModal    from "../components/ui/InfoModal.js";
@@ -55,7 +56,7 @@ function readDemandeId() {
 export default defineComponent({
   name: "ModifierDemandePage",
 
-  components: { AppLayout, DemandeForm, ConfirmModal, InfoModal },
+  components: { AppLayout, DemandeForm, ConfirmModal, InfoModal, BackArrow },
 
   setup() {
     const user = useCurrentUser();
@@ -181,6 +182,7 @@ export default defineComponent({
         <div class="flex-grow px-4 lg:px-8 py-6">
 
             <div class="w-full px-8">
+              <BackArrow fallback="consulter_demandes.html" class="lg:ml-[calc(16.6667%-8px)]" />
               <div class="flex flex-wrap -mx-3">
             <div class="relative w-full lg:w-1/6 px-3"></div>
             <div :class="CARD.card + ' w-full md:w-2/3 mb-6 px-3'">

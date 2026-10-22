@@ -141,6 +141,7 @@ frontend/                          # Served as-is under /workflow (browser files
                                    # "dashboard" / "demandes"), DemandesCard, TabsCard,
                                    # AvisTimeline, DemandeForm
         ui/                        # ConfirmModal, InfoModal (variant "material" / "design"),
+                                   # BackArrow (back arrow on detail / chat / modifier / valider),
                                    # classes.js (shared Tailwind class lists)
       pages/                       # One file per page: AccueilPage.js, etc.
 ```

@@ -55,6 +55,7 @@ import { useCurrentUser }               from "../composables/useCurrentUser.js";
 import { useNotificationPolling }       from "../composables/useNotificationPolling.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
+import BackArrow from "../components/ui/BackArrow.js";
 import InfoModal from "../components/ui/InfoModal.js";
 import AvisTimeline from "../components/demandes/AvisTimeline.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
@@ -74,7 +75,7 @@ function getDemandId() {
 export default defineComponent({
   name: "ValiderDemandePage",
 
-  components: { AppLayout, ConfirmModal, AvisTimeline, InfoModal },
+  components: { AppLayout, ConfirmModal, AvisTimeline, InfoModal, BackArrow },
 
   setup() {
     const user    = useCurrentUser();
@@ -265,6 +266,7 @@ export default defineComponent({
     <AppLayout :polling="polling">
         <div class="flex flex-wrap -mx-3">
             <div class="relative w-full px-3">
+                <BackArrow fallback="demandes_validation.html" class="pl-6" />
                 <div :class="CARD.card + ' w-full mb-6'">
                     <div class="flex flex-wrap h-full overflow-hidden">
                         <div class="relative flex items-center w-full md:w-1/2 pt-px">

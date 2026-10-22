@@ -34,6 +34,7 @@ import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
+import BackArrow from "../components/ui/BackArrow.js";
 import AvisTimeline     from "../components/demandes/AvisTimeline.js";
 import { formatNumber } from "../components/demandes/DemandesTable.js";
 import { BTN, SHEET, ALERT_DANGER, LINK } from "../components/ui/classes.js";
@@ -51,7 +52,7 @@ function readDemandeId() {
 export default defineComponent({
   name: "DetailDemandePage",
 
-  components: { AppLayout, AvisTimeline },
+  components: { AppLayout, AvisTimeline, BackArrow },
 
   setup() {
     const user    = useCurrentUser();
@@ -157,6 +158,7 @@ export default defineComponent({
             <div class="relative w-full px-3">
                 <div class="flex flex-wrap h-full overflow-hidden">
                     <div class="w-full px-8">
+                        <BackArrow fallback="acceuil.html" />
 
                         <div v-if="notFound" :class="ALERT_DANGER" role="alert">
                             Demande introuvable : l'identifiant est absent, invalide ou ne correspond à aucune demande.

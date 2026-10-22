@@ -15,7 +15,7 @@ par le chef de projet.
 - **Visuel identique au legacy, en Tailwind** : depuis le 20/10/2026, le CSS
   legacy est remplacé par des classes Tailwind (Play CDN 3.4.17, copie locale
   de secours) ; rendu comparé au pixel près (voir « Passage à Tailwind »).
-- **Corrections** : CORRECTION-01 à 15, toutes validées.
+- **Corrections** : CORRECTION-01 à 16, toutes validées.
 - **Améliorations techniques (13/10/2026)** : documentation hors du dossier
   servi, bibliothèques hébergées localement, CSS allégé, session alignée
   sur 30 min.
@@ -27,7 +27,7 @@ par le chef de projet.
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
 ### Sommaire
-- CORRECTION-01 à 15 — corrections de comportement, page par page
+- CORRECTION-01 à 16 — corrections de comportement, page par page
 - Bascule finale (05/10/2026) — suppression du legacy, renommage des pages
 - Reprise du visuel legacy (08/10/2026)
 - Améliorations techniques (13/10/2026) — documentation, bibliothèques locales, CSS, session
@@ -568,6 +568,35 @@ dans la console.
 
 ---
 
+## [CORRECTION-16] Pas de retour vers la liste depuis les pages d'une demande
+
+| Champ        | Valeur |
+|---|---|
+| **Fichiers legacy concernés** | `detail_consulter_demande.html`, `chat.html`, `modifier_demande.html`, `valider_demande.html` |
+| **Fichiers corrigés**         | `components/ui/BackArrow.js` (nouveau), `DetailDemandePage.js`, `ChatPage.js`, `ModifierDemandePage.js`, `ValiderDemandePage.js` |
+| **Statut**                    | ✅ **Validé** — décision du 22/10/2026 (amélioration d'ergonomie, écart volontaire au visuel legacy) |
+
+### Description
+Ces quatre pages s'ouvrent depuis une liste (`?id_dmd=`). Seuls le bouton
+« précédent » du navigateur ou le menu latéral permettaient d'y revenir, et
+le menu ne signale pas la page courante (« À confirmer » n°3).
+
+### Correction appliquée
+Petite flèche cliquable (icône feather `icon-arrow-left`, grise, orange au
+survol) en haut du contenu, alignée sur le bord gauche de la carte. Elle
+ramène à la page précédente si elle appartient à l'application (la liste
+d'origine) ; sinon (favori, lien copié) à une page de repli : accueil
+(détail, chat), Mes demandes (modifier), Demandes à valider (valider).
+
+Vérifié le 22/10/2026 : 4 parcours liste → page → flèche, 4 ouvertures
+directes (repli), aucune erreur JavaScript.
+
+### Impact fonctionnel
+Ajout visible : la flèche décale le contenu de ces quatre pages d'environ
+48 px vers le bas.
+
+---
+
 ## Bascule finale (05/10/2026)
 
 Sauvegarde : tag git **`pre-bascule-vue`** (commit `7547874`, poussé sur
@@ -682,7 +711,9 @@ Retraits d'ajouts non legacy :
 - Filtres retirés de « Consulter mes demandes » et des deux pages de
   validation : absents du legacy (ils restent sur l'accueil et l'historique,
   comme dans le legacy).
-- Bouton « Retour » retiré de la page détail.
+- Bouton « Retour » retiré de la page détail. *Remplacé le 22/10/2026 par
+  une petite flèche sur les pages détail, chat, modifier et valider
+  (CORRECTION-16).*
 
 Non reproduit (JavaScript legacy non chargé) :
 - Effet « ripple » au clic (material-ripple.js), barre de chargement Pace.
