@@ -926,6 +926,10 @@ Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
    `dev/fix_niveaux_comptes_2026-10-22.sql`). La validation locale (risque
    local, DG local, fenêtre « OUI/NON » du DG) est désormais testable avec
    `risqueci` et `dgci`. Aucun changement du code de l'application.
+   Complété le même jour par `dev/seed_test_comptes_2026-10-22.sql` : un
+   compte par étape du circuit (`risqueci` passe à l'entité GGR pour l'étape 1 ;
+   nouveaux comptes `consultci` (Niveau 1), `risquesn`, `dgsn`, `regcib`,
+   `regcdcf`, entités AIG « CIB » et « CDCF »).
 2. **Demande sans avis initial (introduire_demandes).** Comme dans le legacy,
    la demande puis l'avis initial sont créés en deux appels. Si le second
    échoue, la demande existe sans avis et n'apparaît dans aucune liste.

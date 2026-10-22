@@ -25,6 +25,9 @@
 --              (validation locale), testawa (AWA), testggr (AIG / GGR)
 -- Corrigé le 22/10/2026 : introci / introsn étaient au Niveau 1 et
 -- risqueci / dgci au Niveau 2 (voir dev/fix_niveaux_comptes_2026-10-22.sql).
+--
+-- Comptes complémentaires (un par étape du circuit, Niveau 1) : exécuter ensuite
+-- dev/seed_test_comptes_2026-10-22.sql.
 -- ============================================================
 
 
