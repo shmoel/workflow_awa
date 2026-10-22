@@ -22,7 +22,7 @@ par le chef de projet.
 - **Conventions API v2** (21/10/2026) : contrat `docs/conventions-api-v2.md` ;
   appliqué au frontend dans la mesure du possible, le reste attend le backend
   (voir « Alignement sur les conventions API v2 »).
-- **Restent ouverts** : 3 points « À confirmer » (frontend ; le n°1 est résolu) et 14 points
+- **Restent ouverts** : 3 points « À confirmer » (frontend ; le n°1 est résolu) et 15 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
@@ -1244,6 +1244,26 @@ Lié à la décision D3 (matrice des droits) et à `GET /api/v2/moi`
 (permissions de l'utilisateur).
 
 *(Identifié lors de la vérification des comptes de test — 22/10/2026)*
+
+### Point 15 — Validation impossible pour un validateur de filiale hors entités GGR / DG
+
+`POST /valider_avis/{id}/process_ongoing/{0|1}` choisit l'étape d'un
+validateur de filiale d'après le libellé de son **entité** : `GGR` → statut 2,
+`DG` → statut 3 (ou 9 si le DG arrête la demande). Pour toute autre entité,
+`id_event` n'est jamais défini et la route plante (erreur 500). Or
+`GET /demandes_a_valider/` présente l'étape 2 à **tout** utilisateur de filiale
+dont l'entité n'est pas GGR : un tel utilisateur voit des demandes à évaluer
+mais ne peut pas les valider (l'écran affiche « Erreur lors de la soumission
+du formulaire. »). Constaté le 22/10/2026 avec `dgci` (poste Directeur
+Général, entité Corporate) ; jeu de test corrigé par
+`dev/fix_entite_dg_2026-10-22.sql` (entité « DG »).
+
+À traiter côté backend : aligner les deux routes (même règle d'aiguillage)
+et répondre `403` avec un message clair plutôt qu'une erreur 500
+(conventions API v2 §5 et §7). À préciser par le métier : le DG local
+est-il défini par son entité (règle actuelle du code) ou par son poste ?
+
+*(Identifié lors du test de la validation DG local — 22/10/2026)*
 
 ---
 
