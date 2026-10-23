@@ -25,7 +25,6 @@
 import {
   defineComponent,
   ref,
-  computed,
   onMounted,
   onUnmounted,
 } from "vue";
@@ -34,38 +33,15 @@ import { apiGet }                     from "../services/api.js";
 import { lastMsgKey, messageStamp, markMessagesSeen } from "../services/chatSeen.js";
 import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
+import { useDashboardDemandes }       from "../composables/useDashboardDemandes.js";
+import { goToDetail, goToChat }       from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import StatCard       from "../components/demandes/StatCard.js";
-import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
+import DemandesTable  from "../components/demandes/DemandesTable.js";
 import DemandesCard   from "../components/demandes/DemandesCard.js";
 import { BTN }        from "../components/ui/classes.js";
-
-// ---------------------------------------------------------------------------
-// Colonnes du tableau (ordre identique au legacy)
-// ---------------------------------------------------------------------------
-const COLUMNS = [
-  { key: "banque",            label: "Banque",            wrap: "cc-label" },
-  { key: "categorie_demande", label: "Entité",            wrap: "cc-label" },
-  { key: "type_demande",      label: "Type de demande",   wrap: "cc" },
-  { key: "nom_client",        label: "Contrepartie",      wrap: "cc" },
-  { key: "_date_heure",       label: "Date / Heure",      wrap: "cc" },
-  { key: "description",       label: "Niveau validation", wrap: "cc" },
-];
-
-// ---------------------------------------------------------------------------
-// Filtres
-// ---------------------------------------------------------------------------
-const FILTER_FIELDS = [
-  { key: "banque",       placeholder: "Filtrer par Banque" },
-  { key: "entite",       placeholder: "Filtrer par Entité" },
-  { key: "type",         placeholder: "Filtrer par Type" },
-  { key: "contrepartie", placeholder: "Filtrer par Contrepartie" },
-  { key: "date",         placeholder: "Filtrer par date " },
-];
-
-const EMPTY_FILTERS = { banque: "", entite: "", type: "", contrepartie: "", date: "" };
 
 // ---------------------------------------------------------------------------
 // Cartes de compteurs (ordre identique au legacy)
@@ -92,31 +68,14 @@ export default defineComponent({
     const user    = useCurrentUser();
     const polling = useNotificationPolling();
 
-    // ---- Données brutes ----
-    const allDemandes    = ref([]);
-    const newMessageMap  = ref({});   // id_demande → boolean
-    const loadingTable   = ref(true);
-    const errorTable     = ref(null);
+    // Colonnes, filtres et chargement communs avec l'historique ;
+    // la route dépend du domaine du profil (rien à charger sans domaine)
+    const { liste, filters, filteredRows, filterFields, columns } = useDashboardDemandes(
+      () => (user.domaine.value ? `/demandes_a_consulter/${user.domaine.value}` : null)
+    );
 
-    // ---- Filtres ----
-    const filters = ref({ ...EMPTY_FILTERS });
-
-    // ---- Liste filtrée ----
-    const filteredRows = computed(() => {
-      const b = filters.value.banque.toLowerCase();
-      const e = filters.value.entite.toLowerCase();
-      const t = filters.value.type.toLowerCase();
-      const c = filters.value.contrepartie.toLowerCase();
-      const d = filters.value.date.toLowerCase();
-      return allDemandes.value.filter(
-        (r) =>
-          (r.banque            ?? "").toLowerCase().includes(b) &&
-          (r.categorie_demande ?? "").toLowerCase().includes(e) &&
-          (r.type_demande      ?? "").toLowerCase().includes(t) &&
-          (r.nom_client        ?? "").toLowerCase().includes(c) &&
-          (r._date_heure       ?? "").toLowerCase().includes(d)
-      );
-    });
+    // ---- Badges "Nouveau" : id_demande → boolean ----
+    const newMessageMap = ref({});
 
     // ---- Vérification nouveau message pour une demande ----
     async function _checkNewMsg(id) {
@@ -132,37 +91,17 @@ export default defineComponent({
       } catch { return false; }
     }
 
-    // ---- Chargement du tableau ----
-    async function loadDemandes() {
-      loadingTable.value = true;
-      errorTable.value   = null;
-      try {
-        // Récupère le domaine depuis le profil déjà chargé
-        const domaine = user.domaine.value;
-        if (!domaine) return;
-
-        const data = await apiGet(`/demandes_a_consulter/${domaine}`);
-        const rows = (data.results ?? []).map((r) => ({
-          ...r,
-          _date_heure: `${r.date_avis || "N/A"} | ${r.heure_avis || "N/A"}`,
-        }));
-        allDemandes.value = rows;
-
-        // Badges "Nouveau message" — vérification en parallèle
-        const checks = await Promise.allSettled(
-          rows.map((r) => _checkNewMsg(r.id_demande))
-        );
-        const map = {};
-        rows.forEach((r, i) => {
-          map[r.id_demande] =
-            checks[i].status === "fulfilled" ? checks[i].value : false;
-        });
-        newMessageMap.value = map;
-      } catch (e) {
-        errorTable.value = e.message;
-      } finally {
-        loadingTable.value = false;
-      }
+    // ---- Badges "Nouveau message" — vérification en parallèle ----
+    async function loadBadges(rows) {
+      const checks = await Promise.allSettled(
+        rows.map((r) => _checkNewMsg(r.id_demande))
+      );
+      const map = {};
+      rows.forEach((r, i) => {
+        map[r.id_demande] =
+          checks[i].status === "fulfilled" ? checks[i].value : false;
+      });
+      newMessageMap.value = map;
     }
 
     // ---- Actions boutons ----
@@ -176,18 +115,15 @@ export default defineComponent({
         const data = await apiGet(`/messages_chat/${id}`);
         markMessagesSeen(id, data.results);
       } catch { /* silencieux */ }
-      setTimeout(() => { window.location.href = `chat.html?id_dmd=${id}`; }, 100);
-    }
-
-    function goToDetail(id) {
-      window.location.href = `detail_consulter_demande.html?id_dmd=${id}`;
+      setTimeout(() => goToChat(id), 100);
     }
 
     // ---- Cycle de vie ----
     onMounted(async () => {
       await user.fetchUser();
       polling.start();
-      await loadDemandes();
+      await liste.load();
+      await loadBadges(liste.rows);
     });
 
     onUnmounted(() => polling.stop());
@@ -196,13 +132,12 @@ export default defineComponent({
       user,
       polling,
       statCards:     STAT_CARDS,
+      liste,
       filteredRows,
       newMessageMap,
-      loadingTable,
-      errorTable,
       filters,
-      filterFields:  FILTER_FIELDS,
-      columns:       COLUMNS,
+      filterFields,
+      columns,
       handleChatClick,
       goToDetail,
       BTN,
@@ -227,7 +162,7 @@ export default defineComponent({
                 <div class="h-[310px]" id="tasks-inner"></div>
 
                 <DemandesCard tab-label="Introduites" :fields="filterFields" v-model="filters">
-                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="errorTable">
+                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error">
                         <template #badge="{ row }">
                             <span v-if="newMessageMap[row.id_demande]" style='background:#ea580c;color:#fff;padding:2px 8px;border-radius:8px;font-size:12px;margin-left:8px;'>Nouveau</span>
                         </template>

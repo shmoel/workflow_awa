@@ -34,9 +34,11 @@ import {
   onUnmounted,
 } from "vue";
 
-import { apiGet, apiPostForm }        from "../services/api.js";
+import { apiPostForm }                from "../services/api.js";
 import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
+import { useDemandesList }           from "../composables/useDemandesList.js";
+import { goToDetail, goToEvaluer }    from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import InfoModal from "../components/ui/InfoModal.js";
@@ -45,16 +47,6 @@ import DemandesTable, { formatNumber } from "../components/demandes/DemandesTabl
 import ConfirmModal   from "../components/ui/ConfirmModal.js";
 import TabsCard       from "../components/demandes/TabsCard.js";
 import { BTN, ALERT_DANGER_FORM } from "../components/ui/classes.js";
-
-// ---------------------------------------------------------------------------
-// Navigation
-// ---------------------------------------------------------------------------
-function goToEvaluer(id) {
-  window.location.href = `valider_demande.html?id_dmd=${id}`;
-}
-function goToDetail(id) {
-  window.location.href = `detail_consulter_demande.html?id_dmd=${id}`;
-}
 
 // ---------------------------------------------------------------------------
 // Définitions des colonnes
@@ -100,48 +92,9 @@ export default defineComponent({
     // ---- Onglet actif ----
     const activeTab = ref("intro");   // "intro" | "cloturer"
 
-    // ---- Données brutes ----
-    const rowsIntro    = ref([]);
-    const rowsCloturer = ref([]);
-
-    const loadingIntro    = ref(true);
-    const loadingCloturer = ref(true);
-
-    const errorIntro    = ref(null);
-    const errorCloturer = ref(null);
-
-
-
-    // Pas de filtres sur cette page (absents du legacy)
-    const filteredIntro = rowsIntro;
-    const filteredCloturer = rowsCloturer;
-
-    // ---- Chargements ----
-    async function loadIntro() {
-      loadingIntro.value = true;
-      errorIntro.value = null;
-      try {
-        const data = await apiGet("/demandes_a_valider/");
-        rowsIntro.value = data.results ?? [];
-      } catch (e) {
-        errorIntro.value = e.message;
-      } finally {
-        loadingIntro.value = false;
-      }
-    }
-
-    async function loadCloturer() {
-      loadingCloturer.value = true;
-      errorCloturer.value = null;
-      try {
-        const data = await apiGet("/demandes_a_cloturer/");
-        rowsCloturer.value = data.results ?? [];
-      } catch (e) {
-        errorCloturer.value = e.message;
-      } finally {
-        loadingCloturer.value = false;
-      }
-    }
+    // ---- Listes des onglets (pas de filtres : absents du legacy) ----
+    const intro    = useDemandesList("/demandes_a_valider/");
+    const cloturer = useDemandesList("/demandes_a_cloturer/");
 
     // ---- Modale clôture ----
     const showCloModal   = ref(false);
@@ -184,7 +137,7 @@ export default defineComponent({
     onMounted(async () => {
       await user.fetchUser();
       polling.start();
-      await Promise.allSettled([loadIntro(), loadCloturer()]);
+      await Promise.allSettled([intro.load(), cloturer.load()]);
     });
 
     onUnmounted(() => polling.stop());
@@ -193,9 +146,7 @@ export default defineComponent({
       user,
       polling,
       activeTab,
-      filteredIntro, filteredCloturer,
-      loadingIntro,  loadingCloturer,
-      errorIntro,    errorCloturer,
+      intro, cloturer,
       colsIntro:    COLS_INTRO,
       colsCloturer: COLS_CLOTURER,
       showCloModal,
@@ -227,14 +178,14 @@ export default defineComponent({
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
                     <template #intro>
-                        <DemandesTable theme="demandes" :rows="filteredIntro" :columns="colsIntro" :action-headers="1" :error="errorIntro">
+                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="1" :error="intro.error">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowInfo" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
                             </template>
                         </DemandesTable>
                     </template>
                     <template #cloturer>
-                        <DemandesTable theme="demandes" :rows="filteredCloturer" :columns="colsCloturer" :error="errorCloturer">
+                        <DemandesTable theme="demandes" :rows="cloturer.rows" :columns="colsCloturer" :error="cloturer.error">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.outlinePrimary" label="Cloturer" @click="openCloModal(row.id_demande)" />

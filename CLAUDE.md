@@ -143,10 +143,13 @@ frontend/                          # Served as-is under /workflow (browser files
         useTimedAlert.js           # in-page alert that disappears after 5 s
         useNoteDownload.js         # downloadNote() with the error shown in the page
         useModalA11y.js            # modal keyboard: focus, Tab trap, Escape (never sends data)
+        useDemandesList.js         # list loaded from a GET route: rows, loading, error, load()
+        useDashboardDemandes.js    # Accueil / Historique table: columns, 5 filters, filtering
       domain/
         workflow.js                # EVENT status codes (1–9), PROCESS (DG continue / stop)
       utils/
         url.js                     # readDemandeId() — ?id_dmd= parameter
+        navigation.js              # goToDetail / goToChat / goToModify / goToEvaluer
       components/
         layout/                    # AppLayout (legacy layout-wrapper), AppSidebar, AppNavbar,
                                    # AppFooter, NotificationPopup

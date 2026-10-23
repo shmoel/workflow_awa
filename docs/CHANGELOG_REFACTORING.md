@@ -1070,6 +1070,25 @@ passe des comptes de test par variable d'environnement
 Relevé : l'onglet de `demandes_validation` s'intitule « Demandes en fin de
 de processus » (coquille du legacy, conservée).
 
+### Lot E — appliqué le 23/10/2026 (code commun des listes)
+
+- `composables/useDemandesList.js` : chargement d'une liste (lignes,
+  chargement, erreur) ; remplace 9 blocs identiques (Mes demandes ×3,
+  Demandes à valider ×3, GGR ×2, Historique).
+- `composables/useDashboardDemandes.js` : colonnes, 5 filtres et filtrage
+  de l'accueil et de l'historique, auparavant recopiés dans les deux pages.
+- `utils/navigation.js` : `goToDetail`, `goToChat`, `goToModify`,
+  `goToEvaluer`, au lieu de 11 copies.
+- Pages : 398 lignes supprimées, 77 ajoutées.
+
+Aucun changement pour l'utilisateur. Vérifié : 27 captures (5 pages, chaque
+onglet, filtres saisis, 4 comptes) identiques avant / après (un pixel
+diffère : le curseur clignotant d'un champ) ; 44 tests de recette réussis,
+dont un nouveau test des 5 filtres (accueil et historique), dont on a
+vérifié qu'il échoue si un filtre vise la mauvaise colonne.
+
+La revue « Qualité du code » est terminée (lots A à E).
+
 ## À confirmer
 
 Choix fonctionnels tranchés au plus près du legacy pendant la migration ;

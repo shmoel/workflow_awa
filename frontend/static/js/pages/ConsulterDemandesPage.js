@@ -49,10 +49,12 @@ import {
   onUnmounted,
 } from "vue";
 
-import { apiGet, apiPost } from "../services/api.js";
+import { apiPost } from "../services/api.js";
 import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
+import { useDemandesList }       from "../composables/useDemandesList.js";
 import { EVENT, etatFinProcess }    from "../domain/workflow.js";
+import { goToDetail, goToModify, goToChat } from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import InfoModal from "../components/ui/InfoModal.js";
@@ -61,19 +63,6 @@ import DemandesTable, { formatNumber } from "../components/demandes/DemandesTabl
 import ConfirmModal  from "../components/ui/ConfirmModal.js";
 import TabsCard      from "../components/demandes/TabsCard.js";
 import { BTN, ALERT_DANGER_FORM } from "../components/ui/classes.js";
-
-// ---------------------------------------------------------------------------
-// Helpers de navigation (réutilisés dans les slots actions)
-// ---------------------------------------------------------------------------
-function goToDetail(id) {
-  window.location.href = `detail_consulter_demande.html?id_dmd=${id}`;
-}
-function goToModify(id) {
-  window.location.href = `modifier_demande.html?id_dmd=${id}`;
-}
-function goToChat(id) {
-  window.location.href = `chat.html?id_dmd=${id}`;
-}
 
 // ---------------------------------------------------------------------------
 // Définitions des colonnes par onglet
@@ -122,21 +111,21 @@ const TABS = [
 ];
 
 function normalizeIntro(rows) {
-  return (rows ?? []).map((r) => ({
+  return rows.map((r) => ({
     ...r,
     _date_heure: [r.date, r.heure].filter(Boolean).join(" "),
   }));
 }
 
 function normalizeValider(rows) {
-  return (rows ?? []).map((r) => ({
+  return rows.map((r) => ({
     ...r,
     _date_heure: r.date_val ?? "",
   }));
 }
 
 function normalizeFinProcess(rows) {
-  return (rows ?? []).map((r) => ({
+  return rows.map((r) => ({
     ...r,
     _date_heure: r.date_val ?? "",
     _etat: etatFinProcess(r),
@@ -160,63 +149,10 @@ export default defineComponent({
     // "intro" | "valid" | "fin"
     const activeTab = ref("intro");
 
-    // ---- Données brutes par onglet ----
-    const rowsIntro = ref([]);
-    const rowsValid = ref([]);
-    const rowsFin   = ref([]);
-
-    const loadingIntro = ref(true);
-    const loadingValid = ref(true);
-    const loadingFin   = ref(true);
-
-    const errorIntro = ref(null);
-    const errorValid = ref(null);
-    const errorFin   = ref(null);
-
-    // Pas de filtres sur cette page (absents du legacy)
-    const filteredIntro = rowsIntro;
-    const filteredValid = rowsValid;
-    const filteredFin   = rowsFin;
-
-    // ---- Chargement des données ----
-    async function loadIntro() {
-      loadingIntro.value = true;
-      errorIntro.value = null;
-      try {
-        const data = await apiGet("/demandes_user/");
-        rowsIntro.value = normalizeIntro(data.results);
-      } catch (e) {
-        errorIntro.value = e.message;
-      } finally {
-        loadingIntro.value = false;
-      }
-    }
-
-    async function loadValid() {
-      loadingValid.value = true;
-      errorValid.value = null;
-      try {
-        const data = await apiGet("/demandes_user_valider/");
-        rowsValid.value = normalizeValider(data.results);
-      } catch (e) {
-        errorValid.value = e.message;
-      } finally {
-        loadingValid.value = false;
-      }
-    }
-
-    async function loadFin() {
-      loadingFin.value = true;
-      errorFin.value = null;
-      try {
-        const data = await apiGet("/demandes_fin_process/");
-        rowsFin.value = normalizeFinProcess(data.results);
-      } catch (e) {
-        errorFin.value = e.message;
-      } finally {
-        loadingFin.value = false;
-      }
-    }
+    // ---- Listes des onglets (pas de filtres : absents du legacy) ----
+    const intro = useDemandesList("/demandes_user/",         normalizeIntro);
+    const valid = useDemandesList("/demandes_user_valider/", normalizeValider);
+    const fin   = useDemandesList("/demandes_fin_process/",  normalizeFinProcess);
 
     // ---- Modale suppression ----
     const showDeleteModal  = ref(false);
@@ -279,7 +215,7 @@ export default defineComponent({
       await user.fetchUser();
       polling.start();
       // Charge les 3 onglets en parallèle
-      await Promise.allSettled([loadIntro(), loadValid(), loadFin()]);
+      await Promise.allSettled([intro.load(), valid.load(), fin.load()]);
     });
 
     onUnmounted(() => polling.stop());
@@ -288,13 +224,8 @@ export default defineComponent({
       user,
       polling,
       activeTab,
-      // Données filtrées
-      filteredIntro,
-      filteredValid,
-      filteredFin,
-      // États de chargement
-      loadingIntro, loadingValid, loadingFin,
-      errorIntro,   errorValid,   errorFin,
+      // Listes des onglets
+      intro, valid, fin,
       // Colonnes
       colsIntro: COLS_INTRO,
       colsValid: COLS_VALID,
@@ -331,7 +262,7 @@ export default defineComponent({
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
                     <template #intro>
-                        <DemandesTable theme="demandes" :rows="filteredIntro" :columns="colsIntro" :action-headers="2" :error="errorIntro">
+                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="2" :error="intro.error">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowWarning" label="Modifier" @click="goToModify(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowDanger" label="Supprimer" @click="openDeleteModal(row.id_demande)" />
@@ -339,7 +270,7 @@ export default defineComponent({
                         </DemandesTable>
                     </template>
                     <template #valid>
-                        <DemandesTable theme="demandes" :rows="filteredValid" :columns="colsValid" :error="errorValid">
+                        <DemandesTable theme="demandes" :rows="valid.rows" :columns="colsValid" :error="valid.error">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowSecondary" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowInfo" label="CHAT" @click="goToChat(row.id_demande)" />
@@ -347,7 +278,7 @@ export default defineComponent({
                         </DemandesTable>
                     </template>
                     <template #fin>
-                        <DemandesTable theme="demandes" :rows="filteredFin" :columns="colsFin" :error="errorFin">
+                        <DemandesTable theme="demandes" :rows="fin.rows" :columns="colsFin" :error="fin.error">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowSecondary" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowInfo" label="CHAT" @click="goToChat(row.id_demande)" />

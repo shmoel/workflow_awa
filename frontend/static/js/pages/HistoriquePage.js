@@ -19,50 +19,20 @@
 
 import {
   defineComponent,
-  ref,
-  computed,
   onMounted,
   onUnmounted,
 } from "vue";
 
-import { apiGet }                 from "../services/api.js";
 import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
+import { useDashboardDemandes }   from "../composables/useDashboardDemandes.js";
+import { goToDetail }             from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable  from "../components/demandes/DemandesTable.js";
 import DemandesCard   from "../components/demandes/DemandesCard.js";
 import { BTN }        from "../components/ui/classes.js";
-
-function goToDetail(id) {
-  window.location.href = `detail_consulter_demande.html?id_dmd=${id}`;
-}
-
-// ---------------------------------------------------------------------------
-// Colonnes du tableau (ordre identique au legacy)
-// ---------------------------------------------------------------------------
-const COLUMNS = [
-  { key: "banque",            label: "Banque",            wrap: "cc-label" },
-  { key: "categorie_demande", label: "Entité",            wrap: "cc-label" },
-  { key: "type_demande",      label: "Type de demande",   wrap: "cc" },
-  { key: "nom_client",        label: "Contrepartie",      wrap: "cc" },
-  { key: "_date_heure",       label: "Date / Heure",      wrap: "cc" },
-  { key: "description",       label: "Niveau validation", wrap: "cc" },
-];
-
-// ---------------------------------------------------------------------------
-// Filtres
-// ---------------------------------------------------------------------------
-const FILTER_FIELDS = [
-  { key: "banque",       placeholder: "Filtrer par Banque" },
-  { key: "entite",       placeholder: "Filtrer par Entité" },
-  { key: "type",         placeholder: "Filtrer par Type" },
-  { key: "contrepartie", placeholder: "Filtrer par Contrepartie" },
-  { key: "date",         placeholder: "Filtrer par date " },
-];
-
-const EMPTY_FILTERS = { banque: "", entite: "", type: "", contrepartie: "", date: "" };
 
 // ---------------------------------------------------------------------------
 // Composant page
@@ -76,50 +46,15 @@ export default defineComponent({
     const user    = useCurrentUser();
     const polling = useNotificationPolling();
 
-    const allDemandes  = ref([]);
-    const loadingTable = ref(true);
-    const errorTable   = ref(null);
-    const filters      = ref({ ...EMPTY_FILTERS });
-
-    // ---- Liste filtrée ----
-    const filteredRows = computed(() => {
-      const b = filters.value.banque.toLowerCase();
-      const e = filters.value.entite.toLowerCase();
-      const t = filters.value.type.toLowerCase();
-      const c = filters.value.contrepartie.toLowerCase();
-      const d = filters.value.date.toLowerCase();
-      return allDemandes.value.filter(
-        (r) =>
-          (r.banque            ?? "").toLowerCase().includes(b) &&
-          (r.categorie_demande ?? "").toLowerCase().includes(e) &&
-          (r.type_demande      ?? "").toLowerCase().includes(t) &&
-          (r.nom_client        ?? "").toLowerCase().includes(c) &&
-          (r._date_heure       ?? "").toLowerCase().includes(d)
-      );
-    });
-
-    // ---- Chargement ----
-    async function loadDemandes() {
-      loadingTable.value = true;
-      errorTable.value   = null;
-      try {
-        const data = await apiGet("/demandes_cloturer/");
-        allDemandes.value = (data.results ?? []).map((r) => ({
-          ...r,
-          _date_heure: `${r.date_avis || "N/A"} | ${r.heure_avis || "N/A"}`,
-        }));
-      } catch (e) {
-        errorTable.value = e.message;
-      } finally {
-        loadingTable.value = false;
-      }
-    }
+    // Colonnes, filtres et chargement communs avec l'accueil
+    const { liste, filters, filteredRows, filterFields, columns } =
+      useDashboardDemandes("/demandes_cloturer/");
 
     // ---- Cycle de vie ----
     onMounted(async () => {
       await user.fetchUser();
       polling.start();
-      await loadDemandes();
+      await liste.load();
     });
 
     onUnmounted(() => polling.stop());
@@ -127,12 +62,11 @@ export default defineComponent({
     return {
       user,
       polling,
+      liste,
       filteredRows,
-      loadingTable,
-      errorTable,
       filters,
-      filterFields: FILTER_FIELDS,
-      columns:      COLUMNS,
+      filterFields,
+      columns,
       goToDetail,
       BTN,
     };
@@ -147,7 +81,7 @@ export default defineComponent({
                 <div class="h-[310px]" id="tasks-inner"></div>
 
                 <DemandesCard tab-label="Demandes Cloturees" :fields="filterFields" v-model="filters">
-                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="errorTable">
+                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error">
                         <template #actions="{ row }">
                             <ActionCell :btn-class="BTN.outlineBrand" label="Détails" @click="goToDetail(row.id_demande)" />
                         </template>

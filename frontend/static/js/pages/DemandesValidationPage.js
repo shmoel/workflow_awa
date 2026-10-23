@@ -36,29 +36,17 @@ import {
   onUnmounted,
 } from "vue";
 
-import { apiGet }                     from "../services/api.js";
 import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
+import { useDemandesList }           from "../composables/useDemandesList.js";
 import { EVENT, etatFinProcess }        from "../domain/workflow.js";
+import { goToDetail, goToChat, goToEvaluer } from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
 import TabsCard  from "../components/demandes/TabsCard.js";
 import { BTN }   from "../components/ui/classes.js";
-
-// ---------------------------------------------------------------------------
-// Navigation
-// ---------------------------------------------------------------------------
-function goToEvaluer(id) {
-  window.location.href = `valider_demande.html?id_dmd=${id}`;
-}
-function goToDetail(id) {
-  window.location.href = `detail_consulter_demande.html?id_dmd=${id}`;
-}
-function goToChat(id) {
-  window.location.href = `chat.html?id_dmd=${id}`;
-}
 
 // ---------------------------------------------------------------------------
 // Colonnes par onglet
@@ -113,75 +101,17 @@ export default defineComponent({
     // ---- Onglet actif ----
     const activeTab = ref("intro");  // "intro" | "valid" | "fin"
 
-    // ---- Données brutes ----
-    const rowsIntro = ref([]);
-    const rowsValid = ref([]);
-    const rowsFin   = ref([]);
-
-    const loadingIntro = ref(true);
-    const loadingValid = ref(true);
-    const loadingFin   = ref(true);
-
-    const errorIntro = ref(null);
-    const errorValid = ref(null);
-    const errorFin   = ref(null);
-
-
-
-    // Pas de filtres sur cette page (absents du legacy)
-    const filteredIntro = rowsIntro;
-    const filteredValid = rowsValid;
-    const filteredFin = rowsFin;
-
-    // ---- Chargements ----
-    async function loadIntro() {
-      loadingIntro.value = true;
-      errorIntro.value = null;
-      try {
-        const data = await apiGet("/demandes_a_valider/");
-        rowsIntro.value = data.results ?? [];
-      } catch (e) {
-        errorIntro.value = e.message;
-      } finally {
-        loadingIntro.value = false;
-      }
-    }
-
-    async function loadValid() {
-      loadingValid.value = true;
-      errorValid.value = null;
-      try {
-        const data = await apiGet("/demandes_deja_valider/");
-        rowsValid.value = data.results ?? [];
-      } catch (e) {
-        errorValid.value = e.message;
-      } finally {
-        loadingValid.value = false;
-      }
-    }
-
-    async function loadFin() {
-      loadingFin.value = true;
-      errorFin.value = null;
-      try {
-        const data = await apiGet("/demandes_fin_process/");
-        // Normalise le champ _etat calculé depuis max_event
-        rowsFin.value = (data.results ?? []).map((r) => ({
-          ...r,
-          _etat: etatFinProcess(r),
-        }));
-      } catch (e) {
-        errorFin.value = e.message;
-      } finally {
-        loadingFin.value = false;
-      }
-    }
+    // ---- Listes des onglets (pas de filtres : absents du legacy) ----
+    const intro = useDemandesList("/demandes_a_valider/");
+    const valid = useDemandesList("/demandes_deja_valider/");
+    const fin   = useDemandesList("/demandes_fin_process/",
+      (rows) => rows.map((r) => ({ ...r, _etat: etatFinProcess(r) })));
 
     // ---- Cycle de vie ----
     onMounted(async () => {
       await user.fetchUser();
       polling.start();
-      await Promise.allSettled([loadIntro(), loadValid(), loadFin()]);
+      await Promise.allSettled([intro.load(), valid.load(), fin.load()]);
     });
 
     onUnmounted(() => polling.stop());
@@ -190,9 +120,7 @@ export default defineComponent({
       user,
       polling,
       activeTab,
-      filteredIntro, filteredValid, filteredFin,
-      loadingIntro,  loadingValid,  loadingFin,
-      errorIntro,    errorValid,    errorFin,
+      intro, valid, fin,
       colsIntroValid:  COLS_INTRO_VALID,
       colsFin:         COLS_FIN,
       goToEvaluer,
@@ -214,14 +142,14 @@ export default defineComponent({
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
                     <template #intro>
-                        <DemandesTable theme="demandes" :rows="filteredIntro" :columns="colsIntroValid" :action-headers="1" :error="errorIntro">
+                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntroValid" :action-headers="1" :error="intro.error">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.info" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
                             </template>
                         </DemandesTable>
                     </template>
                     <template #valid>
-                        <DemandesTable theme="demandes" :rows="filteredValid" :columns="colsIntroValid" :action-headers="1" :error="errorValid">
+                        <DemandesTable theme="demandes" :rows="valid.rows" :columns="colsIntroValid" :action-headers="1" :error="valid.error">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowInfo" label="CHAT" @click="goToChat(row.id_demande)" />
@@ -229,7 +157,7 @@ export default defineComponent({
                         </DemandesTable>
                     </template>
                     <template #fin>
-                        <DemandesTable theme="demandes" :rows="filteredFin" :columns="colsFin" :error="errorFin">
+                        <DemandesTable theme="demandes" :rows="fin.rows" :columns="colsFin" :error="fin.error">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
                             </template>

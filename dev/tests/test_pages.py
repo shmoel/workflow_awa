@@ -70,3 +70,36 @@ def test_etats_fin_de_processus(ouvrir_session):
     if not etats:
         pytest.skip("aucune demande en fin de processus")
     assert set(etats) <= {"Terme", "Arrêté"}
+
+
+# Filtres de l'accueil et de l'historique : colonne du tableau filtrée par chaque champ
+FILTRES = [("Filtrer par Banque", 0), ("Filtrer par Entité", 1), ("Filtrer par Type", 2),
+           ("Filtrer par Contrepartie", 3), ("Filtrer par date", 4)]
+
+
+@pytest.mark.parametrize("chemin", ["acceuil.html", "historique.html"])
+def test_filtres_tableau(ouvrir_session, chemin):
+    page, _ = ouvrir_session("testawa")
+    ouvrir(page, chemin)
+    lignes = page.locator("#tab-table-1 tbody tr")
+    cellules = "(i) => [...document.querySelectorAll('#tab-table-1 tbody tr')].map(tr => tr.cells[i]?.innerText.trim() ?? '')"
+    total = lignes.count()
+    if total == 0:
+        pytest.skip("tableau vide pour testawa")
+    for placeholder, colonne in FILTRES:
+        champ = page.locator(f"input[placeholder^='{placeholder}']")
+        valeurs = page.evaluate(cellules, colonne)
+        # Fragment de la première valeur, saisi en majuscules : le filtre ignore la casse
+        fragment = valeurs[0][:4].upper()
+        champ.fill(fragment)
+        page.wait_for_timeout(200)
+        filtrees = page.evaluate(cellules, colonne)
+        attendu = sum(fragment.lower() in v.lower() for v in valeurs)
+        assert len(filtrees) == attendu, f"{placeholder} « {fragment} » : {len(filtrees)} lignes, {attendu} attendues"
+        assert all(fragment.lower() in v.lower() for v in filtrees)
+        champ.fill("zzz-aucun-resultat")
+        page.wait_for_timeout(200)
+        assert lignes.count() == 0, f"{placeholder} : des lignes restent affichées"
+        champ.fill("")
+        page.wait_for_timeout(200)
+        assert lignes.count() == total

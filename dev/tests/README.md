@@ -19,7 +19,7 @@ Base locale uniquement : ne jamais lancer ces tests sur la production.
 | Fichier | Ce qui est vérifié |
 |---|---|
 | `test_connexion.py` | Alerte du formulaire (disparaît après 5 s), identifiants invalides, message « session expirée » (CORRECTION-14) |
-| `test_pages.py` | Les 11 pages s'affichent pour les comptes concernés ; banque fixée sur celle de l'utilisateur (CORRECTION-17) ; états « Terme » / « Arrêté » |
+| `test_pages.py` | Les 11 pages s'affichent pour les comptes concernés ; banque fixée sur celle de l'utilisateur (CORRECTION-17) ; états « Terme » / « Arrêté » ; 5 filtres de l'accueil et de l'historique |
 | `test_erreurs.py` | Erreurs affichées dans la page : suppression, clôture, note d'analyse, envoi d'un avis ; × de la fenêtre du DG (CORRECTION-18) |
 | `test_clavier.py` | Zoom autorisé sur les 11 pages ; fenêtres : focus, Tab, Échap (qui n'envoie jamais rien) — lot C |
 | `conftest.py`, `outils.py` | Navigateur, connexion des comptes, interceptions réseau |
