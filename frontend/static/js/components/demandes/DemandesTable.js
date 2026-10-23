@@ -1,0 +1,121 @@
+/**
+ * components/demandes/DemandesTable.js
+ *
+ * Tableau de demandes (Tailwind) — reprend les tableaux legacy :
+ *
+ *   table
+ *     thead > tr > th (en gras)
+ *     tbody > tr > td > (wrapper de la colonne) > valeur
+ *
+ * L'apparence dépend de la page (prop `theme`, voir components/ui/classes.js,
+ * TABLE) : « dashboard » = en-tête orange de l'accueil et de l'historique,
+ * « demandes » = tableau simple des autres pages.
+ *
+ * Les lignes legacy étaient générées en JavaScript (fillTable_*, generate*Rows)
+ * avec un wrapper différent selon la page et la colonne : chaque colonne
+ * déclare donc le sien (prop `columns`, champ `wrap`).
+ *
+ * Props :
+ *   rows          : Array — lignes (déjà filtrées par la page)
+ *   columns       : Array<ColumnDef>
+ *   actionHeaders : Number — nombre de <th> vides ajoutés pour les colonnes
+ *                   de boutons (le legacy en avait un par bouton)
+ *   error         : String|null — message affiché dans une ligne du tableau
+ *   theme         : String — clé de TABLE (défaut « dashboard »)
+ *
+ * ColumnDef :
+ *   key     : champ de la ligne
+ *   label   : en-tête
+ *   format? : fn(value, row) → texte
+ *   wrap?   : "cc-label" | "label" | "cc" | "media" | "self" | "inline" (défaut)
+ *     cc-label → <label (CELL.cc)>v<br></label>   (ex-custom-control : retrait de 43 px)
+ *     label    → <label (CELL.label)>v<br></label>
+ *     cc       → <div><div (CELL.cc)>v</div></div>
+ *     media    → <div><div (CELL.media)>v</div></div>
+ *     self     → <div><div (CELL.self)>v</div></div>
+ *     inline   → <div><div (CELL.inline)>v</div></div>
+ *   button? : fn(row) → { cls, label, disabled? } — la cellule contient un
+ *             bouton (ex. « Arrêté » / « Terme ») au lieu d'un texte
+ *
+ * Slots :
+ *   badge   — après la valeur de la 1re colonne (badge « Nouveau »). Props : { row }
+ *   actions — cellules de boutons de la ligne (des <ActionCell>, qui reçoivent
+ *             les classes de cellule du thème par provide/inject). Props : { row }
+ *
+ * Exporte aussi formatNumber() (formatNumber() legacy).
+ */
+
+import { defineComponent, provide } from "vue";
+import { TABLE, CELL } from "../ui/classes.js";
+
+/**
+ * Formate un nombre en locale française (ex : 1 500 000), comme formatNumber() legacy.
+ * @param {number|string} n
+ * @returns {string}
+ */
+export function formatNumber(n) {
+  const num = Number(n);
+  return isNaN(num)
+    ? String(n ?? "")
+    : num.toLocaleString("fr-FR", { minimumFractionDigits: 0 });
+}
+
+export default defineComponent({
+  name: "DemandesTable",
+
+  props: {
+    rows:          { type: Array,  default: () => [] },
+    columns:       { type: Array,  required: true },
+    actionHeaders: { type: Number, default: 0 },
+    error:         { type: String, default: null },
+    theme:         { type: String, default: "dashboard" },
+  },
+
+  setup(props) {
+    const t = TABLE[props.theme];
+    provide("tdClass", t.td);
+
+    function value(col, row) {
+      return col.format ? col.format(row[col.key], row) : (row[col.key] ?? "");
+    }
+    function innerClass(col) {
+      return CELL[col.wrap] ?? CELL.inline;
+    }
+    function isLabel(col) {
+      return col.wrap === "cc-label" || col.wrap === "label";
+    }
+    return { t, value, innerClass, isLabel, CELL };
+  },
+
+  template: /* html */ `
+    <table :class="t.table">
+        <thead>
+            <tr :class="t.headRow">
+                <th v-for="col in columns" :key="col.key" :class="t.th">{{ col.label }}</th>
+                <th v-for="n in actionHeaders" :key="'a' + n" :class="t.th"> </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-if="error">
+                <td :colspan="columns.length + actionHeaders" :class="t.td + ' text-danger'">
+                    Impossible de charger les données : {{ error }}
+                </td>
+            </tr>
+            <tr v-for="(row, i) in rows" :key="row.id_demande ?? i" :class="t.row">
+                <td v-for="(col, c) in columns" :key="col.key" :class="t.td">
+                    <label v-if="isLabel(col)" :class="col.wrap === 'cc-label' ? CELL.cc : CELL.label">
+                        {{ value(col, row) }} <slot v-if="c === 0" name="badge" :row="row" /><br>
+                    </label>
+                    <div v-else>
+                        <div :class="innerClass(col)">
+                            <button v-if="col.button" type="button" :class="col.button(row).cls" :disabled="col.button(row).disabled || null">{{ col.button(row).label }}</button>
+                            <template v-else>{{ value(col, row) }} <slot v-if="c === 0" name="badge" :row="row" /></template>
+                        </div>
+                    </div>
+                </td>
+                <slot name="actions" :row="row" />
+            </tr>
+        </tbody>
+    </table>
+  `,
+});
