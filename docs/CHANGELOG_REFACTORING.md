@@ -33,6 +33,7 @@ par le chef de projet.
 - Améliorations techniques (13/10/2026) — documentation, bibliothèques locales, CSS, session
 - Passage à Tailwind (20/10/2026) — Play CDN figé, secours local, rendu identique au legacy
 - Alignement sur les conventions API v2 (21/10/2026) — appliqué / reste à faire
+- Qualité du code (23/10/2026) — revue du frontend, lots A à E
 - À confirmer — choix fonctionnels en attente de décision
 - Points ouverts backend — à traiter par l'équipe backend
 
@@ -942,6 +943,42 @@ texte d'aide du champ fichier.
   seules routes v2.
 
 ---
+
+## Qualité du code (23/10/2026)
+
+Revue du frontend du 23/10/2026 : structure saine (pages / composants /
+composables / services, un seul client API, pas de `v-html`, aucune URL en
+dur). Améliorations découpées en lots, un commit chacun :
+
+| Lot | Contenu | Comportement |
+|---|---|---|
+| A | Constantes métier, utilitaires partagés, noms harmonisés | Inchangé |
+| B | Erreurs affichées dans la page (fin des `alert()`), message de l'API sur « Valider » | Modifié |
+| C | Accessibilité : zoom autorisé, Échap et focus dans les modales, balises meta | Non visible |
+| D | Tests de recette Playwright versionnés dans `dev/tests/` | — |
+| E | Mise en commun Accueil / Historique et Validation / GGR | Inchangé |
+
+### Lot A — appliqué le 23/10/2026
+
+- `domain/workflow.js` : codes de statut `EVENT` (1 à 9), `PROCESS`
+  (poursuivre / arrêter pour le DG local) et `etatFinProcess()` remplacent
+  les chiffres écrits en dur (introduire, consulter, validation, valider).
+- `utils/url.js` : un seul `readDemandeId()` (entier positif ou `null`) au
+  lieu de quatre copies (chat, détail, modifier, valider).
+- `composables/useTimedAlert.js` : alerte de 5 s partagée par la connexion
+  et la page Valider (champ `text` partout ; la minuterie précédente est
+  annulée et libérée au démontage).
+- Page Valider : noms hérités du legacy remplacés (`confirmSubmission_DG` →
+  `dgContinue`, `cancelSubmission_DG` → `dgStop`, `DG_cancelBox` →
+  `dgClose`, `_submit` → `submitAvis`) ; en-tête de fichier mis à jour.
+
+Vérifié : 26 contrôles (11 pages, 4 comptes, alerte de connexion, fenêtre du
+DG), aucune erreur JavaScript.
+
+**Relevé pendant les tests (traité au lot B) :** le × de la fenêtre « poursuivre
+le processus OUI/NON ? » du DG ne réagit pas au clic : l'en-tête de la
+fenêtre (`position: relative`) le recouvre. Défaut déjà présent dans le
+legacy (`shreerang-material.css`).
 
 ## À confirmer
 

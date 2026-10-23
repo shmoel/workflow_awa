@@ -44,6 +44,7 @@ import {
 } from "vue";
 import { login } from "../services/auth.js";
 import { SESSION_EXPIRED_KEY } from "../services/api.js";
+import { useTimedAlert } from "../composables/useTimedAlert.js";
 
 /** Page d'arrivée après connexion, quel que soit le niveau (CORRECTION-07) */
 const HOME_PAGE = "acceuil.html";
@@ -129,22 +130,13 @@ export default defineComponent({
     const username = ref("");
     const password = ref("");
     const loading  = ref(false);
-    /** { type: "success" | "danger", text: string } | null */
-    const alert    = ref(null);
-    let alertTimer = null;
+    const { alert, showAlert, clearAlert } = useTimedAlert();
 
     // ---- Vitrine ----
     const header     = ref(null);
     const scrolled   = ref(false);
     const mobileOpen = ref(false);
     const activeId   = ref("hero");
-
-    /** Comme showAlert() legacy : le message disparaît après 5 s */
-    function showAlert(type, text) {
-      alert.value = { type, text };
-      clearTimeout(alertTimer);
-      alertTimer = setTimeout(() => { alert.value = null; }, 5000);
-    }
 
     async function submit() {
       const u = username.value.trim();
@@ -155,7 +147,7 @@ export default defineComponent({
       }
 
       loading.value = true;
-      alert.value   = null;
+      clearAlert();
       try {
         await login(u, p);
         showAlert("success", "Connexion réussie ! Redirection en cours...");

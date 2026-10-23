@@ -39,6 +39,7 @@ import {
 import { apiGet }                     from "../services/api.js";
 import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
+import { EVENT, etatFinProcess }        from "../domain/workflow.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import ActionCell from "../components/demandes/ActionCell.js";
@@ -84,7 +85,7 @@ const COLS_FIN = [
   MONTANT,
   { key: "date_val",          label: "Date / Heure" },
   { key: "_etat",             label: "Etat",
-    button: (row) => row.max_event === 9
+    button: (row) => row.max_event === EVENT.ARRETEE_DG
       ? { cls: BTN.danger,  label: "Arrêté", disabled: true }
       : { cls: BTN.default, label: "Terme",  disabled: true } },
 ];
@@ -167,7 +168,7 @@ export default defineComponent({
         // Normalise le champ _etat calculé depuis max_event
         rowsFin.value = (data.results ?? []).map((r) => ({
           ...r,
-          _etat: r.max_event === 9 ? "Arrêté" : "Terme",
+          _etat: etatFinProcess(r),
         }));
       } catch (e) {
         errorFin.value = e.message;

@@ -41,6 +41,7 @@ import { apiGet, apiPostForm }      from "../services/api.js";
 import { markMessagesSeen }         from "../services/chatSeen.js";
 import { useCurrentUser }           from "../composables/useCurrentUser.js";
 import { useNotificationPolling }   from "../composables/useNotificationPolling.js";
+import { readDemandeId }         from "../utils/url.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
@@ -49,16 +50,6 @@ import { ALERT_DANGER, LINK } from "../components/ui/classes.js";
 // En-tête du chat : libellé gris en capitales, valeur en gras (ex-.info-label / .info-value)
 const INFO_LABEL = "text-[0.75rem] font-medium uppercase tracking-[0.05em] text-[#64748b]";
 const INFO_VALUE = "text-[0.875rem] font-semibold text-[#1e293b]";
-
-/**
- * Lit ?id_dmd dans l'URL. Retourne null s'il est absent ou n'est pas
- * un entier positif.
- * @returns {string|null}
- */
-function readDemandeId() {
-  const id = new URLSearchParams(window.location.search).get("id_dmd");
-  return id && /^[1-9]\d*$/.test(id) ? id : null;
-}
 
 export default defineComponent({
   name: "ChatPage",

@@ -35,6 +35,7 @@ import {
 
 import { apiGet, apiPostForm } from "../services/api.js";
 import { useCurrentUser }      from "../composables/useCurrentUser.js";
+import { readDemandeId }         from "../utils/url.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
@@ -42,16 +43,6 @@ import DemandeForm  from "../components/demandes/DemandeForm.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
 import InfoModal    from "../components/ui/InfoModal.js";
 import { CARD, ALERT_DANGER_FORM, LINK } from "../components/ui/classes.js";
-
-/**
- * Lit ?id_dmd dans l'URL. Retourne null s'il est absent ou n'est pas
- * un entier positif.
- * @returns {string|null}
- */
-function readDemandeId() {
-  const id = new URLSearchParams(window.location.search).get("id_dmd");
-  return id && /^[1-9]\d*$/.test(id) ? id : null;
-}
 
 export default defineComponent({
   name: "ModifierDemandePage",

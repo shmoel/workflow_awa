@@ -52,6 +52,7 @@ import {
 import { apiGet, apiPost } from "../services/api.js";
 import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
+import { EVENT, etatFinProcess }    from "../domain/workflow.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import InfoModal from "../components/ui/InfoModal.js";
@@ -107,7 +108,7 @@ const COLS_FIN = [
   MONTANT,
   { key: "_date_heure",       label: "Date / Heure" },
   { key: "_etat",             label: "Etat",
-    button: (row) => row.max_event === 9
+    button: (row) => row.max_event === EVENT.ARRETEE_DG
       ? { cls: BTN.danger,  label: "Arrêté" }
       : { cls: BTN.default, label: "Terme" } },
 ];
@@ -138,7 +139,7 @@ function normalizeFinProcess(rows) {
   return (rows ?? []).map((r) => ({
     ...r,
     _date_heure: r.date_val ?? "",
-    _etat: r.max_event === 9 ? "Arrêté" : "Terme",
+    _etat: etatFinProcess(r),
   }));
 }
 
@@ -252,7 +253,7 @@ export default defineComponent({
           date,
           heure,
           id_demande:         pendingDeleteId.value,
-          id_event:           8,            // code "suppression" côté API
+          id_event:           EVENT.SUPPRIMEE,
           id_valideur:        profil.user_id,
           id_decision:        1,
           id_niveauValidation,

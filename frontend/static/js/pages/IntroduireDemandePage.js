@@ -31,6 +31,7 @@ import {
 
 import { apiGet, apiPost, apiPostForm } from "../services/api.js";
 import { useCurrentUser }              from "../composables/useCurrentUser.js";
+import { EVENT }                       from "../domain/workflow.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import DemandeForm  from "../components/demandes/DemandeForm.js";
@@ -107,7 +108,7 @@ export default defineComponent({
           date:                demande.date,
           heure:               demande.heure,
           id_demande:          demande.id,
-          id_event:            1,
+          id_event:            EVENT.SOUMISE,
           id_valideur:         profil.user_id,
           id_decision:         1,
           id_niveauValidation: profil.id_type_instit,

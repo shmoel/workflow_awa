@@ -134,6 +134,11 @@ frontend/                          # Served as-is under /workflow (browser files
       composables/
         useCurrentUser.js          # profile + sidebar menu flags
         useNotificationPolling.js  # "Nouvelle demande à valider" popup
+        useTimedAlert.js           # in-page alert that disappears after 5 s
+      domain/
+        workflow.js                # EVENT status codes (1–9), PROCESS (DG continue / stop)
+      utils/
+        url.js                     # readDemandeId() — ?id_dmd= parameter
       components/
         layout/                    # AppLayout (legacy layout-wrapper), AppSidebar, AppNavbar,
                                    # AppFooter, NotificationPopup

@@ -16,26 +16,25 @@
  *
  * ── Soumission ─────────────────────────────────────────────────────────────
  *   POST /valider_avis/{id}/process_ongoing/{0|1}  (FormData)
- *   process_ongoing = 1 dans tous les cas sauf DG-NON (= 0)
+ *   process_ongoing = PROCESS.POURSUIVRE (1) dans tous les cas sauf DG-NON
+ *   (PROCESS.ARRETER = 0)
  *
  * ── Logique modale DG ──────────────────────────────────────────────────────
  *   Si banque ≠ "AIG" ET banque ≠ "AWA" ET entite === "DG"
  *      ET décision choisie ≠ "Avis favorable"
  *   → Modale "Malgré votre avis Non favorable, poursuivre ? OUI/NON"
- *      OUI → confirmSubmission_DG() → process_ongoing = 1
- *      NON → cancelSubmission_DG()  → process_ongoing = 0
- *      ×   → DG_cancelBox()         → retour demandes_validation sans soumettre
+ *      OUI → dgContinue() → PROCESS.POURSUIVRE
+ *      NON → dgStop()     → PROCESS.ARRETER (statut EVENT.ARRETEE_DG)
+ *      ×   → dgClose()    → retour demandes_validation sans soumettre
  *   Sinon → confirmationModal standard → process_ongoing = 1
  *
  * ── Redirection après succès ───────────────────────────────────────────────
  *   AIG + GGR → ggrg_demandes_validation.html
  *   Autres    → demandes_validation.html
  *
- * ── Note PDF ───────────────────────────────────────────────────────────────
- *   Le lien note_analyse est construit avec .split('\\').pop() pour extraire
- *   le nom de fichier depuis le chemin Windows stocké en base.
- *   Ce comportement est intentionnel (format de stockage backend) — ne pas
- *   modifier.
+ * ── Note d'analyse ─────────────────────────────────────────────────────────
+ *   noteFilename() extrait le nom du fichier (le backend stocke parfois un
+ *   chemin complet) ; téléchargement authentifié par downloadNote().
  *
  * ── Corrections appliquées ─────────────────────────────────────────────────
  *   CORRECTION-04 : showAlert succès déplacé après vérification response.ok.
@@ -53,6 +52,9 @@ import { apiGet, apiPostForm, downloadNote } from "../services/api.js";
 import { noteFilename } from "../components/demandes/DemandeForm.js";
 import { useCurrentUser }               from "../composables/useCurrentUser.js";
 import { useNotificationPolling }       from "../composables/useNotificationPolling.js";
+import { useTimedAlert }                from "../composables/useTimedAlert.js";
+import { readDemandeId }                from "../utils/url.js";
+import { PROCESS }                      from "../domain/workflow.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
@@ -60,13 +62,6 @@ import InfoModal from "../components/ui/InfoModal.js";
 import AvisTimeline from "../components/demandes/AvisTimeline.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
 import { BTN, CARD, FORM, TEXTAREA, SHEET, LINK, ALERT_DANGER_FORM, ALERT_SUCCESS_FORM } from "../components/ui/classes.js";
-
-// ---------------------------------------------------------------------------
-// Id de la demande depuis l'URL (?id_dmd=X)
-// ---------------------------------------------------------------------------
-function getDemandId() {
-  return new URLSearchParams(window.location.search).get("id_dmd");
-}
 
 // ---------------------------------------------------------------------------
 // Composant page
@@ -81,7 +76,7 @@ export default defineComponent({
     const user    = useCurrentUser();
     const polling = useNotificationPolling();
 
-    const demandeId = getDemandId();
+    const demandeId = readDemandeId();
 
     // ---- Données de la demande ----
     const demande     = ref(null);
@@ -95,12 +90,7 @@ export default defineComponent({
     const commentaire      = ref("");
 
     // ---- Alerte inline ----
-    const alert = ref(null);  // { message, type: 'success'|'danger' } | null
-
-    function showAlert(message, type = "danger") {
-      alert.value = { message, type };
-      setTimeout(() => { alert.value = null; }, 5000);
-    }
+    const { alert, showAlert } = useTimedAlert();
 
     // ---- Modales ----
     const showConfirmModal   = ref(false);
@@ -150,7 +140,7 @@ export default defineComponent({
 
     // ---- Logique modale DG ----
     // Condition : banque ≠ AIG ET banque ≠ AWA ET entite = DG ET décision ≠ "Avis favorable"
-    function _isDGCase() {
+    function isDgCase() {
       const profil = user.raw.value;
       if (!profil) return false;
       if (profil.banque === "AIG" || profil.banque === "AWA") return false;
@@ -162,7 +152,7 @@ export default defineComponent({
     // ---- onSubmit du formulaire (remplace showConfirmation) ----
     function handleFormSubmit(event) {
       event.preventDefault();
-      if (_isDGCase()) {
+      if (isDgCase()) {
         showDGModal.value = true;
       } else {
         showConfirmModal.value = true;
@@ -170,7 +160,7 @@ export default defineComponent({
     }
 
     // ---- Soumission générique ----
-    async function _submit(processOngoing) {
+    async function submitAvis(processOngoing) {
       const fd = new FormData();
       fd.append("id_decision", selectedDecision.value);
       fd.append("commentaire", commentaire.value);
@@ -182,35 +172,35 @@ export default defineComponent({
         );
         // CORRECTION-04 : alerte succès uniquement après vérification response.ok
         // (apiPostForm lance une erreur si !response.ok, donc on est ici = succès)
-        showAlert("Validation en cours…", "success");
+        showAlert("success", "Validation en cours…");
         await new Promise((r) => setTimeout(r, 2000));
         showSuccessModal.value = true;
       } catch (e) {
         console.error("[ValiderDemandePage] Erreur soumission :", e.message);
-        showAlert("Erreur lors de la soumission du formulaire.", "danger");
+        showAlert("danger", "Erreur lors de la soumission du formulaire.");
       }
     }
 
     // Modale standard → Confirmer
     async function confirmSubmission() {
       showConfirmModal.value = false;
-      await _submit(1);
+      await submitAvis(PROCESS.POURSUIVRE);
     }
 
-    // Modale DG → OUI (process_ongoing = 1)
-    async function confirmSubmission_DG() {
+    // Modale DG → OUI : la demande poursuit le circuit
+    async function dgContinue() {
       showDGModal.value = false;
-      await _submit(1);
+      await submitAvis(PROCESS.POURSUIVRE);
     }
 
-    // Modale DG → NON (process_ongoing = 0)
-    async function cancelSubmission_DG() {
+    // Modale DG → NON : le DG arrête la demande
+    async function dgStop() {
       showDGModal.value = false;
-      await _submit(0);
+      await submitAvis(PROCESS.ARRETER);
     }
 
     // Bouton × de la modale DG → retour liste sans soumettre
-    function DG_cancelBox() {
+    function dgClose() {
       showDGModal.value = false;
       window.location.href = "demandes_validation.html";
     }
@@ -254,9 +244,9 @@ export default defineComponent({
       showSuccessModal,
       handleFormSubmit,
       confirmSubmission,
-      confirmSubmission_DG,
-      cancelSubmission_DG,
-      DG_cancelBox,
+      dgContinue,
+      dgStop,
+      dgClose,
       handleSuccess,
       BTN, CARD, FORM, TEXTAREA, SHEET, LINK, ALERT_DANGER_FORM, ALERT_SUCCESS_FORM,
     };
@@ -277,7 +267,7 @@ export default defineComponent({
                                 <div id="alert-container">
                                     <div v-if="alert" :class="alert.type === 'success' ? ALERT_SUCCESS_FORM : ALERT_DANGER_FORM">
                                         <i :class="'bi bi-' + (alert.type === 'success' ? 'check-circle' : 'exclamation-triangle')"></i>
-                                        {{ alert.message }}
+                                        {{ alert.text }}
                                     </div>
                                     <div v-if="errorDemande" :class="ALERT_DANGER_FORM">
                                         <i class="bi bi-exclamation-triangle"></i>
@@ -379,9 +369,9 @@ export default defineComponent({
                 confirm-label="OUI"
                 cancel-label="NON"
                 :closable="true"
-                @confirm="confirmSubmission_DG"
-                @cancel="cancelSubmission_DG"
-                @close="DG_cancelBox"
+                @confirm="dgContinue"
+                @cancel="dgStop"
+                @close="dgClose"
             />
             <InfoModal
                 :show="showSuccessModal"
