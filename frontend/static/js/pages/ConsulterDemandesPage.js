@@ -60,7 +60,7 @@ import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
 import ConfirmModal  from "../components/ui/ConfirmModal.js";
 import TabsCard      from "../components/demandes/TabsCard.js";
-import { BTN }       from "../components/ui/classes.js";
+import { BTN, ALERT_DANGER_FORM } from "../components/ui/classes.js";
 
 // ---------------------------------------------------------------------------
 // Helpers de navigation (réutilisés dans les slots actions)
@@ -230,11 +230,15 @@ export default defineComponent({
     // ---- Modale succès (après suppression) ----
     const showSuccessModal = ref(false);
 
+    /** Erreur de la dernière suppression, affichée en haut de la page */
+    const actionError = ref("");
+
     // ---- Suppression : POST /avis/ avec id_event=8 ----
     async function handleDelete({ comment }) {
       // Récupère le profil pour construire le payload (banque → id_niveauValidation)
       const profil = user.raw.value;
       if (!profil) return;
+      actionError.value = "";
 
       const banque = profil.banque;
       let id_niveauValidation;
@@ -260,9 +264,7 @@ export default defineComponent({
         });
         showSuccessModal.value = true;
       } catch (e) {
-        // Affiche l'erreur dans la modale de suppression plutôt qu'une alert()
-        console.error("[ConsulterDemandesPage] Erreur suppression :", e.message);
-        alert(e.message);
+        actionError.value = e.message;
       }
     }
 
@@ -303,12 +305,14 @@ export default defineComponent({
       openDeleteModal,
       handleDelete,
       handleDeleteSuccess,
+      actionError,
       // Navigation
       goToDetail,
       goToModify,
       goToChat,
       tabs: TABS,
       BTN,
+      ALERT_DANGER_FORM,
     };
   },
 
@@ -316,6 +320,10 @@ export default defineComponent({
     <AppLayout :polling="polling">
         <div class="flex-grow px-4 lg:px-8 py-6">
             <h4 class="py-4 mb-0 text-h4 font-bold">MES DEMANDES</h4>
+
+            <div v-if="actionError" :class="ALERT_DANGER_FORM" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> Erreur lors de la suppression : {{ actionError }}
+            </div>
 
             <div class="flex flex-wrap -mx-3">
 

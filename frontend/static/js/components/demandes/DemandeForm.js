@@ -39,7 +39,8 @@ import {
   watch,
 } from "vue";
 
-import { downloadNote, checkAttachment } from "../../services/api.js";
+import { checkAttachment } from "../../services/api.js";
+import { useNoteDownload } from "../../composables/useNoteDownload.js";
 import { BTN, FORM, TEXTAREA, LINK } from "../ui/classes.js";
 
 const EMPTY = { banque: "", type: "", client: "", montant: "", comm: "" };
@@ -109,6 +110,7 @@ export default defineComponent({
 
     // Nom du fichier de la note déjà enregistrée (lien « Consulter la note… »)
     const existingNoteName = computed(() => noteFilename(props.existingNote));
+    const { noteError, openNote } = useNoteDownload();
 
     function onFileChange(event) {
       fileError.value = "";
@@ -135,7 +137,7 @@ export default defineComponent({
       emit("submit", { ...form.value, file: file.value });
     }
 
-    return { form, fileInput, fileError, banqueError, existingNoteName, downloadNote, onFileChange, onSubmit, BTN, FORM, TEXTAREA, LINK };
+    return { form, fileInput, fileError, banqueError, existingNoteName, noteError, openNote, onFileChange, onSubmit, BTN, FORM, TEXTAREA, LINK };
   },
 
   template: /* html */ `
@@ -166,7 +168,8 @@ export default defineComponent({
                 </div>
         </div>
         <p v-if="existingNoteName" class="mb-4">
-            <a href="javascript:" :class="LINK" @click.prevent="downloadNote(existingNoteName)">Consulter la note préalablement enregistrée</a>
+            <a href="javascript:" :class="LINK" @click.prevent="openNote(existingNoteName)">Consulter la note préalablement enregistrée</a>
+            <small v-if="noteError" :class="FORM.help + ' text-danger'" role="alert">{{ noteError }}</small>
         </p>
         <div :class="FORM.group">
             <label :class="FORM.labelS + ' w-full'" for="df-note">Note d'analyse</label>

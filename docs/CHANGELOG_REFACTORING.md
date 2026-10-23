@@ -15,19 +15,19 @@ par le chef de projet.
 - **Visuel identique au legacy, en Tailwind** : depuis le 20/10/2026, le CSS
   legacy est remplacé par des classes Tailwind (Play CDN 3.4.17, copie locale
   de secours) ; rendu comparé au pixel près (voir « Passage à Tailwind »).
-- **Corrections** : CORRECTION-01 à 17, toutes validées.
+- **Corrections** : CORRECTION-01 à 18, toutes validées.
 - **Améliorations techniques (13/10/2026)** : documentation hors du dossier
   servi, bibliothèques hébergées localement, CSS allégé, session alignée
   sur 30 min.
 - **Conventions API v2** (21/10/2026) : contrat `docs/conventions-api-v2.md` ;
   appliqué au frontend dans la mesure du possible, le reste attend le backend
   (voir « Alignement sur les conventions API v2 »).
-- **Restent ouverts** : 3 points « À confirmer » (frontend ; le n°1 est résolu) et 15 points
+- **Restent ouverts** : 4 points « À confirmer » (frontend ; le n°1 est résolu) et 15 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
 ### Sommaire
-- CORRECTION-01 à 17 — corrections de comportement, page par page
+- CORRECTION-01 à 18 — corrections de comportement, page par page
 - Bascule finale (05/10/2026) — suppression du legacy, renommage des pages
 - Reprise du visuel legacy (08/10/2026)
 - Améliorations techniques (13/10/2026) — documentation, bibliothèques locales, CSS, session
@@ -634,6 +634,48 @@ sienne. Le serveur ne le contrôle pas encore (point ouvert backend 14 :
 
 ---
 
+## [CORRECTION-18] Erreurs en fenêtre du navigateur, message générique, × inactif
+
+| Champ        | Valeur |
+|---|---|
+| **Fichiers legacy concernés** | `consulter_demandes.html`, `ggrg_demandes_validation.html`, `valider_demande.html`, `detail_consulter_demande.html`, `modifier_demande.html` |
+| **Fichiers corrigés**         | `services/api.js` (`downloadNote`), `composables/useNoteDownload.js` (nouveau), `ConsulterDemandesPage.js`, `GgrgValidationPage.js`, `ValiderDemandePage.js`, `DetailDemandePage.js`, `DemandeForm.js`, `ui/ConfirmModal.js` |
+| **Statut**                    | ✅ **Validé** — décision du 23/10/2026 (revue qualité, lot B) |
+
+### Description
+1. Trois erreurs s'affichaient dans une fenêtre `alert()` du navigateur
+   (« 127.0.0.1:8000 indique… ») : suppression d'une demande, clôture
+   (page GGR), téléchargement de la note d'analyse.
+2. Page Valider : tout échec affichait « Erreur lors de la soumission du
+   formulaire. », sans la raison (serveur injoignable, demande introuvable,
+   refus motivé du serveur).
+3. Fenêtre du DG « … poursuive le processus OUI/NON ? » : le × ne réagissait
+   pas au clic, recouvert par l'en-tête de la fenêtre (`position: relative`,
+   déjà le cas avec `shreerang-material.css` dans le legacy).
+
+### Correction appliquée
+1. Messages affichés dans la page, dans le bandeau d'erreur de
+   l'application : « Erreur lors de la suppression : … » et « Erreur lors de
+   la clôture : … » en haut de la page ; erreur de téléchargement sous le
+   lien de la note (détail, modifier, valider). `downloadNote()` ne fait
+   plus d'`alert()` : il relance l'erreur, affichée par `useNoteDownload()`.
+2. « Erreur lors de la soumission du formulaire : » suivi du message de
+   l'API (`ApiError.message`, conventions API v2 §5 : jamais de détail
+   technique). Une erreur 500 reste « Une erreur est survenue, réessayez. ».
+3. × placé au-dessus de l'en-tête (`z-index: 1`) : il ferme la fenêtre et
+   revient à la liste sans enregistrer l'avis. Aucun changement visuel.
+
+Vérifié le 23/10/2026 (erreurs provoquées en coupant les appels réseau dans
+le navigateur, aucune donnée modifiée) : suppression, clôture, note
+(détail, modifier, valider), envoi d'un avis, × du DG ; aucune fenêtre du
+navigateur, aucune erreur JavaScript ; 26 contrôles du lot A toujours OK.
+
+### Impact fonctionnel
+Les messages d'erreur gardent leur texte mais apparaissent dans la page. Le
+DG peut fermer la fenêtre « OUI/NON » sans enregistrer son avis.
+
+---
+
 ## Bascule finale (05/10/2026)
 
 Sauvegarde : tag git **`pre-bascule-vue`** (commit `7547874`, poussé sur
@@ -980,6 +1022,12 @@ le processus OUI/NON ? » du DG ne réagit pas au clic : l'en-tête de la
 fenêtre (`position: relative`) le recouvre. Défaut déjà présent dans le
 legacy (`shreerang-material.css`).
 
+### Lot B — appliqué le 23/10/2026
+
+Voir CORRECTION-18 : erreurs affichées dans la page (fin des `alert()`),
+message de l'API sur la page Valider, × de la fenêtre du DG cliquable.
+Question sur les libellés de décision : « À confirmer » n°5.
+
 ## À confirmer
 
 Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
@@ -1018,6 +1066,16 @@ Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
    Laissée telle quelle (aucun changement visuel, 13/10/2026). À trancher :
    charger `static/vendor/bootstrap-icons/bootstrap-icons.css` sur ces
    4 pages pour afficher l'icône partout.
+5. **Libellés des décisions et fenêtre du DG (valider_demande).** Comme le
+   legacy, la page n'ouvre pas la fenêtre « Malgré votre avis Non favorable,
+   … poursuive le processus OUI/NON ? » quand la décision choisie s'appelle
+   exactement « Avis favorable ». Or la table `decision` du jeu de test
+   contient « Validée », « Rejetée », « En attente » : en local, le DG qui
+   choisit « Validée » voit quand même la fenêtre (constaté le 23/10/2026).
+   À confirmer : libellés de la table `decision` en production. S'ils
+   contiennent « Avis favorable », seul le jeu de test est à corriger ;
+   sinon la règle ne fonctionne nulle part et devra être corrigée (sur
+   accord, par exemple en comparant l'identifiant de la décision).
 
 ---
 

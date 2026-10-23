@@ -52,7 +52,8 @@ API docs at `http://127.0.0.1:8000/docs`.
 - All API calls go through `services/api.js`. Errors are `ApiError` objects whose `message` is safe to show;
   never display technical details (route, HTTP code, SQL) to users
 - Links use Vue `:href` bindings, never `document.getElementById(...).href`. File downloads go through
-  `downloadNote()` (authenticated fetch + blob), never a plain link (a link does not send the token)
+  `downloadNote()` (authenticated fetch + blob, via `useNoteDownload()` in pages), never a plain link
+  (a link does not send the token). Errors are shown in the page, never with `alert()`
 - Attachments: `.pdf`, `.jpg`, `.jpeg`, `.png`, 5 MB max (`checkAttachment()`), same rules as the backend
 - Record every behavior change in `docs/CHANGELOG_REFACTORING.md`
 - `frontend/` is served publicly under `/workflow`: put only browser files there (no .md, .txt, .sql,
@@ -135,6 +136,7 @@ frontend/                          # Served as-is under /workflow (browser files
         useCurrentUser.js          # profile + sidebar menu flags
         useNotificationPolling.js  # "Nouvelle demande à valider" popup
         useTimedAlert.js           # in-page alert that disappears after 5 s
+        useNoteDownload.js         # downloadNote() with the error shown in the page
       domain/
         workflow.js                # EVENT status codes (1–9), PROCESS (DG continue / stop)
       utils/

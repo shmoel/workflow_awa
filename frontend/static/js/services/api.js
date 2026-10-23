@@ -276,9 +276,8 @@ export async function apiDelete(path) {
  *
  * @param {string} filename - nom du fichier stocké (préfixe YYYYMMDD_HHMMSS_)
  * @returns {Promise<void>}
- *
- * @example
- *   <a href="javascript:" @click.prevent="downloadNote(nomFichier)">Télécharger</a>
+ * @throws {ApiError} en cas d'échec : l'appelant affiche e.message dans la page
+ *   (composables/useNoteDownload.js)
  */
 export async function downloadNote(filename) {
   const tab = window.open("", "_blank");
@@ -295,7 +294,7 @@ export async function downloadNote(filename) {
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   } catch (e) {
     if (tab) tab.close();
-    window.alert(e.message);
+    throw e;
   }
 }
 

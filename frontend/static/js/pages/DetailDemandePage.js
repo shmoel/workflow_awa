@@ -29,7 +29,8 @@ import {
   onUnmounted,
 } from "vue";
 
-import { apiGet, downloadNote }   from "../services/api.js";
+import { apiGet }                 from "../services/api.js";
+import { useNoteDownload }        from "../composables/useNoteDownload.js";
 import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
 import { readDemandeId }         from "../utils/url.js";
@@ -58,6 +59,8 @@ export default defineComponent({
     // ---- Note d'analyse ----
     // Le backend stocke le nom de fichier seul ; d'anciennes lignes peuvent
     // contenir un chemin complet (séparateur "\" ou "/").
+    const { noteError, openNote } = useNoteDownload();
+
     const noteFilename = computed(() => {
       const raw = demande.value?.note_analyse;
       if (!raw) return null;
@@ -136,7 +139,8 @@ export default defineComponent({
       error,
       notFound,
       noteFilename,
-      downloadNote,
+      noteError,
+      openNote,
       dateSoumission,
       infos,
       BTN, SHEET, ALERT_DANGER, LINK,
@@ -161,7 +165,8 @@ export default defineComponent({
                         </div>
 
                         <template v-else-if="demande">
-                            <button v-if="noteFilename" type="button" :class="BTN.outlinePrimary"><a href="javascript:" :class="LINK" @click.prevent="downloadNote(noteFilename)">Télécharger la note d'informations</a></button>
+                            <button v-if="noteFilename" type="button" :class="BTN.outlinePrimary"><a href="javascript:" :class="LINK" @click.prevent="openNote(noteFilename)">Télécharger la note d'informations</a></button>
+                            <div v-if="noteError" :class="ALERT_DANGER" role="alert">{{ noteError }}</div>
                             <button v-else type="button" :class="BTN.outlinePrimary" disabled>Aucune note jointe</button>
 
                             <div class="p-6">

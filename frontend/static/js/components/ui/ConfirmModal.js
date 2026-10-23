@@ -86,7 +86,7 @@ export default defineComponent({
           <div :class="MODAL.dialog">
               <div :class="MODAL.content[variant]">
                   <button v-if="closable"
-                          style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:20px; cursor:pointer; color:#333"
+                          style="position:absolute; z-index:1; top:10px; right:10px; background:none; border:none; font-size:20px; cursor:pointer; color:#333"
                           @click="close" aria-label="Fermer">×</button>
                   <div :class="MODAL.header">
                       <h5 :class="MODAL.title" :id="'confirmationModalLabel-' + $.uid">{{ title }}</h5>

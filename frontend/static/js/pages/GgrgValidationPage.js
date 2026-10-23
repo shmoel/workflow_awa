@@ -44,7 +44,7 @@ import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
 import ConfirmModal   from "../components/ui/ConfirmModal.js";
 import TabsCard       from "../components/demandes/TabsCard.js";
-import { BTN }        from "../components/ui/classes.js";
+import { BTN, ALERT_DANGER_FORM } from "../components/ui/classes.js";
 
 // ---------------------------------------------------------------------------
 // Navigation
@@ -155,10 +155,14 @@ export default defineComponent({
     // ---- Modale succès ----
     const showSuccessModal = ref(false);
 
+    /** Erreur de la dernière clôture, affichée en haut de la page */
+    const actionError = ref("");
+
     // ---- Clôture : POST /cloturer_demande/{id} (FormData) ----
     // Bug legacy corrigé : l'Authorization était hors de headers{} → silencieusement ignoré.
     // apiPostForm() gère correctement le header Authorization.
     async function handleCloturer({ comment }) {
+      actionError.value = "";
       const fd = new FormData();
       fd.append("commentaire", comment);
       fd.append("id_decision", 1);
@@ -167,8 +171,7 @@ export default defineComponent({
         await apiPostForm(`/cloturer_demande/${pendingCloId.value}`, fd);
         showSuccessModal.value = true;
       } catch (e) {
-        console.error("[GgrgValidationPage] Erreur clôture :", e.message);
-        alert(e.message);
+        actionError.value = e.message;
       }
     }
 
@@ -204,6 +207,8 @@ export default defineComponent({
       goToDetail,
       tabs: TABS,
       BTN,
+      ALERT_DANGER_FORM,
+      actionError,
     };
   },
 
@@ -211,6 +216,10 @@ export default defineComponent({
     <AppLayout :polling="polling">
         <div class="flex-grow px-4 lg:px-8 py-6">
             <h4 class="py-4 mb-0 text-h4 font-bold">MES DEMANDES</h4>
+
+            <div v-if="actionError" :class="ALERT_DANGER_FORM" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> Erreur lors de la clôture : {{ actionError }}
+            </div>
 
             <div class="flex flex-wrap -mx-3">
 

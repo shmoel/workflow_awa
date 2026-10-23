@@ -48,7 +48,8 @@ import {
   onUnmounted,
 } from "vue";
 
-import { apiGet, apiPostForm, downloadNote } from "../services/api.js";
+import { apiGet, apiPostForm } from "../services/api.js";
+import { useNoteDownload }   from "../composables/useNoteDownload.js";
 import { noteFilename } from "../components/demandes/DemandeForm.js";
 import { useCurrentUser }               from "../composables/useCurrentUser.js";
 import { useNotificationPolling }       from "../composables/useNotificationPolling.js";
@@ -91,6 +92,7 @@ export default defineComponent({
 
     // ---- Alerte inline ----
     const { alert, showAlert } = useTimedAlert();
+    const { noteError, openNote } = useNoteDownload();
 
     // ---- Modales ----
     const showConfirmModal   = ref(false);
@@ -176,8 +178,8 @@ export default defineComponent({
         await new Promise((r) => setTimeout(r, 2000));
         showSuccessModal.value = true;
       } catch (e) {
-        console.error("[ValiderDemandePage] Erreur soumission :", e.message);
-        showAlert("danger", "Erreur lors de la soumission du formulaire.");
+        // e.message : message de l'API destiné à l'utilisateur (ApiError)
+        showAlert("danger", `Erreur lors de la soumission du formulaire : ${e.message}`);
       }
     }
 
@@ -237,7 +239,8 @@ export default defineComponent({
       commentaire,
       alert,
       noteName,
-      downloadNote,
+      noteError,
+      openNote,
       infos,
       showConfirmModal,
       showDGModal,
@@ -303,7 +306,8 @@ export default defineComponent({
                                                 <td :class="SHEET.td">
                                                     <div :class="SHEET.cell">
                                                     <h6 :class="SHEET.value">
-                                                        <a v-if="noteName" href="javascript:" :class="LINK" @click.prevent="downloadNote(noteName)">Télécharger</a>
+                                                        <a v-if="noteName" href="javascript:" :class="LINK" @click.prevent="openNote(noteName)">Télécharger</a>
+                                                        <small v-if="noteError" class="block mt-1 text-sm text-danger" role="alert">{{ noteError }}</small>
                                                         <span v-else>Aucune note jointe</span>
                                                     </h6>
                                                     </div>
