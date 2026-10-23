@@ -1028,6 +1028,32 @@ Voir CORRECTION-18 : erreurs affichées dans la page (fin des `alert()`),
 message de l'API sur la page Valider, × de la fenêtre du DG cliquable.
 Question sur les libellés de décision : « À confirmer » n°5.
 
+### Lot C — appliqué le 23/10/2026 (accessibilité)
+
+- **Zoom autorisé** sur les 11 pages : `viewport` réduit à
+  `width=device-width, initial-scale=1` (le legacy bloquait le zoom avec
+  `user-scalable=no` et `maximum-scale=1.0`, ce qui gênait les utilisateurs
+  malvoyants, critère WCAG 1.4.4).
+- **Balises inutiles retirées** : `X-UA-Compatible` (Internet Explorer) et
+  les balises `author`, `description`, `keywords` vides.
+- **Clavier dans les fenêtres** (`composables/useModalA11y.js`, utilisé par
+  `ConfirmModal` et `InfoModal`) :
+  - à l'ouverture, le focus va sur la fenêtre (aucun contour visible) ;
+  - Tab / Maj+Tab restent dans la fenêtre ;
+  - **Échap** : fenêtre avec × (DG) → comme le × (ferme sans enregistrer
+    l'avis, retour à la liste) ; fenêtre de confirmation → « Annuler » ;
+    fenêtre d'information → « OK » (même suite que le clic) ;
+  - à la fermeture, le focus revient sur le bouton d'origine.
+  Changement de comportement : Échap ne faisait rien auparavant. Il
+  n'envoie jamais de données (le « NON » du DG, qui arrête la demande,
+  reste uniquement sur clic).
+
+Vérifié : 19 contrôles (zoom, focus, Tab, Échap sur suppression,
+modification, information et DG, aucun appel au serveur sur Échap, aucune
+erreur JavaScript). Captures avant / après : pages identiques (0,000 %),
+fenêtres identiques ; seuls diffèrent, derrière le voile, le bouton qui a
+ouvert la fenêtre (il perd le focus) et les animations de la vitrine.
+
 ## À confirmer
 
 Choix fonctionnels tranchés au plus près du legacy pendant la migration ;

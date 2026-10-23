@@ -137,6 +137,7 @@ frontend/                          # Served as-is under /workflow (browser files
         useNotificationPolling.js  # "Nouvelle demande à valider" popup
         useTimedAlert.js           # in-page alert that disappears after 5 s
         useNoteDownload.js         # downloadNote() with the error shown in the page
+        useModalA11y.js            # modal keyboard: focus, Tab trap, Escape (never sends data)
       domain/
         workflow.js                # EVENT status codes (1–9), PROCESS (DG continue / stop)
       utils/

@@ -29,6 +29,9 @@
  *   confirm     — { comment }
  *   cancel      — bouton d'annulation
  *   close       — bouton × (closable)
+ *
+ * Clavier (useModalA11y) : Échap = × si la modale en a un (modale DG : ferme
+ * sans enregistrer l'avis), sinon « Annuler » ; Tab reste dans la modale.
  */
 
 import {
@@ -37,6 +40,7 @@ import {
   watch,
 } from "vue";
 import { BTN, MODAL, TEXTAREA } from "./classes.js";
+import { useModalA11y } from "../../composables/useModalA11y.js";
 
 export default defineComponent({
   name: "ConfirmModal",
@@ -76,13 +80,16 @@ export default defineComponent({
       emit("update:show", false);
     }
 
-    return { comment, cancel, close, confirm, BTN, MODAL, TEXTAREA };
+    const root = ref(null);
+    const { onKeydown } = useModalA11y(() => props.show, root, () => (props.closable ? close() : cancel()));
+
+    return { comment, cancel, close, confirm, root, onKeydown, BTN, MODAL, TEXTAREA };
   },
 
   template: /* html */ `
     <template v-if="show">
-      <div :class="MODAL.wrap" tabindex="-1" role="dialog" aria-modal="true"
-           :aria-labelledby="'confirmationModalLabel-' + $.uid">
+      <div ref="root" :class="MODAL.wrap + ' outline-none'" tabindex="-1" role="dialog" aria-modal="true"
+           :aria-labelledby="'confirmationModalLabel-' + $.uid" @keydown="onKeydown">
           <div :class="MODAL.dialog">
               <div :class="MODAL.content[variant]">
                   <button v-if="closable"

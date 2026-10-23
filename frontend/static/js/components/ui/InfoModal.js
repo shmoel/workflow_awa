@@ -13,11 +13,13 @@
  *   variant : "material" (défaut) | "design" — voir ConfirmModal
  *
  * Événements :
- *   ok — clic OK (la page décide de la suite : rechargement, redirection)
+ *   ok — clic OK ou touche Échap (la page décide de la suite : rechargement,
+ *        redirection)
  */
 
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import { BTN, MODAL } from "./classes.js";
+import { useModalA11y } from "../../composables/useModalA11y.js";
 
 export default defineComponent({
   name: "InfoModal",
@@ -31,14 +33,16 @@ export default defineComponent({
 
   emits: ["ok"],
 
-  setup() {
-    return { BTN, MODAL };
+  setup(props, { emit }) {
+    const root = ref(null);
+    const { onKeydown } = useModalA11y(() => props.show, root, () => emit("ok"));
+    return { root, onKeydown, BTN, MODAL };
   },
 
   template: /* html */ `
     <template v-if="show">
-      <div :class="MODAL.wrap" tabindex="-1" role="dialog" aria-modal="true"
-           :aria-labelledby="'successModalLabel-' + $.uid">
+      <div ref="root" :class="MODAL.wrap + ' outline-none'" tabindex="-1" role="dialog" aria-modal="true"
+           :aria-labelledby="'successModalLabel-' + $.uid" @keydown="onKeydown">
           <div :class="MODAL.dialog">
               <div :class="MODAL.content[variant]">
                   <div :class="MODAL.header">
