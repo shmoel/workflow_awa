@@ -1054,6 +1054,22 @@ erreur JavaScript). Captures avant / après : pages identiques (0,000 %),
 fenêtres identiques ; seuls diffèrent, derrière le voile, le bouton qui a
 ouvert la fenêtre (il perd le focus) et les animations de la vitrine.
 
+### Lot D — appliqué le 23/10/2026 (tests de recette versionnés)
+
+`dev/tests/` (hors du dossier servi) : 42 tests pytest + Playwright, dans
+Chrome installé sur le poste (aucun npm, aucun navigateur téléchargé).
+Connexion, 11 pages par compte, banque fixée (CORRECTION-17), erreurs dans
+la page (CORRECTION-18), clavier et zoom (lot C) ; à chaque test, contrôle
+« aucune erreur JavaScript, aucune fenêtre du navigateur ». Aucune donnée
+modifiée : écritures et erreurs simulées par interception réseau ; aucun
+numéro de demande en dur (test ignoré si les données manquent). Mot de
+passe des comptes de test par variable d'environnement
+(`WORKFLOW_TEST_PASSWORD`), jamais dans un fichier. Notice :
+`dev/tests/README.md`. Résultat du 23/10/2026 : 42 réussis.
+
+Relevé : l'onglet de `demandes_validation` s'intitule « Demandes en fin de
+de processus » (coquille du legacy, conservée).
+
 ## À confirmer
 
 Choix fonctionnels tranchés au plus près du legacy pendant la migration ;

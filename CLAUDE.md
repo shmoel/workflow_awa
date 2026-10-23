@@ -56,6 +56,8 @@ API docs at `http://127.0.0.1:8000/docs`.
   (a link does not send the token). Errors are shown in the page, never with `alert()`
 - Attachments: `.pdf`, `.jpg`, `.jpeg`, `.png`, 5 MB max (`checkAttachment()`), same rules as the backend
 - Record every behavior change in `docs/CHANGELOG_REFACTORING.md`
+- Acceptance tests: `dev/tests/` (pytest + Playwright, local Chrome, see its README). Run them after any
+  change; add a test with each behavior change. Tests never write to the database (network interception)
 - `frontend/` is served publicly under `/workflow`: put only browser files there (no .md, .txt, .sql,
   backups); documentation goes in `docs/`
 - Propose a plan before any significant change
@@ -99,6 +101,9 @@ Centralisation et validation des demandes d'autorisation d'opérations bancaires
 ## Frontend architecture
 
 ```
+dev/
+  tests/                           # Acceptance tests (pytest + Playwright), README.md
+  *.sql                            # Local test data (seed, fixes) — never on production
 docs/
   CHANGELOG_REFACTORING.md         # Behavior changes vs legacy, open points (not served)
   conventions-api-v2.md            # API v2 contract between backend and frontend (proposal)
