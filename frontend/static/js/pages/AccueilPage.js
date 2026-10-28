@@ -70,7 +70,7 @@ export default defineComponent({
 
     // Colonnes, filtres et chargement communs avec l'historique ;
     // la route dépend du domaine du profil (rien à charger sans domaine)
-    const { liste, filters, filteredRows, filterFields, columns } = useDashboardDemandes(
+    const { liste, filters, filteredRows, emptyText, filterFields, columns } = useDashboardDemandes(
       () => (user.domaine.value ? `/demandes_a_consulter/${user.domaine.value}` : null)
     );
 
@@ -134,6 +134,7 @@ export default defineComponent({
       statCards:     STAT_CARDS,
       liste,
       filteredRows,
+      emptyText,
       newMessageMap,
       filters,
       filterFields,
@@ -162,7 +163,7 @@ export default defineComponent({
                 <div class="h-[310px]" id="tasks-inner"></div>
 
                 <DemandesCard tab-label="Introduites" :fields="filterFields" v-model="filters">
-                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error">
+                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error" :loading="liste.loading" :empty-text="emptyText">
                         <template #badge="{ row }">
                             <span v-if="newMessageMap[row.id_demande]" style='background:#ea580c;color:#fff;padding:2px 8px;border-radius:8px;font-size:12px;margin-left:8px;'>Nouveau</span>
                         </template>

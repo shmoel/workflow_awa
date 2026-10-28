@@ -262,7 +262,7 @@ export default defineComponent({
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
                     <template #intro>
-                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="2" :error="intro.error">
+                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="2" :error="intro.error" :loading="intro.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowWarning" label="Modifier" @click="goToModify(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowDanger" label="Supprimer" @click="openDeleteModal(row.id_demande)" />
@@ -270,7 +270,7 @@ export default defineComponent({
                         </DemandesTable>
                     </template>
                     <template #valid>
-                        <DemandesTable theme="demandes" :rows="valid.rows" :columns="colsValid" :error="valid.error">
+                        <DemandesTable theme="demandes" :rows="valid.rows" :columns="colsValid" :error="valid.error" :loading="valid.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowSecondary" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowInfo" label="CHAT" @click="goToChat(row.id_demande)" />
@@ -278,7 +278,7 @@ export default defineComponent({
                         </DemandesTable>
                     </template>
                     <template #fin>
-                        <DemandesTable theme="demandes" :rows="fin.rows" :columns="colsFin" :error="fin.error">
+                        <DemandesTable theme="demandes" :rows="fin.rows" :columns="colsFin" :error="fin.error" :loading="fin.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowSecondary" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowInfo" label="CHAT" @click="goToChat(row.id_demande)" />

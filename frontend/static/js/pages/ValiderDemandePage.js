@@ -51,6 +51,7 @@ import {
 import { apiGet, apiPostForm } from "../services/api.js";
 import { useNoteDownload }   from "../composables/useNoteDownload.js";
 import { noteFilename } from "../components/demandes/DemandeForm.js";
+import { formatNumber } from "../components/demandes/DemandesTable.js";
 import { useCurrentUser }               from "../composables/useCurrentUser.js";
 import { useNotificationPolling }       from "../composables/useNotificationPolling.js";
 import { useTimedAlert }                from "../composables/useTimedAlert.js";
@@ -111,7 +112,7 @@ export default defineComponent({
         { label: "Banque",          value: d?.banque ?? "" },
         { label: "Entité",          value: d?.categorie_demande ?? "" },
         { label: "Contrepartie",    value: d?.nom_client ?? "" },
-        { label: "Montant (XOF)",   value: d?.montant ?? "" },
+        { label: "Montant (XOF)",   value: formatNumber(d?.montant) },
       ];
     });
 
@@ -306,8 +307,10 @@ export default defineComponent({
                                                 <td :class="SHEET.td">
                                                     <div :class="SHEET.cell">
                                                     <h6 :class="SHEET.value">
-                                                        <a v-if="noteName" href="javascript:" :class="LINK" @click.prevent="openNote(noteName)">Télécharger</a>
-                                                        <small v-if="noteError" class="block mt-1 text-sm text-danger" role="alert">{{ noteError }}</small>
+                                                        <template v-if="noteName">
+                                                            <button type="button" :class="LINK" @click="openNote(noteName)">Télécharger</button>
+                                                            <small v-if="noteError" class="block mt-1 text-sm text-danger" role="alert">{{ noteError }}</small>
+                                                        </template>
                                                         <span v-else>Aucune note jointe</span>
                                                     </h6>
                                                     </div>

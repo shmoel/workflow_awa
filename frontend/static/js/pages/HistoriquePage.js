@@ -47,7 +47,7 @@ export default defineComponent({
     const polling = useNotificationPolling();
 
     // Colonnes, filtres et chargement communs avec l'accueil
-    const { liste, filters, filteredRows, filterFields, columns } =
+    const { liste, filters, filteredRows, emptyText, filterFields, columns } =
       useDashboardDemandes("/demandes_cloturer/");
 
     // ---- Cycle de vie ----
@@ -64,6 +64,7 @@ export default defineComponent({
       polling,
       liste,
       filteredRows,
+      emptyText,
       filters,
       filterFields,
       columns,
@@ -81,7 +82,7 @@ export default defineComponent({
                 <div class="h-[310px]" id="tasks-inner"></div>
 
                 <DemandesCard tab-label="Demandes Cloturees" :fields="filterFields" v-model="filters">
-                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error">
+                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error" :loading="liste.loading" :empty-text="emptyText">
                         <template #actions="{ row }">
                             <ActionCell :btn-class="BTN.outlineBrand" label="Détails" @click="goToDetail(row.id_demande)" />
                         </template>

@@ -77,10 +77,11 @@ export default defineComponent({
               <img src="images/sib_logo.PNG" alt="Brand Logo" class="block w-[36px] h-[29px]">
             </span>
             <a href="acceuil.html" class="block ml-2 text-white whitespace-nowrap">WORKFLOW - AWA</a>
-            <a href="javascript:" class="block ml-auto text-white text-[21.456px] leading-[21.456px]"
-               @click.prevent="$emit('toggle-collapse')">
-                <i class="ion ion-md-menu align-middle [&::before]:align-baseline"></i>
-            </a>
+            <button type="button" class="block ml-auto text-white text-[21.456px] leading-[21.456px]"
+                    aria-label="Afficher ou replier le menu"
+                    @click="$emit('toggle-collapse')">
+                <i class="ion ion-md-menu align-middle [&::before]:align-baseline" aria-hidden="true"></i>
+            </button>
         </div>
         <div :class="DIVIDER + ' mt-0 mb-3'"></div>
 
@@ -97,13 +98,14 @@ export default defineComponent({
             <li :class="DIVIDER + ' mt-3 mb-1'"></li>
 
             <li class="w-full my-[2px]">
-              <a href="javascript:" class="py-3 pr-[45.223px] font-medium"
+              <button type="button" class="py-3 pr-[45.223px] font-medium"
                  :class="[LINK, compact ? 'pl-[70px] whitespace-nowrap' : 'pl-[27.2px]']"
-                 @click.prevent="menuOpen = !menuOpen">
+                 :aria-expanded="menuOpen ? 'true' : 'false'"
+                 @click="menuOpen = !menuOpen">
                   <div>{{ menuLabel }}</div>
                   <span class="absolute top-[22.5px] w-[6px] h-[6px] border-l border-b border-current -translate-y-[3px] transition-transform duration-200"
                         :class="[compact ? 'left-[56px]' : 'right-[27.2px]', menuOpen ? '-rotate-45' : 'rotate-45']"></span>
-              </a>
+              </button>
               <ul v-show="menuOpen && !compact" class="flex flex-col m-0 py-[10px] list-none">
                 <li v-if="menu.intro_dmd" id="intro_dmd" class="w-full">
                   <a href="introduire_demandes.html" :class="SUB_LINK">

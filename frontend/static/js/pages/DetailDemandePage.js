@@ -165,8 +165,10 @@ export default defineComponent({
                         </div>
 
                         <template v-else-if="demande">
-                            <button v-if="noteFilename" type="button" :class="BTN.outlinePrimary"><a href="javascript:" :class="LINK" @click.prevent="openNote(noteFilename)">Télécharger la note d'informations</a></button>
-                            <div v-if="noteError" :class="ALERT_DANGER" role="alert">{{ noteError }}</div>
+                            <template v-if="noteFilename">
+                                <button type="button" :class="BTN.outlinePrimary" @click="openNote(noteFilename)"><span :class="LINK">Télécharger la note d'informations</span></button>
+                                <div v-if="noteError" :class="ALERT_DANGER" role="alert">{{ noteError }}</div>
+                            </template>
                             <button v-else type="button" :class="BTN.outlinePrimary" disabled>Aucune note jointe</button>
 
                             <div class="p-6">

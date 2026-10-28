@@ -23,7 +23,7 @@ par le chef de projet.
   appliqué au frontend dans la mesure du possible, le reste attend le backend
   (voir « Alignement sur les conventions API v2 »).
 - **Feuille de route UI/UX** (28/10/2026) : niveaux 1 à 3 validés par le
-  chef de projet, à appliquer (lots F à H) ; le niveau 3 lève la règle du
+  chef de projet ; lot F (niveau 1) appliqué, lots G et H à venir ; le niveau 3 lève la règle du
   rendu identique au legacy pour les éléments redessinés.
 - **Restent ouverts** : 3 points « À confirmer » (frontend ; les n°1 et 3 sont tranchés) et 15 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
@@ -37,7 +37,7 @@ par le chef de projet.
 - Passage à Tailwind (20/10/2026) — Play CDN figé, secours local, rendu identique au legacy
 - Alignement sur les conventions API v2 (21/10/2026) — appliqué / reste à faire
 - Qualité du code (23/10/2026) — revue du frontend, lots A à E
-- Feuille de route UI/UX (28/10/2026) — niveaux 1 à 3 validés, à appliquer (lots F à H)
+- Feuille de route UI/UX (28/10/2026) — niveaux 1 à 3 validés ; lot F appliqué, lots G et H à venir
 - À confirmer — choix fonctionnels en attente de décision
 - Points ouverts backend — à traiter par l'équipe backend
 
@@ -1131,7 +1131,8 @@ tout autre écart avec le legacy reste soumis à son accord préalable.
    onglets dotés de `role="tablist"` / `role="tab"` / `aria-selected`.
 5. **Espace vide de 310 px** (`#tasks-inner`, accueil, consulter,
    validation) : à vérifier contre le legacy ; retiré s'il repousse le
-   tableau sous un vide.
+   tableau sous un vide. *Sans objet (vérifié au lot F) : le bloc fait 0 px
+   de large et se place à côté de la carte, sans la repousser ; conservé.*
 
 ### Niveau 2 — UX, petits écarts avec le legacy
 
@@ -1203,6 +1204,43 @@ Un lot et un commit par niveau, plan détaillé soumis avant chaque lot :
 **lot F** (niveau 1), **lot G** (niveau 2), **lot H** (niveau 3, après
 maquette des composants refondus). Tests de recette `dev/tests/` lancés et
 complétés à chaque lot.
+
+### Lot F — appliqué le 28/10/2026 (niveau 1)
+
+| Point | Modification | Fichiers |
+|---|---|---|
+| 1 | Ligne « Chargement… » pendant le chargement, « Aucune demande » si la liste est vide, « Aucune demande ne correspond aux filtres » sur l'accueil et l'historique. Ordre : erreur, chargement, vide. Lignes marquées `data-message` | `DemandesTable.js`, `useDashboardDemandes.js`, 5 pages de listes |
+| 2 | Montants formatés (1 500 000) sur Valider et Chat | `ValiderDemandePage.js`, `ChatPage.js` |
+| 3 | « Aucun message pour cette demande » dans le chat vide | `ChatPage.js` |
+| 4 | `<button>` au lieu de `href="javascript:"` : onglets (`role="tab"`, `aria-selected`, flèches gauche / droite), accordéon des avis (`aria-expanded`), téléchargement de note, bouton du menu latéral (`aria-label`) et sous-menu (`aria-expanded`), menu utilisateur (`aria-expanded`). Bandes vides en bas des cartes : `<div>` au lieu d'un lien vide | `TabsCard.js`, `DemandesCard.js`, `AvisTimeline.js`, `DemandeForm.js`, `AppSidebar.js`, `AppNavbar.js`, Valider, Détail |
+| 5 | Sans objet : aucun vide (voir ci-dessus) | — |
+
+Non modifiés, comme décidé : liens morts du menu (Statistiques, Login,
+Signup, FAQ), du menu utilisateur (My profile, Messages, Account settings)
+et du pied de page ; lien de déconnexion.
+
+**Correction relevée pendant le lot (bug évident, assouplissement du
+05/10/2026) — note d'analyse affichée en double.** Sur les pages Détail et
+Valider, quand la demande a une note, « Aucune note jointe » s'affichait
+**à côté** du lien de téléchargement : le `v-else` dépendait du message
+d'erreur de téléchargement, pas de la présence de la note. Corrigé : l'un
+ou l'autre, jamais les deux. Sur la page Détail, le bouton entier lance le
+téléchargement (auparavant, seul le texte du lien à l'intérieur du bouton).
+
+Vérifications :
+- Captures avant / après des 10 pages applicatives, API simulée dans le
+  navigateur (même jeu de données) : 7 pages identiques au pixel près
+  (listes, onglets, menu latéral, barre du haut, formulaires) ; les
+  3 écarts sont ceux attendus (montants, chat vide, note sans doublon).
+  Aucune erreur JavaScript.
+- États « Chargement… » et « Aucune demande » contrôlés sur les 5 pages de
+  listes.
+- Tests : `dev/tests/test_lot_f.py` (nouveau) ; `test_pages.py` et
+  `test_erreurs.py` adaptés (lignes de message exclues du comptage, liens
+  de note devenus des boutons). Résultat du 28/10/2026 : **57 réussis**.
+  Contre-épreuve sur le code d'avant le lot : 11 des 13 nouveaux tests
+  échouent (le test « note absente » passe aussi avant : garde-fou ; celui
+  de l'accordéon est ignoré : l'en-tête n'était pas un bouton).
 
 ## À confirmer
 

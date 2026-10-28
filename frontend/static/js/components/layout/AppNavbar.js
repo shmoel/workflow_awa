@@ -58,12 +58,13 @@ export default defineComponent({
 
                 <div class="ml-1 mr-4 text-[16.0205px] font-light leading-none opacity-25">|</div>
                 <div ref="root" class="relative">
-                    <a class="block px-2 py-3 whitespace-nowrap" :class="open ? 'text-white' : 'text-chrome-text'" href="#" @click.prevent="open = !open">
+                    <button type="button" class="block px-2 py-3 whitespace-nowrap" :class="open ? 'text-white' : 'text-chrome-text'"
+                            aria-haspopup="true" :aria-expanded="open ? 'true' : 'false'" @click="open = !open">
                         <span class="inline-flex flex-row-reverse items-center align-middle">
                             <img src="images/avatar.png" alt class="block w-[30px] h-[30px] rounded-full">
                             <span id="user_id" class="px-1 mr-2">{{ fullName }}</span>
                         </span><span class="inline-block align-middle ml-[7.152px] -mt-[4.005px] w-[6px] h-[6px] border-r border-b border-current rotate-45"></span>
-                    </a>
+                    </button>
                     <div v-show="open"
                          class="absolute right-0 top-full z-[1000] min-w-[10rem] mt-1 mb-[2px] py-[5px] bg-white text-ink rounded-[2px] shadow-[0_2px_4px_-1px_rgba(0,0,0,0.07),0_4px_5px_0_rgba(0,0,0,0.05),0_1px_10px_0_rgba(0,0,0,0.03)]">
                         <a href="javascript:" :class="ITEM">

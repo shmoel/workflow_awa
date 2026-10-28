@@ -81,8 +81,9 @@ FILTRES = [("Filtrer par Banque", 0), ("Filtrer par Entité", 1), ("Filtrer par 
 def test_filtres_tableau(ouvrir_session, chemin):
     page, _ = ouvrir_session("testawa")
     ouvrir(page, chemin)
-    lignes = page.locator("#tab-table-1 tbody tr")
-    cellules = "(i) => [...document.querySelectorAll('#tab-table-1 tbody tr')].map(tr => tr.cells[i]?.innerText.trim() ?? '')"
+    # Lignes de demandes, hors ligne de message (« Aucune demande… », lot F)
+    lignes = page.locator("#tab-table-1 tbody tr:not([data-message])")
+    cellules = "(i) => [...document.querySelectorAll('#tab-table-1 tbody tr:not([data-message])')].map(tr => tr.cells[i]?.innerText.trim() ?? '')"
     total = lignes.count()
     if total == 0:
         pytest.skip("tableau vide pour testawa")
@@ -100,6 +101,7 @@ def test_filtres_tableau(ouvrir_session, chemin):
         champ.fill("zzz-aucun-resultat")
         page.wait_for_timeout(200)
         assert lignes.count() == 0, f"{placeholder} : des lignes restent affichées"
+        assert "Aucune demande ne correspond aux filtres" in page.locator("#tab-table-1").inner_text()
         champ.fill("")
         page.wait_for_timeout(200)
         assert lignes.count() == total

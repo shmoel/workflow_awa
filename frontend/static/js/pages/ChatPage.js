@@ -42,6 +42,7 @@ import { markMessagesSeen }         from "../services/chatSeen.js";
 import { useCurrentUser }           from "../composables/useCurrentUser.js";
 import { useNotificationPolling }   from "../composables/useNotificationPolling.js";
 import { readDemandeId }         from "../utils/url.js";
+import { formatNumber }          from "../components/demandes/DemandesTable.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
@@ -155,6 +156,7 @@ export default defineComponent({
       listEl,
       isMine,
       send,
+      formatNumber,
       ALERT_DANGER, LINK, INFO_LABEL, INFO_VALUE,
     };
   },
@@ -202,7 +204,7 @@ export default defineComponent({
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span :class="INFO_LABEL">Montant</span>
-                                    <span :class="INFO_VALUE">{{ demande.montant }} XOF</span>
+                                    <span :class="INFO_VALUE">{{ formatNumber(demande.montant) }} XOF</span>
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span :class="INFO_LABEL">Statut</span>
@@ -216,7 +218,7 @@ export default defineComponent({
                         </div>
 
                         <div class="h-[300px] p-4 overflow-auto bg-[#f1f5f9]" ref="listEl">
-                            <div v-if="!messages.length" class="mt-8 text-center italic text-[#64748b]"></div>
+                            <div v-if="!messages.length" class="mt-8 text-center italic text-[#64748b]">Aucun message pour cette demande</div>
                             <div v-for="(msg, i) in messages" :key="i"
                                  class="relative max-w-[80%] mb-[15px] px-[15px] py-3 rounded-[8px]"
                                  :class="isMine(msg) ? 'ml-auto text-white bg-[#ea580c] rounded-br-none'

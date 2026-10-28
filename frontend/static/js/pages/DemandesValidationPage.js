@@ -142,14 +142,14 @@ export default defineComponent({
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
                     <template #intro>
-                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntroValid" :action-headers="1" :error="intro.error">
+                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntroValid" :action-headers="1" :error="intro.error" :loading="intro.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.info" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
                             </template>
                         </DemandesTable>
                     </template>
                     <template #valid>
-                        <DemandesTable theme="demandes" :rows="valid.rows" :columns="colsIntroValid" :action-headers="1" :error="valid.error">
+                        <DemandesTable theme="demandes" :rows="valid.rows" :columns="colsIntroValid" :action-headers="1" :error="valid.error" :loading="valid.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowInfo" label="CHAT" @click="goToChat(row.id_demande)" />
@@ -157,7 +157,7 @@ export default defineComponent({
                         </DemandesTable>
                     </template>
                     <template #fin>
-                        <DemandesTable theme="demandes" :rows="fin.rows" :columns="colsFin" :error="fin.error">
+                        <DemandesTable theme="demandes" :rows="fin.rows" :columns="colsFin" :error="fin.error" :loading="fin.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
                             </template>

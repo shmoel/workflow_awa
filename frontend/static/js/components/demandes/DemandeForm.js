@@ -168,7 +168,7 @@ export default defineComponent({
                 </div>
         </div>
         <p v-if="existingNoteName" class="mb-4">
-            <a href="javascript:" :class="LINK" @click.prevent="openNote(existingNoteName)">Consulter la note préalablement enregistrée</a>
+            <button type="button" :class="LINK" @click="openNote(existingNoteName)">Consulter la note préalablement enregistrée</button>
             <small v-if="noteError" :class="FORM.help + ' text-danger'" role="alert">{{ noteError }}</small>
         </p>
         <div :class="FORM.group">

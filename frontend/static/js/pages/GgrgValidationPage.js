@@ -178,14 +178,14 @@ export default defineComponent({
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
                     <template #intro>
-                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="1" :error="intro.error">
+                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="1" :error="intro.error" :loading="intro.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowInfo" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
                             </template>
                         </DemandesTable>
                     </template>
                     <template #cloturer>
-                        <DemandesTable theme="demandes" :rows="cloturer.rows" :columns="colsCloturer" :error="cloturer.error">
+                        <DemandesTable theme="demandes" :rows="cloturer.rows" :columns="colsCloturer" :error="cloturer.error" :loading="cloturer.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.outlinePrimary" label="Cloturer" @click="openCloModal(row.id_demande)" />

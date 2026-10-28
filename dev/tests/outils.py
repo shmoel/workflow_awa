@@ -86,14 +86,24 @@ def repondre_json(page, motif, donnees, status=200):
         status=status, content_type="application/json", body=json.dumps(donnees)))
 
 
-def injecter_note(page, motif, nom="20260101_000000_note_absente.pdf"):
-    """Ajoute une note d'analyse à la demande renvoyée par le serveur (lien « Télécharger » affiché)."""
+def modifier_reponse(page, motif, **champs):
+    """Remplace des champs de la demande renvoyée par le serveur (lecture seule, rien n'est écrit)."""
     def _route(route):
         reponse = route.fetch()
         donnees = reponse.json()
         res = donnees.get("results")
         for ligne in (res if isinstance(res, list) else [res]):
             if isinstance(ligne, dict):
-                ligne["note_analyse"] = nom
+                ligne.update(champs)
         route.fulfill(response=reponse, body=json.dumps(donnees))
     page.route(motif, _route)
+
+
+def injecter_note(page, motif, nom="20260101_000000_note_absente.pdf"):
+    """Ajoute une note d'analyse à la demande renvoyée par le serveur (lien « Télécharger » affiché)."""
+    modifier_reponse(page, motif, note_analyse=nom)
+
+
+def sans_reponse(page, motif):
+    """Laisse les appels correspondants sans réponse (page figée sur « Chargement… »)."""
+    page.route(motif, lambda route: None)

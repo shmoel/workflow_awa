@@ -21,6 +21,10 @@
  *   actionHeaders : Number — nombre de <th> vides ajoutés pour les colonnes
  *                   de boutons (le legacy en avait un par bouton)
  *   error         : String|null — message affiché dans une ligne du tableau
+ *   loading       : Boolean — liste en cours de chargement : ligne « Chargement… »
+ *   emptyText     : String — ligne affichée quand la liste chargée est vide
+ *                   (défaut « Aucune demande »). Ordre : erreur, chargement,
+ *                   liste vide (lot F, feuille de route UI/UX)
  *   theme         : String — clé de TABLE (défaut « dashboard »)
  *
  * ColumnDef :
@@ -68,7 +72,9 @@ export default defineComponent({
     columns:       { type: Array,  required: true },
     actionHeaders: { type: Number, default: 0 },
     error:         { type: String, default: null },
-    theme:         { type: String, default: "dashboard" },
+    loading:       { type: Boolean, default: false },
+    emptyText:     { type: String, default: "Aucune demande" },
+    theme:        { type: String, default: "dashboard" },
   },
 
   setup(props) {
@@ -96,10 +102,16 @@ export default defineComponent({
             </tr>
         </thead>
         <tbody>
-            <tr v-if="error">
+            <tr v-if="error" data-message="erreur">
                 <td :colspan="columns.length + actionHeaders" :class="t.td + ' text-danger'">
                     Impossible de charger les données : {{ error }}
                 </td>
+            </tr>
+            <tr v-else-if="loading" data-message="chargement">
+                <td :colspan="columns.length + actionHeaders" :class="t.td + ' text-muted'">Chargement…</td>
+            </tr>
+            <tr v-else-if="!rows.length" data-message="vide">
+                <td :colspan="columns.length + actionHeaders" :class="t.td + ' text-muted'">{{ emptyText }}</td>
             </tr>
             <tr v-for="(row, i) in rows" :key="row.id_demande ?? i" :class="t.row">
                 <td v-for="(col, c) in columns" :key="col.key" :class="t.td">

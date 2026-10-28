@@ -6,11 +6,12 @@
  * réel (Banque / Entité / Type / Contrepartie / Date), comme le legacy.
  *
  * Usage :
- *   const { liste, filters, filteredRows, filterFields, columns } =
+ *   const { liste, filters, filteredRows, emptyText, filterFields, columns } =
  *     useDashboardDemandes("/demandes_cloturer/");
  *   onMounted(() => liste.load());
  *   // template : <DemandesCard :fields="filterFields" v-model="filters">
- *   //              <DemandesTable :rows="filteredRows" :columns="columns" :error="liste.error">
+ *   //              <DemandesTable :rows="filteredRows" :columns="columns" :error="liste.error"
+ *   //                             :loading="liste.loading" :empty-text="emptyText">
  *
  * @param {string | (() => string | null)} source - voir useDemandesList
  */
@@ -69,5 +70,10 @@ export function useDashboardDemandes(source) {
     );
   });
 
-  return { liste, filters, filteredRows, filterFields: FILTER_FIELDS, columns: COLUMNS };
+  // Ligne affichée quand le tableau est vide : liste vide ou filtres sans résultat
+  const emptyText = computed(() =>
+    liste.rows.length ? "Aucune demande ne correspond aux filtres" : "Aucune demande"
+  );
+
+  return { liste, filters, filteredRows, emptyText, filterFields: FILTER_FIELDS, columns: COLUMNS };
 }

@@ -22,6 +22,7 @@ Base locale uniquement : ne jamais lancer ces tests sur la production.
 | `test_pages.py` | Les 11 pages s'affichent pour les comptes concernés ; banque fixée sur celle de l'utilisateur (CORRECTION-17) ; états « Terme » / « Arrêté » ; 5 filtres de l'accueil et de l'historique |
 | `test_erreurs.py` | Erreurs affichées dans la page : suppression, clôture, note d'analyse, envoi d'un avis ; × de la fenêtre du DG (CORRECTION-18) |
 | `test_clavier.py` | Zoom autorisé sur les 11 pages ; fenêtres : focus, Tab, Échap (qui n'envoie jamais rien) — lot C |
+| `test_lot_f.py` | Lot F (feuille de route UI/UX, niveau 1) : lignes « Chargement… » / « Aucune demande », montants formatés, chat vide, onglets et accordéon au clavier, note d'analyse sans doublon |
 | `conftest.py`, `outils.py` | Navigateur, connexion des comptes, interceptions réseau |
 
 ## Prérequis
@@ -72,6 +73,6 @@ lancée, pytest s'arrête tout de suite avec un message explicite.
 - Une correction ou un changement de comportement consigné dans
   `docs/CHANGELOG_REFACTORING.md` s'accompagne d'un test ici.
 - Ne jamais écrire en base : intercepter l'appel (`couper`, `repondre_json`,
-  `repondre_404`, `injecter_note` dans `outils.py`).
+  `repondre_404`, `injecter_note`, `modifier_reponse`, `sans_reponse` dans `outils.py`).
 - Ne pas dépendre d'un numéro de demande : le chercher (`premier_id`) ou
   cliquer sur la première ligne d'une liste, et `pytest.skip` si elle est vide.

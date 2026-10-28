@@ -35,7 +35,7 @@ def test_note_introuvable_dans_la_page(ouvrir_session, gabarit, lien, route):
     injecter_note(page, route)
     repondre_404(page, "**/api/download/**")
     ouvrir(page, gabarit.format(id=id_dmd))
-    page.locator(f"a:has-text(\"{lien}\")").first.click()
+    page.locator(f"button:has-text(\"{lien}\")").first.click()  # bouton depuis le lot F
     page.wait_for_timeout(1_000)
     assert "Introuvable." in texte(page)
     assert len(page.context.pages) == 1, "l'onglet ouvert pour le téléchargement doit être refermé"
@@ -70,7 +70,7 @@ def test_valider_note_introuvable(ouvrir_session):
     injecter_note(page, "**/api/demande_particulier/**")
     repondre_404(page, "**/api/download/**")
     _ouvrir_evaluation(page)
-    page.locator("a", has_text="Télécharger").first.click()
+    page.locator("button", has_text="Télécharger").first.click()  # bouton depuis le lot F
     page.wait_for_timeout(1_000)
     assert "Introuvable." in texte(page)
 

@@ -21,7 +21,9 @@
  *
  * Un seul panneau ouvert à la fois ; panneaux identifiés par leur position
  * (le legacy utilisait event_d : deux avis du même type s'ouvraient ensemble).
- * Bootstrap JS (data-toggle="collapse") est remplacé par Vue.
+ * Bootstrap JS (data-toggle="collapse") est remplacé par Vue. En-tête de
+ * panneau : <button aria-expanded> au lieu du lien legacy
+ * href="javascript:" (lot F, accessibilité).
  */
 
 import {
@@ -67,13 +69,13 @@ export default defineComponent({
 
   template: /* html */ `
     <div v-for="(row, i) in avis" :key="i" class="mb-2 bg-white border border-line">
-        <a href="javascript:" class="flex justify-between px-6 py-4 text-ink hover:text-[#85bdf7]"
+        <button type="button" class="flex justify-between w-full px-6 py-4 text-left text-ink hover:text-[#85bdf7]"
            :aria-expanded="openIndex === i ? 'true' : 'false'"
-           @click.prevent="toggle(i)">
+           @click="toggle(i)">
             {{ row.statut_d }}                            : {{ row.decision }} <span class="relative block w-[14px] h-[14px]"><span
                 class="absolute top-[7px] left-[7px] -ml-1 w-2 h-2 border-l border-b border-[rgba(24,28,33,0.3)] transition-transform duration-300"
                 :class="openIndex === i ? 'rotate-[135deg]' : '-rotate-45'"></span></span>
-        </a>
+        </button>
         <div v-show="openIndex === i" class="text-muted">
             <div class="px-6 pb-4">
                     <div class="block overflow-auto">
