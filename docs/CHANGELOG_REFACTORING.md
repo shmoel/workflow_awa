@@ -8,7 +8,7 @@ Chaque entrée indique : le fichier legacy concerné, la nature du bug,
 le fichier Vue où la correction est appliquée, et le statut de validation
 par le chef de projet.
 
-## État du projet (21/10/2026)
+## État du projet (28/10/2026)
 
 - **Migration terminée** : les 11 pages sont en Vue 3 (hébergé localement, modules ES6) ;
   le legacy n'existe plus que dans le tag git `pre-bascule-vue`.
@@ -22,7 +22,10 @@ par le chef de projet.
 - **Conventions API v2** (21/10/2026) : contrat `docs/conventions-api-v2.md` ;
   appliqué au frontend dans la mesure du possible, le reste attend le backend
   (voir « Alignement sur les conventions API v2 »).
-- **Restent ouverts** : 4 points « À confirmer » (frontend ; le n°1 est résolu) et 15 points
+- **Feuille de route UI/UX** (28/10/2026) : niveaux 1 à 3 validés par le
+  chef de projet, à appliquer (lots F à H) ; le niveau 3 lève la règle du
+  rendu identique au legacy pour les éléments redessinés.
+- **Restent ouverts** : 3 points « À confirmer » (frontend ; les n°1 et 3 sont tranchés) et 15 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
 
@@ -34,6 +37,7 @@ par le chef de projet.
 - Passage à Tailwind (20/10/2026) — Play CDN figé, secours local, rendu identique au legacy
 - Alignement sur les conventions API v2 (21/10/2026) — appliqué / reste à faire
 - Qualité du code (23/10/2026) — revue du frontend, lots A à E
+- Feuille de route UI/UX (28/10/2026) — niveaux 1 à 3 validés, à appliquer (lots F à H)
 - À confirmer — choix fonctionnels en attente de décision
 - Points ouverts backend — à traiter par l'équipe backend
 
@@ -1089,6 +1093,117 @@ vérifié qu'il échoue si un filtre vise la mauvaise colonne.
 
 La revue « Qualité du code » est terminée (lots A à E).
 
+## Feuille de route UI/UX (28/10/2026)
+
+Revue UI/UX du frontend (23/10/2026), recommandations classées en trois
+niveaux. **Décision du chef de projet du 28/10/2026 : les trois niveaux sont
+validés**, à une exception près (niveau 2, point 9 : les liens morts restent).
+Statut de chaque point : *Validé — à appliquer*. Chaque lot appliqué sera
+consigné ici (date, vérifications, tests de recette ajoutés).
+
+**Conséquence sur la règle du rendu identique au legacy.** Le niveau 3
+lève la règle « rendu identique au legacy, comparé au pixel près » (Passage
+à Tailwind, 20/10/2026) pour les éléments qu'il redessine. Jusqu'à
+l'application du niveau 3, la règle reste en vigueur pour le reste de
+l'interface ; les niveaux 1 et 2 ne s'en écartent que sur les points listés.
+Règle mise à jour dans `CLAUDE.md` le 28/10/2026 (accord du chef de projet) :
+tout autre écart avec le legacy reste soumis à son accord préalable.
+
+| Niveau | Contenu | Rendu legacy |
+|---|---|---|
+| 1 | Gains rapides : états vides, montants, accessibilité | Conservé |
+| 2 | UX : alertes lisibles, validation plus sûre, circuit, listes, chat | Petits écarts |
+| 3 | Modernisation visuelle (système de design unifié) | Abandonné sur ces éléments |
+
+### Niveau 1 — Gains rapides, rendu legacy conservé
+
+1. **États « chargement » et « aucune demande » dans les tableaux**
+   (`DemandesTable`) : une ligne « Chargement… » puis, si la liste est vide,
+   « Aucune demande », au style de la ligne d'erreur existante. Aujourd'hui
+   la zone reste blanche sans explication.
+2. **Montants formatés partout** (`formatNumber()`, ex. 1 500 000) : pages
+   Valider et Chat, qui affichent la valeur brute alors que les listes la
+   formatent.
+3. **Chat sans message** : texte « Aucun message pour cette demande » dans
+   la zone vide prévue par le legacy.
+4. **Accessibilité** : liens `href="javascript:"` (menu, accordéon des avis,
+   téléchargement de note) remplacés par des `<button>` au même rendu ;
+   onglets dotés de `role="tablist"` / `role="tab"` / `aria-selected`.
+5. **Espace vide de 310 px** (`#tasks-inner`, accueil, consulter,
+   validation) : à vérifier contre le legacy ; retiré s'il repousse le
+   tableau sous un vide.
+
+### Niveau 2 — UX, petits écarts avec le legacy
+
+6. **Alertes lisibles** (`ALERT_DANGER*`, `ALERT_SUCCESS_FORM`,
+   `components/ui/classes.js`) : texte blanc sur fond pâle remplacé par un
+   texte rouge / vert foncé (contraste WCAG AA). Le legacy les rendait
+   illisibles, alors que les corrections 15 et 18 reposent sur ces messages.
+7. **Formulaire de validation plus sûr** (`valider_demande`) :
+   - plus de décision présélectionnée : option vide « Choisir une décision »,
+     champ obligatoire ;
+   - fenêtre de confirmation qui rappelle l'avis et la demande (décision,
+     référence, contrepartie, montant) ;
+   - fenêtre du DG : boutons « Poursuivre le circuit » / « Arrêter la
+     demande » au lieu de « OUI » / « NON » ;
+   - attente artificielle de 2 s après l'enregistrement supprimée ;
+   - commentaire obligatoire quand l'avis n'est pas favorable (dépend des
+     libellés de décision, « À confirmer » n°5).
+8. **Position de la demande dans le circuit** : frise des 6 étapes
+   (Introduction → Risque local → DG local → AWA → AIG → GGR) sur la page
+   détail, étape courante en orange ; pastille de statut dans les listes
+   « en validation ».
+9. **Menu latéral : page courante en surbrillance**, sous-menu qui la
+   contient ouvert au chargement (« À confirmer » n°3).
+   **Refusé :** retrait des liens « Login », « Signup », « FAQ » et
+   « Statistiques » — conservés comme dans le legacy (décision du
+   08/10/2026 maintenue).
+10. **Cartes de compteurs de l'accueil** : rangées dans l'ordre du circuit,
+    cliquables pour filtrer le tableau.
+11. **Coquilles corrigées** : « Cloturées » → « Clôturées », « Demandes en fin
+    de de processus » → « Demandes en fin de processus », « Votre avis bien
+    été enregistré » → « Votre avis a bien été enregistré », titre « MES
+    DEMANDES » de la page de validation → « DEMANDES À VALIDER ».
+12. **Listes** : tri par date et montant au clic sur l'en-tête ; libellé des
+    filtres et bouton « Effacer les filtres » ; filtres rétablis sur les
+    pages de validation (retirés le 08/10/2026 par fidélité au legacy).
+13. **Chat** : messages rechargés automatiquement (toutes les 20 à 30 s) ;
+    « Utilisateur inconnu » au lieu de « BanqueBot » quand le nom manque.
+
+### Niveau 3 — Modernisation visuelle
+
+Les styles étant centralisés (`components/ui/classes.js`,
+`static/js/tailwind.config.js`), la refonte se fait en grande partie à ces
+deux endroits :
+
+14. **Boutons unifiés** : trois variantes (principale, secondaire, danger)
+    et un seul arrondi, à la place des quatre styles actuels (material en
+    capitales, « glow », contour orange arrondi, pilule du chat).
+15. **Champs encadrés** avec libellé au-dessus et focus visible, à la place
+    des champs soulignés.
+16. **Actions de ligne allégées** : ligne entière cliquable vers le détail,
+    icône pour le chat, à la place des deux boutons en capitales par ligne.
+17. **Tableaux adaptés au mobile** : une carte par demande sous 768 px, au
+    lieu du défilement horizontal.
+18. **Compteur dans le menu** sur « Valider des demandes » (nombre en
+    attente), en complément de la fenêtre de notification.
+19. **Typographie harmonisée** : une seule police d'interface (aujourd'hui
+    Segoe UI, system-ui, -apple-system et Poppins selon les pages).
+
+### Dépend du backend (points ouverts à proposer)
+
+- Badge « Nouveau » de l'accueil : un appel `/messages_chat/{id}` par ligne
+  (et cette route expose les mots de passe, point backend 5). Un champ
+  `date_dernier_message` dans `/demandes_a_consulter` le remplacerait.
+- Pagination côté serveur des listes, quand les volumes augmenteront.
+
+### Ordre d'application prévu
+
+Un lot et un commit par niveau, plan détaillé soumis avant chaque lot :
+**lot F** (niveau 1), **lot G** (niveau 2), **lot H** (niveau 3, après
+maquette des composants refondus). Tests de recette `dev/tests/` lancés et
+complétés à chaque lot.
+
 ## À confirmer
 
 Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
@@ -1117,7 +1232,9 @@ Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
    échoue, la demande existe sans avis et n'apparaît dans aucune liste.
    L'erreur est désormais affichée ; un endpoint unique côté backend
    éviterait ce cas.
-3. **Lien actif du menu (toutes les pages).** Comme dans le legacy, « Accueil »
+3. ✅ **Tranché le 28/10/2026 — mise en surbrillance de la page courante et
+   ouverture de son sous-menu validées** (Feuille de route UI/UX, point 9).
+   **Lien actif du menu (toutes les pages).** Comme dans le legacy, « Accueil »
    reste en surbrillance sur toutes les pages et le sous-menu (« Menu » ou
    « Actions ») est fermé au chargement. À trancher : mettre en surbrillance la page courante
    et ouvrir le sous-menu qui la contient.

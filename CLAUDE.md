@@ -30,7 +30,11 @@ API docs at `http://127.0.0.1:8000/docs`.
   (`static/vendor/tailwindcss/tailwindcss-play-3.4.17.js`, written only if `window.tailwind` is missing), then
   `static/js/tailwind.config.js`. Copy the `<head>` of an existing page; never use `cdn.tailwindcss.com` without a
   version
-- **Legacy look, in Tailwind classes** — the UI must look exactly like the legacy pages (pixel comparison).
+- **Legacy look, in Tailwind classes** — the UI must look exactly like the legacy pages (pixel comparison),
+  **except** for the elements redesigned by the UI/UX roadmap validated on 28/10/2026
+  (`docs/CHANGELOG_REFACTORING.md`, « Feuille de route UI/UX », levels 2 and 3: readable alerts, unified
+  buttons, boxed form fields, lighter row actions, mobile cards, typography…). Those follow the new design,
+  defined in `classes.js` / `tailwind.config.js`; everything else stays pixel-identical to the legacy.
   No CSS file of our own: styles are Tailwind classes in the templates. Shared values live in
   `static/js/tailwind.config.js` (colours, Bootstrap breakpoints 576/768/992/1200/1400, legacy font sizes) and
   shared class lists in `static/js/components/ui/classes.js` (buttons, tables, tabs, modals, form fields,
@@ -45,7 +49,9 @@ API docs at `http://127.0.0.1:8000/docs`.
 - `API_URL` toujours relative à `window.location.origin` — utiliser `` `${window.location.origin}/api` ``, jamais d'URL en dur (ni Render, ni `127.0.0.1`)
 - Migration complete (bascule finale du 05/10/2026): every page is Vue 3; the legacy HTML is only in git tag `pre-bascule-vue`
 - No `v-html`; if ever unavoidable, content must go through `escapeHtml()` first
-- Any visual change must keep the legacy look; compare with the legacy page from tag `pre-bascule-vue`
+- Any visual change must keep the legacy look (compare with the legacy page from tag `pre-bascule-vue`),
+  unless it is part of the UI/UX roadmap (« Feuille de route UI/UX », decision of 28/10/2026); any other
+  departure from the legacy look still needs the project lead's approval first
 - **API contract: `docs/conventions-api-v2.md`** (proposal shared with the backend team). What the frontend
   already applies and what waits for the backend is tracked in `docs/CHANGELOG_REFACTORING.md`
   (« Alignement sur les conventions API v2 »)
