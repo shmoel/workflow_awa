@@ -183,12 +183,33 @@ export const SHEET = {
 // Messages et liens
 // ---------------------------------------------------------------------------
 
-/** Message d'erreur (ex-.alert.alert-danger : texte blanc sur fond rose, comme le legacy) */
-const ALERT_DANGER_BASE = "relative block p-4 text-white bg-[#ffe4e7] border border-[#f0d6d9] rounded-[2px]";
+/**
+ * Message d'erreur (ex-.alert.alert-danger). Le legacy écrivait en blanc sur
+ * fond rose (illisible) : texte rouge foncé depuis le lot G (feuille de route
+ * UI/UX, point 6), contraste supérieur à 4,5:1.
+ */
+const ALERT_DANGER_BASE = "relative block p-4 text-[#a3172b] bg-[#ffe4e7] border border-[#f0d6d9] rounded-[2px]";
 export const ALERT_DANGER      = `${ALERT_DANGER_BASE} my-4`;   // .alert.mt-3
 export const ALERT_DANGER_FORM = `${ALERT_DANGER_BASE} mb-4`;   // .alert seul (formulaires)
-/** Message de succès (ex-.alert.alert-success : texte blanc sur fond vert pâle, comme le legacy) */
-export const ALERT_SUCCESS_FORM = "relative block mb-4 p-4 text-white bg-[#e7f9ef] border border-[#d9eae1] rounded-[2px]";
+/** Message de succès (ex-.alert.alert-success) : texte vert foncé sur fond vert pâle (lot G) */
+export const ALERT_SUCCESS_FORM = "relative block mb-4 p-4 text-[#146c43] bg-[#e7f9ef] border border-[#d9eae1] rounded-[2px]";
 
 /** Lien (couleur des liens du CSS legacy) */
 export const LINK = "text-[#ff4a00] hover:text-[#b33400]";
+
+/** Bouton d'apparence lien, petit texte (« Effacer les filtres », × d'un filtre) */
+export const LINK_BUTTON = "text-sm font-medium text-[#ff4a00] hover:text-[#b33400] underline-offset-2 hover:underline";
+
+// ---------------------------------------------------------------------------
+// Pastille de statut d'une demande (lot G, point 8) — couleur selon le ton
+// renvoyé par statutTone() (domain/workflow.js)
+// ---------------------------------------------------------------------------
+
+const PILL_BASE = "inline-block px-[10px] py-[2px] text-[12px] font-semibold leading-[1.5] whitespace-nowrap rounded-full";
+
+export const PILL = {
+  encours: `${PILL_BASE} text-[#9a3412] bg-[#ffedd5]`,
+  succes:  `${PILL_BASE} text-[#146c43] bg-[#e7f9ef]`,
+  arret:   `${PILL_BASE} text-[#a3172b] bg-[#ffe4e7]`,
+  neutre:  `${PILL_BASE} text-[#4b5563] bg-[#eef0f2]`,
+};

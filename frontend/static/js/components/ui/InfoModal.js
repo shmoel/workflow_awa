@@ -4,7 +4,7 @@
  * Modale d'information à un bouton OK (Tailwind) — reprend les modales legacy
  * « successModal » (« Demande Bien enregistrée ! »,
  * « Demande modifiée avec succès », « Demande supprimée ! »,
- * « Demande cloturée ! », « Votre avis bien été enregistré ! »).
+ * « Demande cloturée ! », « Votre avis a bien été enregistré ! »).
  *
  * Props :
  *   show    : Boolean — affichage

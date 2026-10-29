@@ -36,3 +36,40 @@ export const PROCESS = Object.freeze({
 export function etatFinProcess(row) {
   return row.max_event === EVENT.ARRETEE_DG ? "Arrêté" : "Terme";
 }
+
+/** Étapes du circuit de validation, dans l'ordre (frise de la page détail) */
+export const CIRCUIT = Object.freeze([
+  "Introduction", "Risque local", "DG local", "AWA", "AIG", "GGR",
+]);
+
+/**
+ * Position d'une demande dans le circuit, d'après son statut (MAX(id_event)).
+ * Statut 1 à 5 : l'étape `courante` attend un avis, les précédentes sont
+ * passées. Statut 6 ou 7 : circuit terminé (courante = null, toutes passées).
+ * Statut 8 / 9 : demande arrêtée à l'étape `courante` (supprimée avant le
+ * premier avis, arrêtée par le DG local).
+ * @param {number|null|undefined} maxEvent
+ * @returns {{ passees: number, courante: number|null, arret: string|null } | null}
+ *          null si le statut est inconnu
+ */
+export function positionCircuit(maxEvent) {
+  const e = Number(maxEvent);
+  if (e >= EVENT.SOUMISE && e <= EVENT.ATTENTE_GGR) return { passees: e, courante: e, arret: null };
+  if (e === EVENT.APPROUVEE || e === EVENT.CLOTUREE) return { passees: CIRCUIT.length, courante: null, arret: null };
+  if (e === EVENT.SUPPRIMEE)  return { passees: 1, courante: 1, arret: "Supprimée" };
+  if (e === EVENT.ARRETEE_DG) return { passees: 2, courante: 2, arret: "Arrêtée par le DG local" };
+  return null;
+}
+
+/**
+ * Ton de la pastille de statut (clé de PILL, components/ui/classes.js).
+ * @param {number|null|undefined} maxEvent
+ * @returns {"encours" | "succes" | "arret" | "neutre"}
+ */
+export function statutTone(maxEvent) {
+  const e = Number(maxEvent);
+  if (e >= EVENT.SOUMISE && e <= EVENT.ATTENTE_GGR) return "encours";
+  if (e === EVENT.APPROUVEE) return "succes";
+  if (e === EVENT.ARRETEE_DG) return "arret";
+  return "neutre";
+}

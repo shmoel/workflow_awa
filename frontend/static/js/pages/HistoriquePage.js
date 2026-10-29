@@ -81,7 +81,7 @@ export default defineComponent({
 
                 <div class="h-[310px]" id="tasks-inner"></div>
 
-                <DemandesCard tab-label="Demandes Cloturees" :fields="filterFields" v-model="filters">
+                <DemandesCard tab-label="Demandes Clôturées" :fields="filterFields" v-model="filters">
                     <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error" :loading="liste.loading" :empty-text="emptyText">
                         <template #actions="{ row }">
                             <ActionCell :btn-class="BTN.outlineBrand" label="Détails" @click="goToDetail(row.id_demande)" />

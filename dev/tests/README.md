@@ -23,6 +23,7 @@ Base locale uniquement : ne jamais lancer ces tests sur la production.
 | `test_erreurs.py` | Erreurs affichées dans la page : suppression, clôture, note d'analyse, envoi d'un avis ; × de la fenêtre du DG (CORRECTION-18) |
 | `test_clavier.py` | Zoom autorisé sur les 11 pages ; fenêtres : focus, Tab, Échap (qui n'envoie jamais rien) — lot C |
 | `test_lot_f.py` | Lot F (feuille de route UI/UX, niveau 1) : lignes « Chargement… » / « Aucune demande », montants formatés, chat vide, onglets et accordéon au clavier, note d'analyse sans doublon |
+| `test_lot_g.py` | Lot G (feuille de route UI/UX, niveau 2) : alertes lisibles, formulaire de validation (aucune présélection, récapitulatif, boutons du DG, pas d'attente), frise du circuit, pastille de statut, menu actif, cartes de compteurs, tri, filtres et « Effacer les filtres », chat (« Utilisateur inconnu », rechargement), coquilles |
 | `conftest.py`, `outils.py` | Navigateur, connexion des comptes, interceptions réseau |
 
 ## Prérequis

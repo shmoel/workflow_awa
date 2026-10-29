@@ -14,7 +14,7 @@
  *   Colonnes : Type de demande | Filiale (= banque) | Contrepartie |
  *              Entité | Montant (Xof)
  *   Actions  : [Détails] → detail_consulter_demande.html?id_dmd=X
- *              [Cloturer] → ouvre ConfirmModal avec commentaire
+ *              [Clôturer] → ouvre ConfirmModal avec commentaire
  *                         → POST /cloturer_demande/{id} (FormData)
  *
  * ── Correction bug legacy ───────────────────────────────────────────────────
@@ -30,6 +30,7 @@
 import {
   defineComponent,
   ref,
+  computed,
   onMounted,
   onUnmounted,
 } from "vue";
@@ -38,12 +39,14 @@ import { apiPostForm }                from "../services/api.js";
 import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
 import { useDemandesList }           from "../composables/useDemandesList.js";
+import { useRowFilters }             from "../composables/useRowFilters.js";
 import { goToDetail, goToEvaluer }    from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import InfoModal from "../components/ui/InfoModal.js";
 import ActionCell from "../components/demandes/ActionCell.js";
-import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
+import DemandesTable, { formatNumber, SORT_MONTANT } from "../components/demandes/DemandesTable.js";
+import DemandeFilters from "../components/demandes/DemandeFilters.js";
 import ConfirmModal   from "../components/ui/ConfirmModal.js";
 import TabsCard       from "../components/demandes/TabsCard.js";
 import { BTN, ALERT_DANGER_FORM } from "../components/ui/classes.js";
@@ -59,7 +62,7 @@ const COLS_INTRO = [
   { key: "banque",            label: "Banque",          wrap: "self" },
   { key: "categorie_demande", label: "Entité" },
   { key: "nom_client",        label: "Contrepartie" },
-  { key: "montant",           label: "Montant (Xof)", format: (v) => formatNumber(v) },
+  { key: "montant",           label: "Montant (Xof)", format: (v) => formatNumber(v), sort: SORT_MONTANT },
 ];
 
 const COLS_CLOTURER = [
@@ -67,8 +70,23 @@ const COLS_CLOTURER = [
   { key: "banque",            label: "Filiale",         wrap: "self" },
   { key: "nom_client",        label: "Contrepartie" },
   { key: "categorie_demande", label: "Entité" },
-  { key: "montant",           label: "Montant (Xof)", format: (v) => formatNumber(v) },
+  { key: "montant",           label: "Montant (Xof)", format: (v) => formatNumber(v), sort: SORT_MONTANT },
 ];
+
+// Filtres au-dessus des onglets (lot G, feuille de route UI/UX, point 12 ;
+// retirés le 08/10/2026 par fidélité au legacy) : ils s'appliquent à tous les onglets
+const FILTER_FIELDS = [
+  { key: "banque",       placeholder: "Filtrer par Banque" },
+  { key: "entite",       placeholder: "Filtrer par Entité" },
+  { key: "type",         placeholder: "Filtrer par Type" },
+  { key: "contrepartie", placeholder: "Filtrer par Contrepartie" },
+];
+const FILTERED_FIELD = {
+  banque:       "banque",
+  entite:       "categorie_demande",
+  type:         "type_demande",
+  contrepartie: "nom_client",
+};
 
 // ---------------------------------------------------------------------------
 // Composant page
@@ -83,7 +101,7 @@ const TABS = [
 export default defineComponent({
   name: "GgrgValidationPage",
 
-  components: { AppLayout, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal },
+  components: { AppLayout, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal, DemandeFilters },
 
   setup() {
     const user    = useCurrentUser();
@@ -92,9 +110,16 @@ export default defineComponent({
     // ---- Onglet actif ----
     const activeTab = ref("intro");   // "intro" | "cloturer"
 
-    // ---- Listes des onglets (pas de filtres : absents du legacy) ----
+    // ---- Listes des onglets ----
     const intro    = useDemandesList("/demandes_a_valider/");
     const cloturer = useDemandesList("/demandes_a_cloturer/");
+
+    // ---- Filtres communs aux 2 onglets ----
+    const { filters, filterRows } = useRowFilters(FILTERED_FIELD);
+    const introRows    = computed(() => filterRows(intro.rows));
+    const cloturerRows = computed(() => filterRows(cloturer.rows));
+    const emptyText = computed(() => Object.values(filters.value).some(Boolean)
+      ? "Aucune demande ne correspond aux filtres" : "Aucune demande");
 
     // ---- Modale clôture ----
     const showCloModal   = ref(false);
@@ -147,6 +172,10 @@ export default defineComponent({
       polling,
       activeTab,
       intro, cloturer,
+      introRows, cloturerRows,
+      filters,
+      filterFields: FILTER_FIELDS,
+      emptyText,
       colsIntro:    COLS_INTRO,
       colsCloturer: COLS_CLOTURER,
       showCloModal,
@@ -166,7 +195,7 @@ export default defineComponent({
   template: /* html */ `
     <AppLayout :polling="polling">
         <div class="flex-grow px-4 lg:px-8 py-6">
-            <h4 class="py-4 mb-0 text-h4 font-bold">MES DEMANDES</h4>
+            <h4 class="py-4 mb-0 text-h4 font-bold">DEMANDES À VALIDER</h4>
 
             <div v-if="actionError" :class="ALERT_DANGER_FORM" role="alert">
                 <i class="bi bi-exclamation-triangle"></i> Erreur lors de la clôture : {{ actionError }}
@@ -177,18 +206,21 @@ export default defineComponent({
                 <div class="h-[310px]" id="tasks-inner"></div>
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
+                    <template #filters>
+                        <DemandeFilters :fields="filterFields" v-model="filters" />
+                    </template>
                     <template #intro>
-                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="1" :error="intro.error" :loading="intro.loading">
+                        <DemandesTable theme="demandes" :rows="introRows" :columns="colsIntro" :action-headers="1" :error="intro.error" :loading="intro.loading" :empty-text="emptyText">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowInfo" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
                             </template>
                         </DemandesTable>
                     </template>
                     <template #cloturer>
-                        <DemandesTable theme="demandes" :rows="cloturer.rows" :columns="colsCloturer" :error="cloturer.error" :loading="cloturer.loading">
+                        <DemandesTable theme="demandes" :rows="cloturerRows" :columns="colsCloturer" :error="cloturer.error" :loading="cloturer.loading" :empty-text="emptyText">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
-                                <ActionCell :btn-class="BTN.outlinePrimary" label="Cloturer" @click="openCloModal(row.id_demande)" />
+                                <ActionCell :btn-class="BTN.outlinePrimary" label="Clôturer" @click="openCloModal(row.id_demande)" />
                             </template>
                         </DemandesTable>
                     </template>
@@ -201,7 +233,7 @@ export default defineComponent({
             <ConfirmModal
                 v-model:show="showCloModal"
                 variant="design"
-                title="Voulez-vous vraiment cloturer cette demande  ?"
+                title="Voulez-vous vraiment clôturer cette demande  ?"
                 :with-comment="true"
                 comment-placeholder="Laisser un message"
                 @confirm="handleCloturer"
@@ -209,8 +241,8 @@ export default defineComponent({
             <InfoModal
                 :show="showSuccessModal"
                 variant="design"
-                title="Cloturer demande"
-                message="Demande  cloturée !"
+                title="Clôturer la demande"
+                message="Demande  clôturée !"
                 @ok="handleCloSuccess"
             />
         </template>

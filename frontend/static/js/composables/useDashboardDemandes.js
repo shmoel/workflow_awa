@@ -5,8 +5,12 @@
  * l'historique (historique.html) : mêmes colonnes, mêmes 5 filtres en temps
  * réel (Banque / Entité / Type / Contrepartie / Date), comme le legacy.
  *
+ * Lot G (feuille de route UI/UX) : colonne « Date / Heure » triable, étape en
+ * pastille de statut, filtre par statut (cartes de compteurs de l'accueil :
+ * `statut` = id_event, null = tous).
+ *
  * Usage :
- *   const { liste, filters, filteredRows, emptyText, filterFields, columns } =
+ *   const { liste, filters, statut, filteredRows, emptyText, filterFields, columns } =
  *     useDashboardDemandes("/demandes_cloturer/");
  *   onMounted(() => liste.load());
  *   // template : <DemandesCard :fields="filterFields" v-model="filters">
@@ -18,6 +22,10 @@
 
 import { ref, computed } from "vue";
 import { useDemandesList } from "./useDemandesList.js";
+import { useRowFilters } from "./useRowFilters.js";
+import { statutTone } from "../domain/workflow.js";
+import { sortDate } from "../components/demandes/DemandesTable.js";
+import { PILL } from "../components/ui/classes.js";
 
 /** Colonnes du tableau (ordre identique au legacy) */
 const COLUMNS = [
@@ -25,8 +33,8 @@ const COLUMNS = [
   { key: "categorie_demande", label: "Entité",            wrap: "cc-label" },
   { key: "type_demande",      label: "Type de demande",   wrap: "cc" },
   { key: "nom_client",        label: "Contrepartie",      wrap: "cc" },
-  { key: "_date_heure",       label: "Date / Heure",      wrap: "cc" },
-  { key: "description",       label: "Niveau validation", wrap: "cc" },
+  { key: "_date_heure",       label: "Date / Heure",      wrap: "cc", sort: sortDate("date_avis", "heure_avis") },
+  { key: "description",       label: "Niveau validation", wrap: "cc", pill: (r) => PILL[statutTone(r.max_event)] },
 ];
 
 /** Champs de filtre (placeholders legacy) */
@@ -47,8 +55,6 @@ const FILTERED_FIELD = {
   date:         "_date_heure",
 };
 
-const EMPTY_FILTERS = { banque: "", entite: "", type: "", contrepartie: "", date: "" };
-
 /** Date / heure du dernier avis, affichée « date | heure » (legacy) */
 function withDateHeureAvis(rows) {
   return rows.map((r) => ({
@@ -58,16 +64,13 @@ function withDateHeureAvis(rows) {
 }
 
 export function useDashboardDemandes(source) {
-  const liste   = useDemandesList(source, withDateHeureAvis);
-  const filters = ref({ ...EMPTY_FILTERS });
+  const liste  = useDemandesList(source, withDateHeureAvis);
+  const statut = ref(null);
+  const { filters, filterRows } = useRowFilters(FILTERED_FIELD);
 
-  // Filtrage en temps réel : sous-chaîne, sans tenir compte des majuscules
   const filteredRows = computed(() => {
-    const actifs = Object.entries(filters.value)
-      .map(([filtre, valeur]) => [FILTERED_FIELD[filtre], valeur.toLowerCase()]);
-    return liste.rows.filter((r) =>
-      actifs.every(([champ, valeur]) => (r[champ] ?? "").toLowerCase().includes(valeur))
-    );
+    const rows = filterRows(liste.rows);
+    return statut.value === null ? rows : rows.filter((r) => Number(r.max_event) === statut.value);
   });
 
   // Ligne affichée quand le tableau est vide : liste vide ou filtres sans résultat
@@ -75,5 +78,5 @@ export function useDashboardDemandes(source) {
     liste.rows.length ? "Aucune demande ne correspond aux filtres" : "Aucune demande"
   );
 
-  return { liste, filters, filteredRows, emptyText, filterFields: FILTER_FIELDS, columns: COLUMNS };
+  return { liste, filters, statut, filteredRows, emptyText, filterFields: FILTER_FIELDS, columns: COLUMNS };
 }

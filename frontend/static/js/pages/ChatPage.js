@@ -25,6 +25,11 @@
  *   - Code mort non repris : getBotResponse() (réponses simulées « BanqueBot »,
  *     jamais affichées, 1 s d'attente à chaque envoi)
  *
+ * Lot G (feuille de route UI/UX, point 13) : messages rechargés toutes les
+ * 25 s quand l'onglet est visible et qu'aucun envoi n'est en cours ; la zone
+ * ne défile vers le bas que si l'utilisateur y était déjà. « Utilisateur
+ * inconnu » quand le nom manque (le legacy affichait « BanqueBot »).
+ *
  * AvisTimeline n'est pas réutilisé : la page affiche des messages
  * (table commentaires), pas l'historique des avis.
  */
@@ -47,6 +52,9 @@ import { formatNumber }          from "../components/demandes/DemandesTable.js";
 import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
 import { ALERT_DANGER, LINK } from "../components/ui/classes.js";
+
+/** Intervalle de rechargement automatique des messages */
+const REFRESH_MS = 25_000;
 
 // En-tête du chat : libellé gris en capitales, valeur en gras (ex-.info-label / .info-value)
 const INFO_LABEL = "text-[0.75rem] font-medium uppercase tracking-[0.05em] text-[#64748b]";
@@ -90,6 +98,27 @@ export default defineComponent({
       messages.value = data.results ?? [];
       markMessagesSeen(demandeId, messages.value);
       await scrollToBottom();
+    }
+
+    /** La zone des messages est-elle (presque) en bas ? */
+    function atBottom() {
+      const el = listEl.value;
+      return !el || el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    }
+
+    // ---- Rechargement automatique (erreurs ignorées : on réessaie au tour suivant) ----
+    let timer = null;
+    async function refresh() {
+      if (document.visibilityState !== "visible" || sending.value || !demande.value) return;
+      try {
+        const data = await apiGet(`/messages_chat/${demandeId}`);
+        const rows = data.results ?? [];
+        if (JSON.stringify(rows) === JSON.stringify(messages.value)) return;
+        const suivre = atBottom();
+        messages.value = rows;
+        markMessagesSeen(demandeId, rows);
+        if (suivre) await scrollToBottom();
+      } catch { /* silencieux */ }
     }
 
     async function load() {
@@ -138,9 +167,13 @@ export default defineComponent({
         return;
       }
       await load();
+      timer = setInterval(refresh, REFRESH_MS);
     });
 
-    onUnmounted(() => polling.stop());
+    onUnmounted(() => {
+      polling.stop();
+      clearInterval(timer);
+    });
 
     return {
       user,
@@ -223,8 +256,8 @@ export default defineComponent({
                                  class="relative max-w-[80%] mb-[15px] px-[15px] py-3 rounded-[8px]"
                                  :class="isMine(msg) ? 'ml-auto text-white bg-[#ea580c] rounded-br-none'
                                                     : 'mr-auto text-[#333] bg-white border border-[#ddd] rounded-bl-none'">
-                                <span class="flex items-center justify-center shrink-0 w-8 h-8 text-[0.875rem] font-semibold text-white bg-[#ea580c] rounded-full">{{ isMine(msg) ? 'V' : (msg.username || 'B').charAt(0) }}</span>
-                                <div class="mb-[5px] text-[0.9em] font-bold text-[#333]">{{ isMine(msg) ? 'Vous' : (msg.username || 'BanqueBot') }}</div>
+                                <span class="flex items-center justify-center shrink-0 w-8 h-8 text-[0.875rem] font-semibold text-white bg-[#ea580c] rounded-full">{{ isMine(msg) ? 'V' : (msg.username || '?').charAt(0) }}</span>
+                                <div class="mb-[5px] text-[0.9em] font-bold text-[#333]">{{ isMine(msg) ? 'Vous' : (msg.username || 'Utilisateur inconnu') }}</div>
                                 <div>{{ msg.commentaire }}</div>
                                 <div>{{ msg.date_creation }} {{ msg.heure_creation }}</div>
                             </div>

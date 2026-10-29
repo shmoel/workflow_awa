@@ -8,7 +8,7 @@ Chaque entrée indique : le fichier legacy concerné, la nature du bug,
 le fichier Vue où la correction est appliquée, et le statut de validation
 par le chef de projet.
 
-## État du projet (28/10/2026)
+## État du projet (29/10/2026)
 
 - **Migration terminée** : les 11 pages sont en Vue 3 (hébergé localement, modules ES6) ;
   le legacy n'existe plus que dans le tag git `pre-bascule-vue`.
@@ -23,7 +23,7 @@ par le chef de projet.
   appliqué au frontend dans la mesure du possible, le reste attend le backend
   (voir « Alignement sur les conventions API v2 »).
 - **Feuille de route UI/UX** (28/10/2026) : niveaux 1 à 3 validés par le
-  chef de projet ; lot F (niveau 1) appliqué, lots G et H à venir ; le niveau 3 lève la règle du
+  chef de projet ; lots F (niveau 1) et G (niveau 2) appliqués, lot H à venir ; le niveau 3 lève la règle du
   rendu identique au legacy pour les éléments redessinés.
 - **Restent ouverts** : 3 points « À confirmer » (frontend ; les n°1 et 3 sont tranchés) et 15 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
@@ -37,7 +37,7 @@ par le chef de projet.
 - Passage à Tailwind (20/10/2026) — Play CDN figé, secours local, rendu identique au legacy
 - Alignement sur les conventions API v2 (21/10/2026) — appliqué / reste à faire
 - Qualité du code (23/10/2026) — revue du frontend, lots A à E
-- Feuille de route UI/UX (28/10/2026) — niveaux 1 à 3 validés ; lot F appliqué, lots G et H à venir
+- Feuille de route UI/UX (28/10/2026) — niveaux 1 à 3 validés ; lots F et G appliqués, lot H à venir
 - À confirmer — choix fonctionnels en attente de décision
 - Points ouverts backend — à traiter par l'équipe backend
 
@@ -1149,11 +1149,13 @@ tout autre écart avec le legacy reste soumis à son accord préalable.
      demande » au lieu de « OUI » / « NON » ;
    - attente artificielle de 2 s après l'enregistrement supprimée ;
    - commentaire obligatoire quand l'avis n'est pas favorable (dépend des
-     libellés de décision, « À confirmer » n°5).
+     libellés de décision, « À confirmer » n°5) — **reporté** au lot G
+     jusqu'à la réponse sur ces libellés.
 8. **Position de la demande dans le circuit** : frise des 6 étapes
    (Introduction → Risque local → DG local → AWA → AIG → GGR) sur la page
    détail, étape courante en orange ; pastille de statut dans les listes
-   « en validation ».
+   « en validation » (sauf celles des pages de validation : la route ne
+   renvoie pas le statut, voir « Dépend du backend »).
 9. **Menu latéral : page courante en surbrillance**, sous-menu qui la
    contient ouvert au chargement (« À confirmer » n°3).
    **Refusé :** retrait des liens « Login », « Signup », « FAQ » et
@@ -1197,6 +1199,12 @@ deux endroits :
   (et cette route expose les mots de passe, point backend 5). Un champ
   `date_dernier_message` dans `/demandes_a_consulter` le remplacerait.
 - Pagination côté serveur des listes, quand les volumes augmenteront.
+- Statut (`max_event`, `description`) dans `/demandes_deja_valider/` :
+  pastille de statut sur l'onglet « Demandes en validation » des pages de
+  validation (lot G, point 8).
+- Statut chiffré (`max_event`) dans `/demande_particulier/{id}` : la frise
+  du circuit le retrouve aujourd'hui à partir des avis et de
+  `/event_statuts/` (deux libellés identiques fausseraient la frise).
 
 ### Ordre d'application prévu
 
@@ -1241,6 +1249,36 @@ Vérifications :
   Contre-épreuve sur le code d'avant le lot : 11 des 13 nouveaux tests
   échouent (le test « note absente » passe aussi avant : garde-fou ; celui
   de l'accordéon est ignoré : l'en-tête n'était pas un bouton).
+
+### Lot G — appliqué le 29/10/2026 (niveau 2)
+
+Plan soumis et accepté le 29/10/2026, avec deux choix : le commentaire
+obligatoire du point 7 est **reporté** (« À confirmer » n°5) ; les cartes
+de compteurs sont cliquables malgré l'écart de périmètre signalé (voir
+point 10).
+
+| Point | Modification | Fichiers |
+|---|---|---|
+| 6 | Texte des alertes en rouge foncé `#a3172b` / vert foncé `#146c43` (au lieu de blanc) sur les fonds pâles legacy, contraste > 4,5:1 | `classes.js` |
+| 7 | Valider une demande : option « Choisir une décision », aucune présélection (le legacy présélectionnait la première décision, souvent « Validée ») ; confirmation avec récapitulatif (décision, référence `DEM-{entité}-{id}`, contrepartie, montant) ; fenêtre du DG : « Poursuivre le circuit » / « Arrêter la demande » au lieu de « OUI » / « NON » (le × ne soumet toujours rien) ; plus d'alerte « Validation en cours… » ni d'attente de 2 s ; bouton « Valider » désactivé pendant l'envoi (double envoi impossible). **Reporté :** commentaire obligatoire si l'avis n'est pas favorable | `ValiderDemandePage.js`, `ConfirmModal.js` (doc) |
+| 8 | Frise des 6 étapes sur la page Détail (nouveau composant `CircuitFrise`) : étapes passées cochées, étape en attente en orange (`aria-current="step"`), arrêt en rouge (DG local, ou suppression avant le premier avis) ; « Circuit de validation terminé » aux statuts 6 et 7. Statut retrouvé à partir des avis (`event_d`) et de `GET /event_statuts/` ; frise masquée si ces données manquent. Pastille de statut (orange en cours, vert approuvée, rouge arrêtée, gris sinon) dans « Mes demandes / en validation », l'accueil et l'historique. **Pas de pastille** sur les onglets « en validation » des pages de validation : `/demandes_deja_valider/` ne renvoie pas le statut (point backend ci-dessus) | `CircuitFrise.js`, `workflow.js` (`CIRCUIT`, `positionCircuit()`, `statutTone()`), `DetailDemandePage.js`, `DemandesTable.js` (`pill`), `useDashboardDemandes.js`, `ConsulterDemandesPage.js` |
+| 9 | Menu latéral : page courante en surbrillance (fond legacy de « Accueil », texte orange, `aria-current="page"`), sous-menu qui la contient ouvert au chargement. Valider une demande → « Valider des demandes » ; modifier → « Consulter mes demandes » ; détail et chat : aucune entrée (on y arrive depuis plusieurs listes) | `AppSidebar.js` |
+| 10 | Cartes de l'accueil dans l'ordre du circuit (GGR Local, DG Local, AWA, FO Group, GGR Group, Clôturées ; legacy : 1, 6, 4, 2, 3, 5). Chaque carte est un bouton (`aria-pressed`) qui filtre le tableau sur son statut ; bandeau « Filtre : … × » ; second clic ou × = tous. Écart connu : le compteur porte sur la banque / l'entité, le tableau sur le domaine ; le tableau filtré peut donc compter moins de lignes que la carte | `StatCard.js`, `AccueilPage.js`, `useDashboardDemandes.js` |
+| 11 | « Cloturées » → « Clôturées » (accueil), « Demandes Cloturees » → « Demandes Clôturées » (historique), « fin de de processus » → « fin de processus » (Mes demandes, validation), « Votre avis bien été enregistré » → « Votre avis a bien été enregistré », titre « MES DEMANDES » → « DEMANDES À VALIDER » sur les deux pages de validation (inchangé sur « Consulter mes demandes »). Ajout : « Cloturer » → « Clôturer » (bouton, fenêtres de la page GGR) | pages concernées |
+| 12 | Tri au clic sur l'en-tête (▲ / ▼, `aria-sort`) : Date / Heure (accueil, historique, Mes demandes, fin de processus) et Montant (Mes demandes, validation, GGR). Champs de filtre avec libellé pour les lecteurs d'écran (`aria-label`) ; bouton « Effacer les filtres » dès qu'un filtre est rempli. Filtres (Banque, Entité, Type, Contrepartie) rétablis au-dessus des onglets des deux pages de validation, appliqués à tous les onglets | `DemandesTable.js` (`sort`, `SORT_MONTANT`, `sortDate()`), `DemandeFilters.js`, `TabsCard.js` (slot `filters`), `useRowFilters.js` (nouveau, filtrage commun), pages de validation |
+| 13 | Chat : messages rechargés toutes les 25 s si l'onglet est visible et qu'aucun envoi n'est en cours ; défilement vers le bas seulement si l'utilisateur y était déjà ; erreurs ignorées (nouvel essai au tour suivant). « Utilisateur inconnu » (initiale « ? ») au lieu de « BanqueBot » | `ChatPage.js` |
+
+Vérifications :
+- Rendu des 10 pages applicatives avec l'API simulée : aucune erreur
+  JavaScript ; frise, pastilles, filtres et menu contrôlés sur capture.
+  Correction faite pendant la vérification : l'entrée active du menu
+  n'est pas en gras (« Valider des demandes » passait sur deux lignes).
+- Tests : `dev/tests/test_lot_g.py` (nouveau, 18 tests) ; `test_erreurs.py`
+  et `test_pages.py` adaptés aux nouveaux libellés (« Poursuivre le
+  circuit », « Clôturer », « fin de processus »). Résultat du 29/10/2026 :
+  **75 réussis**. Contre-épreuve sur le code d'avant le lot : 17 des
+  18 nouveaux tests échouent (le test « frise absente sans statut » passe
+  aussi avant : garde-fou).
 
 ## À confirmer
 
@@ -1292,6 +1330,8 @@ Choix fonctionnels tranchés au plus près du legacy pendant la migration ;
    contiennent « Avis favorable », seul le jeu de test est à corriger ;
    sinon la règle ne fonctionne nulle part et devra être corrigée (sur
    accord, par exemple en comparant l'identifiant de la décision).
+   Bloque aussi le « commentaire obligatoire si l'avis n'est pas
+   favorable » (feuille de route UI/UX, point 7), reporté le 29/10/2026.
 
 ---
 

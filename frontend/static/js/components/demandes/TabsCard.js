@@ -18,7 +18,9 @@
  *   tabs       : Array<{ key, label, paneId }> — onglets, dans l'ordre
  *   modelValue : String — clé de l'onglet actif (v-model)
  *
- * Slots : un slot par onglet, nommé d'après sa clé (le tableau du volet).
+ * Slots : un slot par onglet, nommé d'après sa clé (le tableau du volet) ;
+ *         slot « filters » à gauche des onglets (champs de filtre des pages
+ *         de validation, lot G).
  */
 
 import { defineComponent } from "vue";
@@ -50,6 +52,7 @@ export default defineComponent({
         <div class="relative flex flex-col mb-6 bg-white rounded-[2px] shadow-[0_0_0_1px_rgba(24,28,33,0.08)]">
             <div class="flex flex-wrap items-center px-6 pt-[10.4px] pb-0 leading-[22.0282px] border-b border-line rounded-t-[2px]">
                 <h6 class="mb-0 py-[10.4px] font-medium leading-[1.1]"></h6>
+                <slot name="filters" />
                 <div class="flex items-center ml-auto p-0">
                     <ul class="flex m-0 p-0 list-none" role="tablist">
                         <li v-for="(tab, n) in tabs" :key="tab.key" role="presentation">

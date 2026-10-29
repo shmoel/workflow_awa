@@ -14,7 +14,7 @@
  * zone du tableau role="tabpanel".
  *
  * Props :
- *   tabLabel   : String — libellé de l'onglet (« Introduites », « Demandes Cloturees »)
+ *   tabLabel   : String — libellé de l'onglet (« Introduites », « Demandes Clôturées »)
  *   fields     : Array  — champs de filtre (voir DemandeFilters)
  *   modelValue : Object — valeurs des filtres (v-model)
  *

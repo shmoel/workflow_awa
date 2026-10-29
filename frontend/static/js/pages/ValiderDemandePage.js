@@ -22,11 +22,17 @@
  * ── Logique modale DG ──────────────────────────────────────────────────────
  *   Si banque ≠ "AIG" ET banque ≠ "AWA" ET entite === "DG"
  *      ET décision choisie ≠ "Avis favorable"
- *   → Modale "Malgré votre avis Non favorable, poursuivre ? OUI/NON"
- *      OUI → dgContinue() → PROCESS.POURSUIVRE
- *      NON → dgStop()     → PROCESS.ARRETER (statut EVENT.ARRETEE_DG)
- *      ×   → dgClose()    → retour demandes_validation sans soumettre
+ *   → Modale "Malgré votre avis non favorable, … poursuive le circuit ?"
+ *      « Poursuivre le circuit » → dgContinue() → PROCESS.POURSUIVRE
+ *      « Arrêter la demande »    → dgStop()     → PROCESS.ARRETER (statut EVENT.ARRETEE_DG)
+ *      ×                         → dgClose()    → retour demandes_validation sans soumettre
  *   Sinon → confirmationModal standard → process_ongoing = 1
+ *
+ * ── Lot G (feuille de route UI/UX, point 7) ────────────────────────────────
+ *   Aucune décision présélectionnée (option « Choisir une décision », champ
+ *   obligatoire) ; la confirmation rappelle la décision et la demande ;
+ *   boutons du DG explicites au lieu de « OUI / NON » ; plus d'attente de 2 s
+ *   après l'enregistrement ; bouton « Valider » désactivé pendant l'envoi.
  *
  * ── Redirection après succès ───────────────────────────────────────────────
  *   AIG + GGR → ggrg_demandes_validation.html
@@ -88,8 +94,9 @@ export default defineComponent({
     const errorDemande   = ref(null);
 
     // ---- Formulaire avis ----
-    const selectedDecision = ref("");
+    const selectedDecision = ref("");   // vide : l'utilisateur doit choisir
     const commentaire      = ref("");
+    const submitting       = ref(false);
 
     // ---- Alerte inline ----
     const { alert, showAlert } = useTimedAlert();
@@ -116,6 +123,20 @@ export default defineComponent({
       ];
     });
 
+    // ---- Récapitulatif affiché dans la fenêtre de confirmation ----
+    const decisionLabel = computed(() =>
+      decisions.value.find((d) => String(d.id) === selectedDecision.value)?.libelle ?? ""
+    );
+    const recap = computed(() => {
+      const d = demande.value;
+      return [
+        { label: "Décision",     value: decisionLabel.value },
+        { label: "Référence",    value: d ? `DEM-${d.categorie_demande}-${d.id_demande}` : "" },
+        { label: "Contrepartie", value: d?.nom_client ?? "" },
+        { label: "Montant",      value: d ? `${formatNumber(d.montant)} XOF` : "" },
+      ];
+    });
+
     // ---- Chargement ----
     async function loadAll() {
       loadingDemande.value = true;
@@ -129,11 +150,6 @@ export default defineComponent({
         demande.value      = dData.results?.[0] ?? null;
         decisions.value    = decData ?? [];
         commentaires.value = commData.results ?? [];
-
-        // Pré-sélectionner la première décision
-        if (decisions.value.length > 0) {
-          selectedDecision.value = String(decisions.value[0].id);
-        }
       } catch (e) {
         errorDemande.value = e.message;
       } finally {
@@ -164,6 +180,8 @@ export default defineComponent({
 
     // ---- Soumission générique ----
     async function submitAvis(processOngoing) {
+      if (submitting.value) return;
+      submitting.value = true;
       const fd = new FormData();
       fd.append("id_decision", selectedDecision.value);
       fd.append("commentaire", commentaire.value);
@@ -173,14 +191,14 @@ export default defineComponent({
           `/valider_avis/${demandeId}/process_ongoing/${processOngoing}`,
           fd
         );
-        // CORRECTION-04 : alerte succès uniquement après vérification response.ok
+        // CORRECTION-04 : succès affiché uniquement après vérification response.ok
         // (apiPostForm lance une erreur si !response.ok, donc on est ici = succès)
-        showAlert("success", "Validation en cours…");
-        await new Promise((r) => setTimeout(r, 2000));
         showSuccessModal.value = true;
       } catch (e) {
         // e.message : message de l'API destiné à l'utilisateur (ApiError)
         showAlert("danger", `Erreur lors de la soumission du formulaire : ${e.message}`);
+      } finally {
+        submitting.value = false;
       }
     }
 
@@ -238,6 +256,8 @@ export default defineComponent({
       errorDemande,
       selectedDecision,
       commentaire,
+      submitting,
+      recap,
       alert,
       noteName,
       noteError,
@@ -335,6 +355,7 @@ export default defineComponent({
                                     <div :class="FORM.group">
                                         <label class="inline-block text-[13.3px] leading-[1.47] font-medium" for="decision"><strong class="font-black">Décision </strong></label>
                                         <select :class="FORM.select" id="decision" v-model="selectedDecision" required>
+                                            <option value="" disabled>Choisir une décision</option>
                                             <option v-for="d in decisions" :key="d.id" :value="String(d.id)">{{ d.libelle }}</option>
                                         </select>
                                     </div>
@@ -342,7 +363,7 @@ export default defineComponent({
                                         <label class="inline-block mb-2" for="comm"><strong class="font-black">Commentaire</strong></label>
                                         <textarea :class="TEXTAREA" id='comm' v-model="commentaire"></textarea>
                                     </div>
-                                    <div class="text-center"> <button id="valider_avis" type="submit" :class="BTN.primary">Valider</button></div>
+                                    <div class="text-center"> <button id="valider_avis" type="submit" :class="BTN.primary" :disabled="submitting">{{ submitting ? 'Envoi…' : 'Valider' }}</button></div>
                                 </form>
                             </div>
                         </div>
@@ -366,15 +387,22 @@ export default defineComponent({
             <ConfirmModal
                 v-model:show="showConfirmModal"
                 title="Confirmation"
-                message="Voulez-vous vraiment soumettre le formulaire ?"
                 @confirm="confirmSubmission"
-            />
+            >
+                <p class="mb-3">Voulez-vous vraiment enregistrer cet avis ?</p>
+                <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 m-0" data-recap>
+                    <template v-for="r in recap" :key="r.label">
+                        <dt class="font-bold">{{ r.label }}</dt>
+                        <dd class="m-0">{{ r.value }}</dd>
+                    </template>
+                </dl>
+            </ConfirmModal>
             <ConfirmModal
                 v-model:show="showDGModal"
                 title="Confirmation"
-                message="Malgré votre avis Non favorable, voulez-vous que la demande poursuive le processus OUI/NON ?"
-                confirm-label="OUI"
-                cancel-label="NON"
+                message="Malgré votre avis non favorable, voulez-vous que la demande poursuive le circuit de validation ?"
+                confirm-label="Poursuivre le circuit"
+                cancel-label="Arrêter la demande"
                 :closable="true"
                 @confirm="dgContinue"
                 @cancel="dgStop"
@@ -383,7 +411,7 @@ export default defineComponent({
             <InfoModal
                 :show="showSuccessModal"
                 title="Confirmation"
-                message="Votre avis bien été enregistré !"
+                message="Votre avis a bien été enregistré !"
                 @ok="handleSuccess"
             />
         </template>

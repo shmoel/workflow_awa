@@ -5,13 +5,16 @@
  * mêmes libellés, mêmes icônes (polices feather / ionicons), mêmes dimensions.
  *
  * Comportements repris du JavaScript legacy (sidenav.js + demo.js), sans jQuery :
- *   - Sous-menu « Menu » : fermé au chargement, s'ouvre / se ferme au clic
+ *   - Sous-menu « Menu » : s'ouvre / se ferme au clic
  *   - Bouton ☰ : replie le menu (événement "toggle-collapse" géré par AppLayout)
  *   - Menu replié (compact) : 70 px, icônes centrées, sous-menu masqué ;
  *     se déploie au survol (événement "hover")
  *   - Liens masqués selon le niveau d'habilitation (user.menu, ex-infos_user())
- *   - « Accueil » est en surbrillance sur toutes les pages, comme dans le
- *     legacy (balisage copié tel quel dans chaque page)
+ *   - Page courante en surbrillance (aria-current="page") et sous-menu qui la
+ *     contient ouvert au chargement (lot G, feuille de route UI/UX, point 9 ;
+ *     le legacy surlignait « Accueil » partout, sous-menu fermé). Pages d'une
+ *     demande : valider → « Valider des demandes », modifier → « Consulter
+ *     mes demandes » ; détail et chat n'ont pas d'entrée (plusieurs origines)
  *   - Liens « Login », « Signup », « FAQ » conservés comme dans le legacy
  *     (décision du 08/10/2026) : ils mènent à des pages inexistantes (404)
  *
@@ -36,6 +39,20 @@ const SUB_LINK = LINK + " py-[10px] pl-[59.2px] pr-[27.2px]";
 const SUB_ICON = ICON + " w-[28px]";
 // Séparateur (ex-.sidenav-divider) : 30 px de marge de chaque côté
 const DIVIDER = "self-stretch mx-[30px] border-t border-[rgba(33,37,41,0.075)]";
+// Entrée de la page courante (fond legacy de « Accueil », texte orange)
+const ACTIVE = " bg-[#f9f9f9] !text-[#ff4a00]";
+
+/** Page → entrées du menu à mettre en surbrillance */
+const ACTIVE_ITEMS = {
+  "acceuil.html":                  ["accueil"],
+  "introduire_demandes.html":      ["intro_dmd"],
+  "consulter_demandes.html":       ["consult_dmd"],
+  "modifier_demande.html":         ["consult_dmd"],
+  "demandes_validation.html":      ["valid_dmd"],
+  "ggrg_demandes_validation.html": ["valid_dmd_ggrg"],
+  "valider_demande.html":          ["valid_dmd", "valid_dmd_ggrg"],
+  "historique.html":               ["hist_dmd"],
+};
 
 export default defineComponent({
   name: "AppSidebar",
@@ -54,7 +71,13 @@ export default defineComponent({
     // computed rangé dans un objet ordinaire : exposé directement pour que
     // le template le déballe
     const menu = user.menu;
-    const menuOpen = ref(false);
+    const actifs = ACTIVE_ITEMS[window.location.pathname.split("/").pop()] ?? [];
+    const isActive = (item) => actifs.includes(item);
+    // Sous-menu ouvert au chargement s'il contient la page courante
+    const menuOpen = ref(actifs.some((item) => item !== "accueil"));
+
+    /** Classes et aria-current d'une entrée */
+    const sub = (item) => ({ class: SUB_LINK + (isActive(item) ? ACTIVE : ""), "aria-current": isActive(item) ? "page" : null });
     const statsIcon = computed(() =>
       props.menuLabel === "Actions" ? "feather icon-lock " + SUB_ICON : "bi bi-bar-chart block"
     );
@@ -63,7 +86,7 @@ export default defineComponent({
     const link = computed(() => LINK + " py-3 " + (props.compact ? "pl-0 pr-[27.2px] whitespace-nowrap" : "px-[27.2px]"));
     const icon = computed(() => ICON + (props.compact ? " w-[70px] text-center" : " w-[28px]"));
 
-    return { menu, menuOpen, statsIcon, link, icon, LINK, SUB_LINK, SUB_ICON, DIVIDER };
+    return { menu, menuOpen, statsIcon, link, icon, isActive, sub, ACTIVE, LINK, SUB_LINK, SUB_ICON, DIVIDER };
   },
 
   template: /* html */ `
@@ -88,7 +111,8 @@ export default defineComponent({
         <ul class="flex flex-col items-start flex-auto m-0 py-1 overflow-y-auto overflow-x-hidden list-none [scrollbar-width:thin] [scrollbar-color:transparent_transparent] hover:[scrollbar-color:#aaa_transparent]">
 
             <li class="w-full my-[2px]">
-                <a href="acceuil.html" :class="link + ' bg-[#f9f9f9]'">
+                <a href="acceuil.html" :class="link + (isActive('accueil') ? ACTIVE : '')"
+                   :aria-current="isActive('accueil') ? 'page' : null">
                     <i :class="'feather icon-home ' + icon"></i>
                     <div>Accueil</div>
                     <div class="pl-1 ml-auto"></div>
@@ -108,25 +132,25 @@ export default defineComponent({
               </button>
               <ul v-show="menuOpen && !compact" class="flex flex-col m-0 py-[10px] list-none">
                 <li v-if="menu.intro_dmd" id="intro_dmd" class="w-full">
-                  <a href="introduire_demandes.html" :class="SUB_LINK">
+                  <a href="introduire_demandes.html" v-bind="sub('intro_dmd')">
                     <i :class="'feather icon-clipboard ' + SUB_ICON"></i>
                     <div>Introduire demande</div>
                   </a>
                 </li>
                 <li v-if="menu.consult_dmd" id="consult_dmd" class="w-full">
-                  <a href="consulter_demandes.html" :class="SUB_LINK">
+                  <a href="consulter_demandes.html" v-bind="sub('consult_dmd')">
                     <i :class="'feather icon-grid ' + SUB_ICON"></i>
                     <div>Consulter mes demandes</div>
                   </a>
                 </li>
                 <li v-if="menu.valid_dmd" id="valid_dmd" class="w-full">
-                    <a href="demandes_validation.html" :class="SUB_LINK">
+                    <a href="demandes_validation.html" v-bind="sub('valid_dmd')">
                       <i :class="'feather icon-lock ' + SUB_ICON"></i>
                       <div>Valider des demandes</div>
                     </a>
                 </li>
                 <li v-if="menu.valid_dmd_ggrg" id="valid_dmd_ggrg" class="w-full">
-                    <a href="ggrg_demandes_validation.html" :class="SUB_LINK">
+                    <a href="ggrg_demandes_validation.html" v-bind="sub('valid_dmd_ggrg')">
                       <i :class="'feather icon-lock ' + SUB_ICON"></i>
                       <div>Valider des demandes</div>
                     </a>
@@ -138,7 +162,7 @@ export default defineComponent({
                     </a>
                 </li>
                 <li v-if="menu.hist_dmd" id="hist_dmd" class="w-full">
-                    <a href="historique.html" :class="SUB_LINK">
+                    <a href="historique.html" v-bind="sub('hist_dmd')">
                       <i class="bi bi-bar-chart block"></i>
                       <div>   Historique</div>
                     </a>

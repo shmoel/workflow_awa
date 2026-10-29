@@ -62,7 +62,7 @@ def test_banque_fixee_modification(ouvrir_session):
 def test_etats_fin_de_processus(ouvrir_session):
     page, _ = ouvrir_session("testawa")
     ouvrir(page, "demandes_validation.html")
-    page.locator("a,button,li", has_text="processus").first.click()  # libellé legacy : « fin de de processus »
+    page.locator("a,button,li", has_text="processus").first.click()  # « fin de processus » (« fin de de » avant le lot G)
     page.wait_for_timeout(400)
     etats = page.evaluate("""() => [...document.querySelectorAll('button')]
         .filter(b => b.offsetParent).map(b => b.textContent.trim())

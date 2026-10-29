@@ -49,7 +49,7 @@ def test_cloture_erreur_dans_la_page(ouvrir_session):
     couper(page, "**/api/cloturer_demande/**")
     ouvrir(page, "ggrg_demandes_validation.html", attente_ms=1_500)
     page.locator("a,button,li", has_text="Demandes fin de processus").first.click()
-    page.locator("button:visible", has_text="Cloturer").first.click()
+    page.locator("button:visible", has_text="Clôturer").first.click()
     page.locator("button:visible", has_text="Confirmer").click()
     page.wait_for_timeout(1_000)
     assert f"Erreur lors de la clôture : {MSG_RESEAU}" in texte(page)
@@ -82,7 +82,7 @@ def test_valider_message_de_l_api(ouvrir_session):
     page.select_option("select", label="Rejetée")
     page.locator("form button[type=submit]").first.click()
     page.wait_for_timeout(500)
-    page.locator("button:visible", has_text="OUI").click()
+    page.locator("button:visible", has_text="Poursuivre le circuit").click()  # « OUI » avant le lot G
     page.wait_for_timeout(800)
     alerte = page.locator("#alert-container").inner_text()
     assert f"Erreur lors de la soumission du formulaire : {MSG_RESEAU}" in alerte

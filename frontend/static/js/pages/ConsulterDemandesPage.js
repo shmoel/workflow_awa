@@ -53,16 +53,16 @@ import { apiPost } from "../services/api.js";
 import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
 import { useDemandesList }       from "../composables/useDemandesList.js";
-import { EVENT, etatFinProcess }    from "../domain/workflow.js";
+import { EVENT, etatFinProcess, statutTone } from "../domain/workflow.js";
 import { goToDetail, goToModify, goToChat } from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import InfoModal from "../components/ui/InfoModal.js";
 import ActionCell from "../components/demandes/ActionCell.js";
-import DemandesTable, { formatNumber } from "../components/demandes/DemandesTable.js";
+import DemandesTable, { formatNumber, SORT_MONTANT, sortDate } from "../components/demandes/DemandesTable.js";
 import ConfirmModal  from "../components/ui/ConfirmModal.js";
 import TabsCard      from "../components/demandes/TabsCard.js";
-import { BTN, ALERT_DANGER_FORM } from "../components/ui/classes.js";
+import { BTN, PILL, ALERT_DANGER_FORM } from "../components/ui/classes.js";
 
 // ---------------------------------------------------------------------------
 // Définitions des colonnes par onglet
@@ -72,30 +72,31 @@ import { BTN, ALERT_DANGER_FORM } from "../components/ui/classes.js";
  * Colonnes des 3 onglets — wrappers de cellule identiques au legacy
  * (generateTableDemandeRows, generateValidDemandesValiderRows, generateDemandes_finProcess).
  * Le legacy n'avait pas d'en-tête pour les colonnes de boutons des onglets 2 et 3.
+ * Lot G : montant et date triables, étape de validation en pastille.
  */
-const MONTANT = { key: "montant", label: "Montant (Xof)", format: (v) => formatNumber(v) };
+const MONTANT = { key: "montant", label: "Montant (Xof)", format: (v) => formatNumber(v), sort: SORT_MONTANT };
 
 const COLS_INTRO = [
   { key: "categorie_demande", label: "Entité",          wrap: "label" },
   { key: "type_demande",      label: "Type de demande", wrap: "self" },
   { key: "nom_client",        label: "Contrepartie" },
   MONTANT,
-  { key: "_date_heure",       label: "Date / Heure" },
+  { key: "_date_heure",       label: "Date / Heure", sort: sortDate("date", "heure") },
 ];
 const COLS_VALID = [
   { key: "categorie_demande", label: "Entité",          wrap: "cc-label" },
   { key: "type_demande",      label: "Type de demande", wrap: "media" },
   { key: "nom_client",        label: "Contrepartie" },
   MONTANT,
-  { key: "_date_heure",       label: "Date / Heure" },
-  { key: "description",       label: "Etape de validation" },
+  { key: "_date_heure",       label: "Date / Heure", sort: sortDate("date_val") },
+  { key: "description",       label: "Etape de validation", pill: (r) => PILL[statutTone(r.max_event)] },
 ];
 const COLS_FIN = [
   { key: "categorie_demande", label: "Entité",          wrap: "cc-label" },
   { key: "type_demande",      label: "Type de demande", wrap: "media" },
   { key: "nom_client",        label: "Contrepartie" },
   MONTANT,
-  { key: "_date_heure",       label: "Date / Heure" },
+  { key: "_date_heure",       label: "Date / Heure", sort: sortDate("date_val") },
   { key: "_etat",             label: "Etat",
     button: (row) => row.max_event === EVENT.ARRETEE_DG
       ? { cls: BTN.danger,  label: "Arrêté" }
@@ -107,7 +108,7 @@ const COLS_FIN = [
 const TABS = [
   { key: "intro", label: "Demandes Introduites",            paneId: "demande-intro" },
   { key: "valid", label: "Demandes en validation",          paneId: "demande-val" },
-  { key: "fin",   label: "Demandes en fin de de processus", paneId: "demande-fin-process" },
+  { key: "fin",   label: "Demandes en fin de processus", paneId: "demande-fin-process" },
 ];
 
 function normalizeIntro(rows) {

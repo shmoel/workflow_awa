@@ -150,9 +150,11 @@ frontend/                          # Served as-is under /workflow (browser files
         useNoteDownload.js         # downloadNote() with the error shown in the page
         useModalA11y.js            # modal keyboard: focus, Tab trap, Escape (never sends data)
         useDemandesList.js         # list loaded from a GET route: rows, loading, error, load()
-        useDashboardDemandes.js    # Accueil / Historique table: columns, 5 filters, filtering
+        useRowFilters.js           # real-time list filters (accueil, historique, validation pages)
+        useDashboardDemandes.js    # Accueil / Historique table: columns, 5 filters, status filter
       domain/
-        workflow.js                # EVENT status codes (1–9), PROCESS (DG continue / stop)
+        workflow.js                # EVENT status codes (1–9), PROCESS (DG continue / stop),
+                                   # CIRCUIT steps, positionCircuit(), statutTone()
       utils/
         url.js                     # readDemandeId() — ?id_dmd= parameter
         navigation.js              # goToDetail / goToChat / goToModify / goToEvaluer
@@ -160,8 +162,9 @@ frontend/                          # Served as-is under /workflow (browser files
         layout/                    # AppLayout (legacy layout-wrapper), AppSidebar, AppNavbar,
                                    # AppFooter, NotificationPopup
         demandes/                  # StatCard, DemandeFilters, DemandesTable (+ ActionCell, themes
-                                   # "dashboard" / "demandes"), DemandesCard, TabsCard,
-                                   # AvisTimeline, DemandeForm
+                                   # "dashboard" / "demandes", sortable columns, status pills),
+                                   # DemandesCard, TabsCard, AvisTimeline, CircuitFrise (6-step
+                                   # circuit timeline), DemandeForm
         ui/                        # ConfirmModal, InfoModal (variant "material" / "design"),
                                    # BackArrow (back arrow on detail / chat / modifier / valider),
                                    # classes.js (shared Tailwind class lists)

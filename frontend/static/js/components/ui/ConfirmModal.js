@@ -10,7 +10,8 @@
  *   - consulter_demandes : « Pourquoi voulez-vous supprimer votre demande ? »
  *                          + commentaire
  *   - ggrg_demandes_validation : « Voulez-vous vraiment cloturer… ? » + commentaire
- *   - valider_demande : confirmation, et modale DG (OUI / NON + bouton ×)
+ *   - valider_demande : confirmation avec récapitulatif (slot), et modale DG
+ *     (« Poursuivre le circuit » / « Arrêter la demande » + bouton ×)
  *
  * Props :
  *   show               : Boolean — affichage (v-model:show)
