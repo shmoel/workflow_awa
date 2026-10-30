@@ -39,6 +39,7 @@ import { readDemandeId }         from "../utils/url.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
+import Breadcrumb from "../components/ui/Breadcrumb.js";
 import DemandeForm  from "../components/demandes/DemandeForm.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
 import InfoModal    from "../components/ui/InfoModal.js";
@@ -47,7 +48,7 @@ import { CARD, ALERT_DANGER_FORM, LINK } from "../components/ui/classes.js";
 export default defineComponent({
   name: "ModifierDemandePage",
 
-  components: { AppLayout, DemandeForm, ConfirmModal, InfoModal, BackArrow },
+  components: { AppLayout, DemandeForm, ConfirmModal, InfoModal, BackArrow, Breadcrumb },
 
   setup() {
     const user = useCurrentUser();
@@ -148,6 +149,14 @@ export default defineComponent({
       else loading.value = false;
     });
 
+    // ---- Breadcrumb ----
+    const demandeId = readDemandeId();
+    const breadcrumbItems = ref([
+      { label: 'Accueil', href: 'acceuil.html' },
+      { label: 'Mes Demandes', href: 'consulter_demandes.html' },
+      { label: `Modification - Demande #${demandeId}`, active: true },
+    ]);
+
     return {
       user,
       banques,
@@ -161,6 +170,7 @@ export default defineComponent({
       submitting,
       showConfirm,
       showSuccess,
+      breadcrumbItems,
       askConfirm,
       submit,
       onSuccessOk,
@@ -174,6 +184,12 @@ export default defineComponent({
 
             <div class="w-full px-8">
               <BackArrow fallback="consulter_demandes.html" class="lg:ml-[calc(16.6667%-8px)]" />
+              
+              <!-- Breadcrumb -->
+              <div class="lg:ml-[calc(16.6667%-8px)]">
+                  <Breadcrumb :items="breadcrumbItems" />
+              </div>
+              
               <div class="flex flex-wrap -mx-3">
             <div class="relative w-full lg:w-1/6 px-3"></div>
             <div :class="CARD.card + ' w-full md:w-2/3 mb-6 px-3'">

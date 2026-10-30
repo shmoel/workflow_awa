@@ -66,6 +66,7 @@ import { PROCESS }                      from "../domain/workflow.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
+import Breadcrumb from "../components/ui/Breadcrumb.js";
 import InfoModal from "../components/ui/InfoModal.js";
 import AvisTimeline from "../components/demandes/AvisTimeline.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
@@ -78,7 +79,7 @@ import { BTN, CARD, FORM, TEXTAREA, SHEET, LINK, ALERT_DANGER_FORM, ALERT_SUCCES
 export default defineComponent({
   name: "ValiderDemandePage",
 
-  components: { AppLayout, ConfirmModal, AvisTimeline, InfoModal, BackArrow },
+  components: { AppLayout, ConfirmModal, AvisTimeline, InfoModal, BackArrow, Breadcrumb },
 
   setup() {
     const user    = useCurrentUser();
@@ -246,6 +247,14 @@ export default defineComponent({
 
     onUnmounted(() => polling.stop());
 
+    // ---- Breadcrumb ----
+    const demandeId = readDemandeId();
+    const breadcrumbItems = ref([
+      { label: 'Accueil', href: 'acceuil.html' },
+      { label: 'Demandes à valider', href: user.menu.value.valid_dmd_ggrg ? 'ggrg_demandes_validation.html' : 'demandes_validation.html' },
+      { label: `Validation - Demande #${demandeId}`, active: true },
+    ]);
+
     return {
       user,
       polling,
@@ -263,6 +272,7 @@ export default defineComponent({
       noteError,
       openNote,
       infos,
+      breadcrumbItems,
       showConfirmModal,
       showDGModal,
       showSuccessModal,
@@ -281,6 +291,12 @@ export default defineComponent({
         <div class="flex flex-wrap -mx-3">
             <div class="relative w-full px-3">
                 <BackArrow fallback="demandes_validation.html" class="pl-6" />
+                
+                <!-- Breadcrumb -->
+                <div class="pl-6">
+                    <Breadcrumb :items="breadcrumbItems" />
+                </div>
+                
                 <div :class="CARD.card + ' w-full mb-6'">
                     <div class="flex flex-wrap h-full overflow-hidden">
                         <div class="relative flex items-center w-full md:w-1/2 pt-px">
