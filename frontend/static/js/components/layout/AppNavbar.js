@@ -27,12 +27,17 @@ import {
 } from "vue";
 import { useCurrentUser } from "../../composables/useCurrentUser.js";
 import { logout } from "../../services/auth.js";
+import NotificationCenter from "../ui/NotificationCenter.js";
 
 // Élément du menu déroulant (ex-.dropdown-item)
 const ITEM = "block px-5 py-2 leading-[22.0282px] whitespace-nowrap text-ink hover:bg-[rgba(24,28,33,0.03)]";
 
 export default defineComponent({
   name: "AppNavbar",
+
+  components: { NotificationCenter },
+
+  emits: ["toggle-mobile-menu"],
 
   setup() {
     const user = useCurrentUser();
@@ -53,8 +58,21 @@ export default defineComponent({
   template: /* html */ `
     <nav class="relative z-navbar flex items-center px-4 lg:px-8 py-2 bg-chrome text-chrome-text shadow-[1px_0_0_1px_rgba(0,0,0,0.08)]">
 
+        <!-- Hamburger menu pour mobile -->
+        <button
+          type="button"
+          class="lg:hidden p-2 text-chrome-text hover:text-white transition-colors"
+          aria-label="Menu"
+          @click="$emit('toggle-mobile-menu')"
+        >
+          <i class="bi bi-list text-2xl"></i>
+        </button>
+
         <div class="hidden lg:flex items-center flex-auto">
-            <div class="flex items-center ml-auto">
+            <div class="flex items-center ml-auto gap-1">
+
+                <!-- Centre de notifications -->
+                <NotificationCenter />
 
                 <div class="ml-1 mr-4 text-[16.0205px] font-light leading-none opacity-25">|</div>
                 <div ref="root" class="relative">

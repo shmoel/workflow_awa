@@ -71,7 +71,11 @@ export default defineComponent({
       try { localStorage.setItem(COLLAPSED_KEY, String(collapsed.value)); } catch { /* stockage indisponible */ }
     }
 
-    return { collapsed, expanded, hovered, compact, toggleCollapse };
+    function toggleMobileMenu() {
+      expanded.value = !expanded.value;
+    }
+
+    return { collapsed, expanded, hovered, compact, toggleCollapse, toggleMobileMenu };
   },
 
   template: /* html */ `
@@ -81,7 +85,7 @@ export default defineComponent({
 
         <div class="flex flex-col flex-auto w-full min-w-0 min-h-screen transition-[padding] duration-200"
              :class="collapsed ? 'lg:pl-[70px]' : 'lg:pl-[250px]'">
-            <AppNavbar />
+            <AppNavbar @toggle-mobile-menu="toggleMobileMenu" />
 
             <div class="flex flex-col flex-auto justify-between">
                 <slot />

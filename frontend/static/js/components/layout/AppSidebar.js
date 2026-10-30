@@ -39,8 +39,8 @@ const SUB_LINK = LINK + " py-[10px] pl-[59.2px] pr-[27.2px]";
 const SUB_ICON = ICON + " w-[28px]";
 // Séparateur (ex-.sidenav-divider) : 30 px de marge de chaque côté
 const DIVIDER = "self-stretch mx-[30px] border-t border-[rgba(33,37,41,0.075)]";
-// Entrée de la page courante (fond legacy de « Accueil », texte orange)
-const ACTIVE = " bg-[#f9f9f9] !text-[#ff4a00]";
+// Entrée de la page courante (fond legacy de « Accueil », texte orange, barre gauche)
+const ACTIVE = " bg-[#f9f9f9] !text-[#ff4a00] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px] before:bg-brand before:rounded-r-sm font-medium";
 
 /** Page → entrées du menu à mettre en surbrillance */
 const ACTIVE_ITEMS = {
