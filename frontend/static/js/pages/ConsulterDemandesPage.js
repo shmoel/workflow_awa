@@ -53,6 +53,7 @@ import { apiPost } from "../services/api.js";
 import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
 import { useDemandesList }       from "../composables/useDemandesList.js";
+import { useNotifications }      from "../composables/useNotifications.js";
 import { EVENT, etatFinProcess, statutTone } from "../domain/workflow.js";
 import { goToDetail, goToModify, goToChat } from "../utils/navigation.js";
 
@@ -146,6 +147,7 @@ export default defineComponent({
   setup() {
     const user    = useCurrentUser();
     const polling = useNotificationPolling();
+    const notifications = useNotifications();
 
     // ---- Onglet actif ----
     // "intro" | "valid" | "fin"
@@ -200,8 +202,10 @@ export default defineComponent({
           id_decision:        1,
           id_niveauValidation,
         });
+        notifications.success("Demande supprimée", `La demande #${pendingDeleteId.value} a été supprimée.`);
         showSuccessModal.value = true;
       } catch (e) {
+        notifications.error("Erreur de suppression", e.message);
         actionError.value = e.message;
       }
     }

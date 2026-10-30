@@ -61,6 +61,7 @@ import { formatNumber } from "../components/demandes/DemandesTable.js";
 import { useCurrentUser }               from "../composables/useCurrentUser.js";
 import { useNotificationPolling }       from "../composables/useNotificationPolling.js";
 import { useTimedAlert }                from "../composables/useTimedAlert.js";
+import { useNotifications }            from "../composables/useNotifications.js";
 import { readDemandeId }                from "../utils/url.js";
 import { PROCESS }                      from "../domain/workflow.js";
 
@@ -84,6 +85,7 @@ export default defineComponent({
   setup() {
     const user    = useCurrentUser();
     const polling = useNotificationPolling();
+    const notifications = useNotifications();
 
     const demandeId = readDemandeId();
 
@@ -194,9 +196,11 @@ export default defineComponent({
         );
         // CORRECTION-04 : succès affiché uniquement après vérification response.ok
         // (apiPostForm lance une erreur si !response.ok, donc on est ici = succès)
+        notifications.success("Avis enregistré", `L'avis sur la demande #${demandeId} a été enregistré.`);
         showSuccessModal.value = true;
       } catch (e) {
         // e.message : message de l'API destiné à l'utilisateur (ApiError)
+        notifications.error("Erreur de validation", e.message);
         showAlert("danger", `Erreur lors de la soumission du formulaire : ${e.message}`);
       } finally {
         submitting.value = false;

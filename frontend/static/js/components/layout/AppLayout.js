@@ -31,6 +31,8 @@ import AppSidebar        from "./AppSidebar.js";
 import AppNavbar         from "./AppNavbar.js";
 import AppFooter         from "./AppFooter.js";
 import NotificationPopup from "./NotificationPopup.js";
+import ProgressBar       from "../ui/ProgressBar.js";
+import { useGlobalProgress } from "../../composables/useGlobalProgress.js";
 
 const COLLAPSED_KEY     = "layoutCollapsed";
 const LAYOUT_BREAKPOINT = 992;
@@ -46,7 +48,7 @@ function readCollapsed() {
 export default defineComponent({
   name: "AppLayout",
 
-  components: { AppSidebar, AppNavbar, AppFooter, NotificationPopup },
+  components: { AppSidebar, AppNavbar, AppFooter, NotificationPopup, ProgressBar },
 
   props: {
     polling:   { type: Object, default: null },
@@ -75,10 +77,15 @@ export default defineComponent({
       expanded.value = !expanded.value;
     }
 
-    return { collapsed, expanded, hovered, compact, toggleCollapse, toggleMobileMenu };
+    const gp = useGlobalProgress();
+
+    return { collapsed, expanded, hovered, compact, toggleCollapse, toggleMobileMenu, gp };
   },
 
   template: /* html */ `
+    <ProgressBar :show="gp.showing.value" :progress="gp.progress.value"
+                 :indeterminate="gp.indeterminate.value" :color="gp.color.value" />
+
     <div class="flex min-h-screen overflow-hidden">
         <AppSidebar :menu-label="menuLabel" :compact="compact" :collapsed="collapsed" :expanded="expanded"
                     @toggle-collapse="toggleCollapse" @hover="hovered = collapsed && $event" />
