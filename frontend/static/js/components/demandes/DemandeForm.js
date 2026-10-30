@@ -164,7 +164,7 @@ export default defineComponent({
                 <div :class="FORM.inputGroup">
                     <div class="flex"></div>
                     <span :class="FORM.addon">XOF</span>
-                        <input :class="FORM.groupInput" type='number' step="any" id='df-montant' v-model="form.montant" placeholder='Spécifiez le montant svp' required>
+                        <input :class="FORM.groupInput" type='number' step="any" min="0" id='df-montant' v-model="form.montant" placeholder='Spécifiez le montant svp' required>
                 </div>
         </div>
         <p v-if="existingNoteName" class="mb-4">

@@ -257,8 +257,7 @@ export default defineComponent({
     onUnmounted(() => polling.stop());
 
     // ---- Breadcrumb ----
-    const demandeId = readDemandeId();
-    const breadcrumbItems = ref([
+    const breadcrumbItems = computed(() => [
       { label: 'Accueil', href: 'acceuil.html' },
       { label: 'Demandes à valider', href: user.menu.value.valid_dmd_ggrg ? 'ggrg_demandes_validation.html' : 'demandes_validation.html' },
       { label: `Validation - Demande #${demandeId}`, active: true },

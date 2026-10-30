@@ -35,6 +35,8 @@ import { useNotifications }            from "../composables/useNotifications.js"
 import { EVENT }                       from "../domain/workflow.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
+import BackArrow    from "../components/ui/BackArrow.js";
+import Breadcrumb   from "../components/ui/Breadcrumb.js";
 import DemandeForm  from "../components/demandes/DemandeForm.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
 import { CARD, ALERT_DANGER_FORM, LINK } from "../components/ui/classes.js";
@@ -42,7 +44,7 @@ import { CARD, ALERT_DANGER_FORM, LINK } from "../components/ui/classes.js";
 export default defineComponent({
   name: "IntroduireDemandePage",
 
-  components: { AppLayout, DemandeForm, ConfirmModal },
+  components: { AppLayout, BackArrow, Breadcrumb, DemandeForm, ConfirmModal },
 
   setup() {
     const user = useCurrentUser();
@@ -129,14 +131,15 @@ export default defineComponent({
       }
     }
 
-    function onSuccessOk() {
-      window.location.reload();
-    }
-
     onMounted(async () => {
       await user.fetchUser();
       if (user.raw.value) await loadListes();
     });
+
+    const breadcrumbItems = [
+      { label: 'Accueil', href: 'acceuil.html' },
+      { label: 'Introduire une demande', active: true },
+    ];
 
     return {
       user,
@@ -146,6 +149,7 @@ export default defineComponent({
       submitError,
       submitting,
       showConfirm,
+      breadcrumbItems,
       askConfirm,
       submit,
       CARD, ALERT_DANGER_FORM, LINK,
@@ -157,6 +161,10 @@ export default defineComponent({
         <div class="flex-grow px-4 lg:px-8 py-6">
 
             <div class="w-full px-8">
+              <BackArrow fallback="acceuil.html" class="lg:ml-[calc(16.6667%-8px)]" />
+              <div class="lg:ml-[calc(16.6667%-8px)]">
+                  <Breadcrumb :items="breadcrumbItems" />
+              </div>
               <div class="flex flex-wrap -mx-3">
             <div class="relative w-full lg:w-1/6 px-3"></div>
             <div :class="CARD.card + ' w-full md:w-2/3 mb-6 px-3'">

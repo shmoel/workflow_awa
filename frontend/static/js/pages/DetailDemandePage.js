@@ -204,15 +204,9 @@ export default defineComponent({
                         </div>
 
                         <template v-else-if="demande">
-                            <template v-if="noteFilename">
-                                <button type="button" :class="BTN.outlinePrimary" @click="openNote(noteFilename)"><span :class="LINK">Télécharger la note d'informations</span></button>
-                                <div v-if="noteError" :class="ALERT_DANGER" role="alert">{{ noteError }}</div>
-                            </template>
-                            <button v-else type="button" :class="BTN.outlinePrimary" disabled>Aucune note jointe</button>
 
-                            <CircuitFrise :max-event="maxEvent" />
-
-                            <div class="p-6">
+                            <!-- 1. Récapitulatif de la demande -->
+                            <div class="p-6 pb-0">
                                 <table :class="SHEET.table">
                                     <thead>
                                         <tr>
@@ -224,21 +218,47 @@ export default defineComponent({
                                         <tr v-for="info in infos" :key="info.label">
                                             <td :class="SHEET.td">
                                                 <div :class="SHEET.cell">
-                                                <strong :class="SHEET.label"> {{ info.label }} </strong>
+                                                    <strong :class="SHEET.label">{{ info.label }}</strong>
                                                 </div>
                                             </td>
                                             <td :class="SHEET.td">
                                                 <div :class="SHEET.cell">
-                                                <h6 :class="SHEET.value"> {{ info.value }} </h6>
+                                                    <h6 :class="SHEET.value">{{ info.value }}</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Note d'analyse intégrée dans le tableau -->
+                                        <tr>
+                                            <td :class="SHEET.td">
+                                                <div :class="SHEET.cell">
+                                                    <strong :class="SHEET.label">Note d'analyse</strong>
+                                                </div>
+                                            </td>
+                                            <td :class="SHEET.td">
+                                                <div :class="SHEET.cell">
+                                                    <template v-if="noteFilename">
+                                                        <button type="button" :class="LINK" @click="openNote(noteFilename)">Télécharger</button>
+                                                        <small v-if="noteError" class="block mt-1 text-sm text-danger" role="alert">{{ noteError }}</small>
+                                                    </template>
+                                                    <span v-else class="text-muted">Aucune note jointe</span>
                                                 </div>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div id="detail_commentaire" class="relative px-3">
+                            </div>
+
+                            <!-- 2. Position dans le circuit -->
+                            <CircuitFrise :max-event="maxEvent" />
+
+                            <!-- 3. Historique des avis -->
+                            <div class="px-6 pb-6">
+                                <h6 class="mb-3 font-medium leading-[1.1]">Historique des avis</h6>
+                                <div id="detail_commentaire" class="relative">
                                     <AvisTimeline :avis="avis" />
                                 </div>
                             </div>
+
                         </template>
 
                     </div>

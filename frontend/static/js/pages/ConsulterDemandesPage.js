@@ -100,10 +100,8 @@ const COLS_FIN = [
   { key: "nom_client",        label: "Contrepartie" },
   MONTANT,
   { key: "_date_heure",       label: "Date / Heure", sort: sortDate("date_val") },
-  { key: "_etat",             label: "Etat",
-    button: (row) => row.max_event === EVENT.ARRETEE_DG
-      ? { cls: BTN.danger,  label: "Arrêté" }
-      : { cls: BTN.default, label: "Terme" } },
+  { key: "_etat", label: "Etat",
+    pill: (row) => row.max_event === EVENT.ARRETEE_DG ? PILL.arret : PILL.neutre },
 ];
 
 
@@ -283,8 +281,6 @@ export default defineComponent({
             </div>
 
             <div class="flex flex-wrap -mx-3">
-
-                <div class="h-[310px]" id="tasks-inner"></div>
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
                     <template #actions>

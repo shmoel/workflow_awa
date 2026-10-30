@@ -142,10 +142,6 @@ export default defineComponent({
       }
     }
 
-    function onSuccessOk() {
-      window.location.replace("consulter_demandes.html");
-    }
-
     onMounted(async () => {
       await user.fetchUser();
       if (!demandeId) {
@@ -158,7 +154,6 @@ export default defineComponent({
     });
 
     // ---- Breadcrumb ----
-    const demandeId = readDemandeId();
     const breadcrumbItems = ref([
       { label: 'Accueil', href: 'acceuil.html' },
       { label: 'Mes Demandes', href: 'consulter_demandes.html' },

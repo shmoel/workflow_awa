@@ -68,6 +68,7 @@ export default defineComponent({
   },
 
   template: /* html */ `
+    <div v-if="!avis.length" class="py-6 text-center text-sm italic text-muted">Aucun avis pour cette demande.</div>
     <div v-for="(row, i) in avis" :key="i" class="mb-2 bg-white border border-line">
         <button type="button" class="flex justify-between w-full px-6 py-4 text-left text-ink hover:text-[#85bdf7]"
            :aria-expanded="openIndex === i ? 'true' : 'false'"
@@ -107,14 +108,13 @@ export default defineComponent({
                                     </td>
                                     <td :class="SHEET.td">
                                         <div :class="SHEET.cell">
+                                            <h6 :class="SHEET.value" style="white-space:pre-wrap">{{ row.commentaire || '—' }}</h6>
                                         </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                <textarea class="block w-full min-h-[35px] ml-4 px-0 pt-2 pb-[7px] text-[13px] leading-[1.33] text-muted bg-transparent border-0 border-b border-dotted border-[rgba(24,28,33,0.3)] resize-y outline-none"
-                          cols="100" disabled :value="row.commentaire ?? ''"></textarea>
             </div>
         </div>
     </div>
