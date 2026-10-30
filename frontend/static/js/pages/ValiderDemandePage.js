@@ -62,6 +62,7 @@ import { useCurrentUser }               from "../composables/useCurrentUser.js";
 import { useNotificationPolling }       from "../composables/useNotificationPolling.js";
 import { useTimedAlert }                from "../composables/useTimedAlert.js";
 import { useNotifications }            from "../composables/useNotifications.js";
+import { useGlobalProgress }           from "../composables/useGlobalProgress.js";
 import { readDemandeId }                from "../utils/url.js";
 import { PROCESS }                      from "../domain/workflow.js";
 
@@ -86,6 +87,7 @@ export default defineComponent({
     const user    = useCurrentUser();
     const polling = useNotificationPolling();
     const notifications = useNotifications();
+    const gp      = useGlobalProgress();
 
     const demandeId = readDemandeId();
 
@@ -144,6 +146,7 @@ export default defineComponent({
     async function loadAll() {
       loadingDemande.value = true;
       errorDemande.value = null;
+      gp.start();
       try {
         const [dData, decData, commData] = await Promise.all([
           apiGet(`/demande_particulier/${demandeId}`),
@@ -153,8 +156,10 @@ export default defineComponent({
         demande.value      = dData.results?.[0] ?? null;
         decisions.value    = decData ?? [];
         commentaires.value = commData.results ?? [];
+        gp.finish();
       } catch (e) {
         errorDemande.value = e.message;
+        gp.fail();
       } finally {
         loadingDemande.value = false;
       }

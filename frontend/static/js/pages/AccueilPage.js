@@ -27,6 +27,7 @@ import {
   defineComponent,
   ref,
   computed,
+  watch,
   onMounted,
   onUnmounted,
 } from "vue";
@@ -36,6 +37,7 @@ import { lastMsgKey, messageStamp, markMessagesSeen } from "../services/chatSeen
 import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
 import { useDashboardDemandes }       from "../composables/useDashboardDemandes.js";
+import { useGlobalProgress }          from "../composables/useGlobalProgress.js";
 import { goToDetail, goToChat }       from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
@@ -71,12 +73,16 @@ export default defineComponent({
   setup() {
     const user    = useCurrentUser();
     const polling = useNotificationPolling();
+    const gp      = useGlobalProgress();
 
     // Colonnes, filtres et chargement communs avec l'historique ;
     // la route dépend du domaine du profil (rien à charger sans domaine)
     const { liste, filters, statut, filteredRows, emptyText, filterFields, columns } = useDashboardDemandes(
       () => (user.domaine.value ? `/demandes_a_consulter/${user.domaine.value}` : null)
     );
+
+    // Barre de progression globale : suit le chargement de la liste
+    watch(liste.loading, (loading) => { loading ? gp.start() : gp.finish(); }, { immediate: true });
 
     // ---- Filtre par carte de compteur : second clic sur la carte = tous ----
     function selectStatut(niveau) {
