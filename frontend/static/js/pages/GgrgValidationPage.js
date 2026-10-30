@@ -50,6 +50,7 @@ import DemandeFilters from "../components/demandes/DemandeFilters.js";
 import ConfirmModal   from "../components/ui/ConfirmModal.js";
 import TabsCard       from "../components/demandes/TabsCard.js";
 import { BTN, ALERT_DANGER_FORM } from "../components/ui/classes.js";
+import { SkeletonTable } from "../components/ui/SkeletonLoader.js";
 
 // ---------------------------------------------------------------------------
 // Définitions des colonnes
@@ -101,7 +102,7 @@ const TABS = [
 export default defineComponent({
   name: "GgrgValidationPage",
 
-  components: { AppLayout, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal, DemandeFilters },
+  components: { AppLayout, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal, DemandeFilters, SkeletonTable },
 
   setup() {
     const user    = useCurrentUser();
@@ -210,14 +211,22 @@ export default defineComponent({
                         <DemandeFilters :fields="filterFields" v-model="filters" />
                     </template>
                     <template #intro>
-                        <DemandesTable theme="demandes" :rows="introRows" :columns="colsIntro" :action-headers="1" :error="intro.error" :loading="intro.loading" :empty-text="emptyText">
+                        <!-- Skeleton pendant le chargement -->
+                        <SkeletonTable v-if="intro.loading" :rows="5" :columns="7" />
+                        
+                        <!-- Tableau réel -->
+                        <DemandesTable v-else theme="demandes" :rows="introRows" :columns="colsIntro" :action-headers="1" :error="intro.error" :loading="intro.loading" :empty-text="emptyText">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowInfo" label="Evaluer" @click="goToEvaluer(row.id_demande)" />
                             </template>
                         </DemandesTable>
                     </template>
                     <template #cloturer>
-                        <DemandesTable theme="demandes" :rows="cloturerRows" :columns="colsCloturer" :error="cloturer.error" :loading="cloturer.loading" :empty-text="emptyText">
+                        <!-- Skeleton pendant le chargement -->
+                        <SkeletonTable v-if="cloturer.loading" :rows="5" :columns="7" />
+                        
+                        <!-- Tableau réel -->
+                        <DemandesTable v-else theme="demandes" :rows="cloturerRows" :columns="colsCloturer" :error="cloturer.error" :loading="cloturer.loading" :empty-text="emptyText">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.dark" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.outlinePrimary" label="Clôturer" @click="openCloModal(row.id_demande)" />

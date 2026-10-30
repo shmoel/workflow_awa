@@ -33,6 +33,7 @@ import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable  from "../components/demandes/DemandesTable.js";
 import DemandesCard   from "../components/demandes/DemandesCard.js";
 import { BTN }        from "../components/ui/classes.js";
+import { SkeletonTable } from "../components/ui/SkeletonLoader.js";
 
 // ---------------------------------------------------------------------------
 // Composant page
@@ -40,7 +41,7 @@ import { BTN }        from "../components/ui/classes.js";
 export default defineComponent({
   name: "HistoriquePage",
 
-  components: { AppLayout, DemandesTable, DemandesCard, ActionCell },
+  components: { AppLayout, DemandesTable, DemandesCard, ActionCell, SkeletonTable },
 
   setup() {
     const user    = useCurrentUser();
@@ -82,7 +83,11 @@ export default defineComponent({
                 <div class="h-[310px]" id="tasks-inner"></div>
 
                 <DemandesCard tab-label="Demandes Clôturées" :fields="filterFields" v-model="filters">
-                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error" :loading="liste.loading" :empty-text="emptyText">
+                    <!-- Skeleton pendant le chargement -->
+                    <SkeletonTable v-if="liste.loading" :rows="5" :columns="7" />
+                    
+                    <!-- Tableau réel -->
+                    <DemandesTable v-else theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error" :loading="liste.loading" :empty-text="emptyText">
                         <template #actions="{ row }">
                             <ActionCell :btn-class="BTN.outlineBrand" label="Détails" @click="goToDetail(row.id_demande)" />
                         </template>
