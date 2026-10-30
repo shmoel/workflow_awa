@@ -49,8 +49,7 @@ import ActionCell from "../components/demandes/ActionCell.js";
 import StatCard       from "../components/demandes/StatCard.js";
 import DemandesTable  from "../components/demandes/DemandesTable.js";
 import DemandesCard   from "../components/demandes/DemandesCard.js";
-import DashboardChart from "../components/demandes/DashboardChart.js";
-import { SkeletonTable, SkeletonStat } from "../components/ui/SkeletonLoader.js";
+import { SkeletonTable } from "../components/ui/SkeletonLoader.js";
 import { BTN, LINK_BUTTON } from "../components/ui/classes.js";
 
 // ---------------------------------------------------------------------------
@@ -73,7 +72,7 @@ const STAT_CARDS = [
 export default defineComponent({
   name: "AccueilPage",
 
-  components: { AppLayout, StatCard, DemandesTable, DemandesCard, DashboardChart, ActionCell, SkeletonTable, SkeletonStat },
+  components: { AppLayout, StatCard, DemandesTable, DemandesCard, ActionCell, SkeletonTable },
 
   setup() {
     const user    = useCurrentUser();
@@ -216,8 +215,6 @@ export default defineComponent({
             </div>
 
             <div class="flex flex-wrap -mx-3">
-
-                <DashboardChart :cards="statCards" :active-niveau="statut" @select="selectStatut" />
 
                 <div v-if="statut !== null" class="w-full px-3 mb-3" data-filtre-statut>
                     <span class="inline-flex items-center gap-2 px-3 py-1 text-sm bg-brand-soft border border-brand-line rounded-full">
