@@ -29,6 +29,11 @@ par le chef de projet.
   fichiers (Breadcrumb, NotificationCenter, FormField, ProgressBar, SkeletonLoader,
   useNotifications, useGlobalProgress), intégrés dans AccueilPage, Consulter,
   DetailDemande, Chat, ValiderDemande, ModifierDemande (7 commits, prêt pour merge).
+- **Phase 2 UX/UI** (30/10/2026) : branche `ux-improvements-phase2` — export CSV,
+  recherche globale fulltext, histogramme SVG du dashboard (DashboardChart).
+- **Phase 3 UX/UI** (30/10/2026) : branche `ux-improvements-phase3` — filtres
+  sauvegardés (usePersistedFilters), recherche dans les messages chat, mode sombre
+  (useDarkMode + toggle navbar), raccourcis clavier (`/` pour focus recherche).
 - **Restent ouverts** : 3 points « À confirmer » (frontend ; les n°1 et 3 sont tranchés) et 15 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
@@ -1905,13 +1910,7 @@ par un graphique SVG inline montrant la répartition des demandes par niveau.
 
 **Intégration :** `AccueilPage.js` — remplace `<div id="tasks-inner">` vide
 
-**Phase 3 prévue :**
-- Mode sombre (Tailwind dark mode toggle)
-- Chat modernisé avec recherche dans l'historique
-- Filtres sauvegardés (localStorage)
-- Accessibilité complète (WCAG AA, raccourcis clavier)
-
-### Règles et contraintes respectées
+### Règles et contraintes respectées (Phase 2)
 
 - ✅ **Aucune modification backend** — 100% frontend
 - ✅ **Aucun breaking change** — Compatible avec le code existant
@@ -1922,6 +1921,76 @@ par un graphique SVG inline montrant la répartition des demandes par niveau.
 - ✅ **Accessibilité** — Support ARIA sur Breadcrumb et NotificationCenter
 - ✅ **Responsive** — Mobile-first, breakpoints Bootstrap respectés
 - ✅ **Documentation** — Chaque composant documenté avec JSDoc
+
+---
+
+## Améliorations UX/UI Phase 3 — Persistance, recherche chat & mode sombre (30/10/2026)
+
+**Branche :** `ux-improvements-phase3`
+
+### Filtres sauvegardés (30/10/2026)
+
+**Fichier :** `composables/usePersistedFilters.js` (nouveau)  
+**Raison :** Les utilisateurs perdaient leurs filtres à chaque rechargement de page.
+Sauvegarde automatique dans `localStorage` avec clé `awa_filters_<page>`.
+
+**Fonctionnalités :**
+- Protection contre les clés obsolètes (seules les clés du schéma actuel sont lues)
+- Silencieux si localStorage est indisponible (mode privé, quota)
+- `resetFilters()` pour réinitialiser proprement
+
+**Intégration :**
+- `AccueilPage.js` : filtres colonnes restaurés au chargement, bouton "Effacer" apparaît si un filtre est actif
+- `HistoriquePage.js` : idem, + bouton CSV ajouté à cette page
+
+### Recherche dans les messages chat (30/10/2026)
+
+**Fichier :** `pages/ChatPage.js` — modifié  
+**Raison :** Les conversations longues sont difficiles à parcourir.
+
+**Fonctionnalités :**
+- Barre de recherche au-dessus de la liste de messages
+- Filtre en temps réel sur le contenu du message et le nom d'utilisateur
+- Normalisation accent/casse (NFD)
+- Compteur "N / total" quand une recherche est active
+- Message vide adapté : "Aucun message ne correspond à «…»" vs "Aucun message"
+
+### Mode sombre (30/10/2026)
+
+**Fichier :** `composables/useDarkMode.js` (nouveau)  
+**Fichier modifié :** `tailwind.config.js` (`darkMode: "class"` ajouté)  
+**Raison :** Confort visuel lors des sessions longues.
+
+**Fonctionnalités :**
+- Singleton (`init()` idempotent) : une seule instance partagée entre composants
+- Respects la préférence système (`prefers-color-scheme: dark`) au premier chargement
+- Mémorise le choix dans `localStorage` (clé `awa_dark_mode`)
+- Ajoute/retire la classe `dark` sur `<html>` (required by Tailwind)
+
+**Intégration :**
+- `AppNavbar.js` : bouton soleil/lune (Bootstrap Icons `bi-sun` / `bi-moon`)
+- `AppLayout.js` : `dark:bg-[#1a1a2e]` sur le fond principal
+- `AppSidebar.js` : `dark:bg-[#16213e]` + `dark:text-[#cbd5e1]` sur les liens
+
+### Raccourcis clavier (30/10/2026)
+
+**Fichier :** `composables/useKeyboardShortcuts.js` (nouveau)  
+**Raison :** Accessibilité et efficacité pour les utilisateurs avancés.
+
+**Raccourcis :**
+- `/` : met le focus sur le champ de recherche globale (si hors d'un champ de saisie)
+- `Escape` : retire le focus du champ de recherche
+
+**Intégration :** `AccueilPage.js` — `useKeyboardShortcuts(searchInputRef)` + `ref="searchInputRef"` sur l'input
+
+### Règles et contraintes respectées (Phase 3)
+
+- ✅ **Aucune modification backend** — 100% frontend
+- ✅ **Aucun breaking change** — Chaque fonctionnalité est additive
+- ✅ **Tailwind `darkMode: 'class'`** — Activé dans `tailwind.config.js`, pas d'impact sur les pages sans dark mode
+- ✅ **localStorage silencieux** — Toutes les lectures/écritures sont dans des blocs `try/catch`
+- ✅ **Singleton `useDarkMode`** — Pas d'effet secondaire si appelé depuis plusieurs composants
+- ✅ **Raccourcis non-intrusifs** — Inactifs si focus dans un champ de saisie
 
 ### Impact utilisateur attendu
 

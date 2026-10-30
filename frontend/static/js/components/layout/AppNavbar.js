@@ -29,6 +29,7 @@ import { useCurrentUser } from "../../composables/useCurrentUser.js";
 import { logout } from "../../services/auth.js";
 import NotificationCenter from "../ui/NotificationCenter.js";
 import { setNotificationInstance } from "../../composables/useNotifications.js";
+import { useDarkMode } from "../../composables/useDarkMode.js";
 
 // Élément du menu déroulant (ex-.dropdown-item)
 const ITEM = "block px-5 py-2 leading-[22.0282px] whitespace-nowrap text-ink hover:bg-[rgba(24,28,33,0.03)]";
@@ -60,7 +61,9 @@ export default defineComponent({
     });
     onUnmounted(() => document.removeEventListener("click", onDocumentClick));
 
-    return { fullName, open, root, logout, notificationCenter, ITEM };
+    const { isDark, toggleDark } = useDarkMode();
+
+    return { fullName, open, root, logout, notificationCenter, isDark, toggleDark, ITEM };
   },
 
   template: /* html */ `
@@ -78,6 +81,15 @@ export default defineComponent({
 
         <div class="hidden lg:flex items-center flex-auto">
             <div class="flex items-center ml-auto gap-1">
+
+                <!-- Bascule mode sombre -->
+                <button type="button"
+                        class="p-2 text-chrome-text hover:text-white transition-colors rounded"
+                        :aria-label="isDark ? 'Passer en mode clair' : 'Passer en mode sombre'"
+                        :title="isDark ? 'Mode clair' : 'Mode sombre'"
+                        @click="toggleDark">
+                    <i :class="isDark ? 'bi bi-sun' : 'bi bi-moon'" class="text-base"></i>
+                </button>
 
                 <!-- Centre de notifications -->
                 <NotificationCenter ref="notificationCenter" />

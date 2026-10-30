@@ -19,6 +19,7 @@
 
 import {
   defineComponent,
+  watch,
   onMounted,
   onUnmounted,
 } from "vue";
@@ -26,6 +27,8 @@ import {
 import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
 import { useDashboardDemandes }   from "../composables/useDashboardDemandes.js";
+import { usePersistedFilters }    from "../composables/usePersistedFilters.js";
+import { exportCsv }              from "../utils/exportCsv.js";
 import { goToDetail }             from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
@@ -51,6 +54,24 @@ export default defineComponent({
     const { liste, filters, filteredRows, emptyText, filterFields, columns } =
       useDashboardDemandes("/demandes_cloturer/");
 
+    // Filtres persistés
+    const FILTER_DEFAULTS = { banque: "", entite: "", type: "", contrepartie: "", date: "" };
+    const { filters: persistedFilters } = usePersistedFilters("historique", FILTER_DEFAULTS);
+    filters.value = { ...persistedFilters.value };
+    watch(filters, (v) => { persistedFilters.value = { ...v }; }, { deep: true });
+    function clearFilters() { filters.value = { ...FILTER_DEFAULTS }; }
+
+    // Export CSV
+    const CSV_COLS = [
+      { key: "banque",            label: "Banque" },
+      { key: "categorie_demande", label: "Entité" },
+      { key: "type_demande",      label: "Type de demande" },
+      { key: "nom_client",        label: "Contrepartie" },
+      { key: "_date_heure",       label: "Date / Heure" },
+      { key: "description",       label: "Niveau validation" },
+    ];
+    function doExportCsv() { exportCsv(filteredRows.value, CSV_COLS, "demandes_historique"); }
+
     // ---- Cycle de vie ----
     onMounted(async () => {
       await user.fetchUser();
@@ -70,6 +91,8 @@ export default defineComponent({
       filterFields,
       columns,
       goToDetail,
+      clearFilters,
+      doExportCsv,
       BTN,
     };
   },
@@ -83,6 +106,19 @@ export default defineComponent({
                 <div class="h-[310px]" id="tasks-inner"></div>
 
                 <DemandesCard tab-label="Demandes Clôturées" :fields="filterFields" v-model="filters">
+                    <template #actions>
+                        <button type="button" @click="doExportCsv"
+                                class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-brand border border-brand rounded-[2px] hover:bg-brand hover:text-white transition-colors duration-150"
+                                title="Exporter la liste filtrée en CSV">
+                            <i class="bi bi-download"></i> CSV
+                        </button>
+                        <button v-if="Object.values(filters).some(v => v)"
+                                type="button" @click="clearFilters"
+                                class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-[rgba(24,28,33,0.55)] border border-[rgba(24,28,33,0.2)] rounded-[2px] hover:bg-[rgba(24,28,33,0.06)] transition-colors duration-150"
+                                title="Réinitialiser les filtres">
+                            <i class="bi bi-x-circle"></i> Effacer
+                        </button>
+                    </template>
                     <!-- Skeleton pendant le chargement -->
                     <SkeletonTable v-if="liste.loading" :rows="5" :columns="7" />
                     

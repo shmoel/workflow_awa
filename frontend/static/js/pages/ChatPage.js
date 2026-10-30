@@ -37,6 +37,7 @@
 import {
   defineComponent,
   ref,
+  computed,
   nextTick,
   onMounted,
   onUnmounted,
@@ -176,6 +177,18 @@ export default defineComponent({
       clearInterval(timer);
     });
 
+    // ---- Recherche dans les messages ----
+    const searchMsg = ref("");
+    const filteredMessages = computed(() => {
+      const q = searchMsg.value.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+      if (!q) return messages.value;
+      return messages.value.filter((m) => {
+        const text = (m.commentaire ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+        const name = (m.username ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+        return text.includes(q) || name.includes(q);
+      });
+    });
+
     // ---- Breadcrumb ----
     const breadcrumbItems = ref([
       { label: 'Accueil', href: 'acceuil.html' },
@@ -187,6 +200,8 @@ export default defineComponent({
       polling,
       demande,
       messages,
+      filteredMessages,
+      searchMsg,
       loading,
       notFound,
       error,
@@ -261,9 +276,24 @@ export default defineComponent({
                             </div>
                         </div>
 
+                        <!-- Barre de recherche dans les messages -->
+                        <div class="flex items-center gap-2 px-4 py-2 bg-white border-b border-[#e2e8f0]">
+                            <i class="bi bi-search text-[#64748b] text-sm"></i>
+                            <input v-model="searchMsg" type="search"
+                                   placeholder="Rechercher dans les messages…"
+                                   class="flex-1 py-1 text-[0.8125rem] bg-transparent outline-none placeholder:text-[#9ca3af]"
+                                   aria-label="Rechercher dans les messages" />
+                            <span v-if="searchMsg" class="text-[0.75rem] text-[#64748b]">
+                                {{ filteredMessages.length }} / {{ messages.length }}
+                            </span>
+                        </div>
+
                         <div class="h-[300px] p-4 overflow-auto bg-[#f1f5f9]" ref="listEl">
-                            <div v-if="!messages.length" class="mt-8 text-center italic text-[#64748b]">Aucun message pour cette demande</div>
-                            <div v-for="(msg, i) in messages" :key="i"
+                            <div v-if="!filteredMessages.length" class="mt-8 text-center italic text-[#64748b]">
+                                <span v-if="searchMsg">Aucun message ne correspond à « {{ searchMsg }} »</span>
+                                <span v-else>Aucun message pour cette demande</span>
+                            </div>
+                            <div v-for="(msg, i) in filteredMessages" :key="i"
                                  class="relative max-w-[80%] mb-[15px] px-[15px] py-3 rounded-[8px]"
                                  :class="isMine(msg) ? 'ml-auto text-white bg-[#ea580c] rounded-br-none'
                                                     : 'mr-auto text-[#333] bg-white border border-[#ddd] rounded-bl-none'">

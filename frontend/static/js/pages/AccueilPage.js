@@ -39,6 +39,8 @@ import { useNotificationPolling }     from "../composables/useNotificationPollin
 import { useDashboardDemandes }       from "../composables/useDashboardDemandes.js";
 import { useGlobalProgress }          from "../composables/useGlobalProgress.js";
 import { useGlobalSearch }            from "../composables/useGlobalSearch.js";
+import { usePersistedFilters }        from "../composables/usePersistedFilters.js";
+import { useKeyboardShortcuts }       from "../composables/useKeyboardShortcuts.js";
 import { exportCsv }                  from "../utils/exportCsv.js";
 import { goToDetail, goToChat }       from "../utils/navigation.js";
 
@@ -78,12 +80,21 @@ export default defineComponent({
     const polling = useNotificationPolling();
     const gp      = useGlobalProgress();
     const { searchQuery, applySearch } = useGlobalSearch();
+    const searchInputRef = ref(null);
+    useKeyboardShortcuts(searchInputRef);
 
     // Colonnes, filtres et chargement communs avec l'historique ;
     // la route dépend du domaine du profil (rien à charger sans domaine)
     const { liste, filters, statut, filteredRows, emptyText, filterFields, columns } = useDashboardDemandes(
       () => (user.domaine.value ? `/demandes_a_consulter/${user.domaine.value}` : null)
     );
+
+    // Filtres persistés : restaure depuis localStorage, sauvegarde les changements
+    const FILTER_DEFAULTS = { banque: "", entite: "", type: "", contrepartie: "", date: "" };
+    const { filters: persistedFilters } = usePersistedFilters("accueil", FILTER_DEFAULTS);
+    filters.value = { ...persistedFilters.value };
+    watch(filters, (v) => { persistedFilters.value = { ...v }; }, { deep: true });
+    function clearFilters() { filters.value = { ...FILTER_DEFAULTS }; }
 
     // Barre de progression globale : suit le chargement de la liste
     watch(liste.loading, (loading) => { loading ? gp.start() : gp.finish(); }, { immediate: true });
@@ -181,7 +192,9 @@ export default defineComponent({
       handleChatClick,
       goToDetail,
       doExportCsv,
+      clearFilters,
       searchQuery,
+      searchInputRef,
       displayRows,
       BTN,
       LINK_BUTTON,
@@ -215,13 +228,19 @@ export default defineComponent({
 
                 <DemandesCard tab-label="Introduites" :fields="filterFields" v-model="filters">
                     <template #actions>
-                        <input v-model="searchQuery" type="search" placeholder="Rechercher…"
+                        <input v-model="searchQuery" ref="searchInputRef" type="search" placeholder="Rechercher… [/]"
                                class="h-[28px] px-2 py-0 text-xs border border-[rgba(24,28,33,0.2)] rounded-[2px] outline-none focus:border-brand w-[140px] transition-[border-color] duration-150"
-                               aria-label="Recherche globale" />
+                               aria-label="Recherche globale (raccourci : /)" />
                         <button type="button" @click="doExportCsv"
                                 class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-brand border border-brand rounded-[2px] hover:bg-brand hover:text-white transition-colors duration-150"
                                 title="Exporter la liste filtrée en CSV">
                             <i class="bi bi-download"></i> CSV
+                        </button>
+                        <button v-if="Object.values(filters).some(v => v)"
+                                type="button" @click="clearFilters"
+                                class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-[rgba(24,28,33,0.55)] border border-[rgba(24,28,33,0.2)] rounded-[2px] hover:bg-[rgba(24,28,33,0.06)] transition-colors duration-150"
+                                title="Réinitialiser les filtres">
+                            <i class="bi bi-x-circle"></i> Effacer
                         </button>
                     </template>
                     <!-- Skeleton pendant le chargement -->

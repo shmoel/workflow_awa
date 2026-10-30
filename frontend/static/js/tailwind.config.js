@@ -16,6 +16,7 @@
  */
 
 if (window.tailwind) tailwind.config = {
+  darkMode: "class",
   theme: {
     // Points de rupture Bootstrap (le legacy bascule le menu latéral à 992 px ;
     // xxl = conteneurs Bootstrap 5 de la vitrine)

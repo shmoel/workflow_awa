@@ -86,7 +86,7 @@ export default defineComponent({
     <ProgressBar :show="gp.showing.value" :progress="gp.progress.value"
                  :indeterminate="gp.indeterminate.value" :color="gp.color.value" />
 
-    <div class="flex min-h-screen overflow-hidden">
+    <div class="flex min-h-screen overflow-hidden bg-[#f4f4f4] dark:bg-[#1a1a2e] transition-colors duration-300">
         <AppSidebar :menu-label="menuLabel" :compact="compact" :collapsed="collapsed" :expanded="expanded"
                     @toggle-collapse="toggleCollapse" @hover="hovered = collapsed && $event" />
 
@@ -94,7 +94,7 @@ export default defineComponent({
              :class="collapsed ? 'lg:pl-[70px]' : 'lg:pl-[250px]'">
             <AppNavbar @toggle-mobile-menu="toggleMobileMenu" />
 
-            <div class="flex flex-col flex-auto justify-between">
+            <div class="flex flex-col flex-auto justify-between dark:text-[#e2e8f0]">
                 <slot />
                 <AppFooter />
             </div>

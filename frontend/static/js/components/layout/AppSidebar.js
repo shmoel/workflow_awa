@@ -32,7 +32,7 @@ import { defineComponent, ref, computed } from "vue";
 import { useCurrentUser } from "../../composables/useCurrentUser.js";
 
 // Lien du menu (ex-.sidenav-link) et icône (ex-.sidenav-icon)
-const LINK = "relative flex items-center w-full text-ink cursor-pointer transition-colors duration-200";
+const LINK = "relative flex items-center w-full text-ink dark:text-[#cbd5e1] cursor-pointer transition-colors duration-200";
 const ICON = "block shrink-0 text-[16px] leading-4 mr-1";
 // Lien du sous-menu : décalé sous le libellé « Menu »
 const SUB_LINK = LINK + " py-[10px] pl-[59.2px] pr-[27.2px]";
@@ -90,7 +90,7 @@ export default defineComponent({
   },
 
   template: /* html */ `
-    <div class="fixed top-0 left-0 flex flex-col h-screen bg-white overflow-hidden shadow-[0_1px_0_1px_rgba(0,0,0,0.08)] transition-[width,transform] duration-200 lg:translate-x-0"
+    <div class="fixed top-0 left-0 flex flex-col h-screen bg-white dark:bg-[#16213e] overflow-hidden shadow-[0_1px_0_1px_rgba(0,0,0,0.08)] transition-[width,transform,background-color] duration-200 lg:translate-x-0"
          :class="[compact ? 'w-[70px]' : 'w-[250px]', collapsed ? 'z-[1085]' : 'z-sidenav', expanded ? 'translate-x-0' : '-translate-x-full']"
          @mouseenter="$emit('hover', true)" @mouseleave="$emit('hover', false)">
 
