@@ -1853,38 +1853,63 @@ connectées via le singleton `useGlobalProgress`)
 **Commits :** 7 commits poussés vers GitHub  
 **État :** ✅ Phase 1 Quick Wins terminée
 
-**À faire avant merge :**
+**À faire avant merge Phase 1 :**
 1. `FormField` dans `DemandeForm.js` — nécessite alignement du style
    (boxed fields vs. material actuel) avec le chef de projet
-2. `useGlobalProgress` à brancher dans les hooks API des pages (calls `start/finish/fail`)
 
-**Phase 2 prévue (4 semaines) :**
-- Dashboard enrichi avec graphiques (Chart.js ou ApexCharts)
-- Recherche globale instantanée dans les tableaux
-- Filtres sauvegardés (vues personnalisées)
-- Export CSV/Excel
-- Chat modernisé avec contexte
-- Mode sombre
+## Améliorations UX/UI Phase 2 — Dashboard enrichi (30/10/2026)
 
-**Phase 3 prévue (6 semaines) :**
-- Tour guidé interactif (intro.js ou shepherd.js)
-- Optimisations performance (cache intelligent, lazy loading)
-- Accessibilité complète (raccourcis clavier, WCAG AA)
-- Analytics et métriques
+**Branche :** `ux-improvements-phase2`
 
-**Phase 2 prévue (4 semaines) :**
-- Dashboard enrichi avec graphiques (Chart.js ou ApexCharts)
-- Recherche globale instantanée dans les tableaux
-- Filtres sauvegardés (vues personnalisées)
-- Export CSV/Excel
-- Chat modernisé avec contexte
-- Mode sombre
+### Export CSV (30/10/2026)
 
-**Phase 3 prévue (6 semaines) :**
-- Tour guidé interactif (intro.js ou shepherd.js)
-- Optimisations performance (cache intelligent, lazy loading)
-- Accessibilité complète (raccourcis clavier, WCAG AA)
-- Analytics et métriques
+**Fichier :** `utils/exportCsv.js` (nouveau)  
+**Raison :** Besoin récurrent d'extraire les listes vers Excel pour analyse.
+Aucune librairie externe — Blob + `URL.createObjectURL`, UTF-8 avec BOM Excel.
+
+**Intégration :**
+- `DemandesCard.js` : slot `#actions` ajouté (bouton CSV dans l'en-tête de carte)
+- `TabsCard.js` : slot `#actions` ajouté (idem pour les pages à onglets)
+- `AccueilPage.js` : bouton "CSV" → exporte les lignes **filtrées** (filtres colonnes + recherche)
+- `ConsulterDemandesPage.js` : bouton "CSV" → exporte l'onglet actif (intro / valid / fin)
+
+### Recherche globale fulltext (30/10/2026)
+
+**Fichier :** `composables/useGlobalSearch.js` (nouveau)  
+**Raison :** Les filtres colonnes ne permettent pas de chercher un terme dans
+toutes les colonnes à la fois.
+
+**Fonctionnalités :**
+- Normalisation : minuscules, sans accents (NFD)
+- Filtre sur toutes les valeurs string de la ligne
+- Indépendant des filtres par colonne (chaîné après)
+- Champ `input[type=search]` dans le slot `#actions` de DemandesCard
+
+**Intégration :** `AccueilPage.js` — `displayRows = applySearch(filteredRows)`
+
+### Histogramme SVG du dashboard (30/10/2026)
+
+**Fichier :** `components/demandes/DashboardChart.js` (nouveau)  
+**Raison :** La zone `#tasks-inner` était vide depuis la migration Vue. Remplacée
+par un graphique SVG inline montrant la répartition des demandes par niveau.
+
+**Fonctionnalités :**
+- SVG pur (pas de librairie) — 600×200 viewBox, responsive
+- 6 barres (un niveau par barre) cliquables → filtre le tableau
+- Barre orange vif quand active (même couleur que StatCard)
+- Valeurs au-dessus de chaque barre
+- Axe Y gradué (0 / max/2 / max)
+- Grille horizontale légère
+- Skeleton animé pendant le chargement
+- `aria-label` accessible sur chaque barre
+
+**Intégration :** `AccueilPage.js` — remplace `<div id="tasks-inner">` vide
+
+**Phase 3 prévue :**
+- Mode sombre (Tailwind dark mode toggle)
+- Chat modernisé avec recherche dans l'historique
+- Filtres sauvegardés (localStorage)
+- Accessibilité complète (WCAG AA, raccourcis clavier)
 
 ### Règles et contraintes respectées
 
