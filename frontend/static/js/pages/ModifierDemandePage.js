@@ -35,6 +35,7 @@ import {
 
 import { apiGet, apiPostForm } from "../services/api.js";
 import { useCurrentUser }      from "../composables/useCurrentUser.js";
+import { useNotifications }    from "../composables/useNotifications.js";
 import { readDemandeId }         from "../utils/url.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
@@ -42,16 +43,16 @@ import BackArrow from "../components/ui/BackArrow.js";
 import Breadcrumb from "../components/ui/Breadcrumb.js";
 import DemandeForm  from "../components/demandes/DemandeForm.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
-import InfoModal    from "../components/ui/InfoModal.js";
 import { CARD, ALERT_DANGER_FORM, LINK } from "../components/ui/classes.js";
 
 export default defineComponent({
   name: "ModifierDemandePage",
 
-  components: { AppLayout, DemandeForm, ConfirmModal, InfoModal, BackArrow, Breadcrumb },
+  components: { AppLayout, DemandeForm, ConfirmModal, BackArrow, Breadcrumb },
 
   setup() {
     const user = useCurrentUser();
+    const notifications = useNotifications();
     const demandeId = readDemandeId();
 
     const banques      = ref([]);
@@ -64,7 +65,6 @@ export default defineComponent({
     const submitError  = ref(null);
     const submitting   = ref(false);
     const showConfirm  = ref(false);
-    const showSuccess  = ref(false);
 
     let pending = null;
 
@@ -126,7 +126,15 @@ export default defineComponent({
         if (pending.file) fd.append("note_analyse", pending.file);
 
         await apiPostForm(`/update_demandes/${demandeId}`, fd);
-        showSuccess.value = true;
+        
+        // Afficher une notification de succès et rediriger
+        notifications.success(
+          "Demande modifiée",
+          "La demande a été modifiée avec succès !"
+        );
+        
+        // Rediriger après un court délai pour que l'utilisateur voie la notification
+        setTimeout(() => window.location.replace("consulter_demandes.html"), 1500);
       } catch (e) {
         submitError.value = e.message;
       } finally {
@@ -169,11 +177,9 @@ export default defineComponent({
       submitError,
       submitting,
       showConfirm,
-      showSuccess,
       breadcrumbItems,
       askConfirm,
       submit,
-      onSuccessOk,
       CARD, ALERT_DANGER_FORM, LINK,
     };
   },
@@ -234,13 +240,6 @@ export default defineComponent({
                 title="Confirmation"
                 message="Voulez-vous vraiment modifier cette demande ?"
                 @confirm="submit"
-            />
-            <InfoModal
-                :show="showSuccess"
-                variant="design"
-                title="Validation"
-                message="Demande  modifiée avec succès"
-                @ok="onSuccessOk"
             />
         </template>
     </AppLayout>

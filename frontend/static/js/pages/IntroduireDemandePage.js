@@ -31,21 +31,22 @@ import {
 
 import { apiGet, apiPost, apiPostForm } from "../services/api.js";
 import { useCurrentUser }              from "../composables/useCurrentUser.js";
+import { useNotifications }            from "../composables/useNotifications.js";
 import { EVENT }                       from "../domain/workflow.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import DemandeForm  from "../components/demandes/DemandeForm.js";
 import ConfirmModal from "../components/ui/ConfirmModal.js";
-import InfoModal    from "../components/ui/InfoModal.js";
 import { CARD, ALERT_DANGER_FORM, LINK } from "../components/ui/classes.js";
 
 export default defineComponent({
   name: "IntroduireDemandePage",
 
-  components: { AppLayout, DemandeForm, ConfirmModal, InfoModal },
+  components: { AppLayout, DemandeForm, ConfirmModal },
 
   setup() {
     const user = useCurrentUser();
+    const notifications = useNotifications();
 
     const banques     = ref([]);
     const types       = ref([]);
@@ -53,7 +54,6 @@ export default defineComponent({
     const submitError = ref(null);
     const submitting  = ref(false);
     const showConfirm = ref(false);
-    const showSuccess = ref(false);
 
     /** Valeurs saisies, en attente de confirmation */
     let pending = null;
@@ -114,7 +114,14 @@ export default defineComponent({
           id_niveauValidation: profil.id_type_instit,
         });
 
-        showSuccess.value = true;
+        // Afficher une notification de succès et recharger la page
+        notifications.success(
+          "Demande enregistrée",
+          "Votre demande a été enregistrée avec succès !"
+        );
+        
+        // Recharger après un court délai pour que l'utilisateur voie la notification
+        setTimeout(() => window.location.reload(), 1500);
       } catch (e) {
         submitError.value = e.message;
       } finally {
@@ -139,10 +146,8 @@ export default defineComponent({
       submitError,
       submitting,
       showConfirm,
-      showSuccess,
       askConfirm,
       submit,
-      onSuccessOk,
       CARD, ALERT_DANGER_FORM, LINK,
     };
   },
@@ -187,12 +192,6 @@ export default defineComponent({
                 title="Confirmation"
                 message="Voulez-vous vraiment soumettre le formulaire ?"
                 @confirm="submit"
-            />
-            <InfoModal
-                :show="showSuccess"
-                title="Validation"
-                message="Demande Bien enregistrée !"
-                @ok="onSuccessOk"
             />
         </template>
     </AppLayout>

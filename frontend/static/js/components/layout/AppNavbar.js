@@ -28,6 +28,7 @@ import {
 import { useCurrentUser } from "../../composables/useCurrentUser.js";
 import { logout } from "../../services/auth.js";
 import NotificationCenter from "../ui/NotificationCenter.js";
+import { setNotificationInstance } from "../../composables/useNotifications.js";
 
 // Élément du menu déroulant (ex-.dropdown-item)
 const ITEM = "block px-5 py-2 leading-[22.0282px] whitespace-nowrap text-ink hover:bg-[rgba(24,28,33,0.03)]";
@@ -44,15 +45,22 @@ export default defineComponent({
     const fullName = user.fullName;
     const open = ref(false);
     const root = ref(null);
+    const notificationCenter = ref(null);
 
     function onDocumentClick(e) {
       if (open.value && root.value && !root.value.contains(e.target)) open.value = false;
     }
 
-    onMounted(() => document.addEventListener("click", onDocumentClick));
+    onMounted(() => {
+      document.addEventListener("click", onDocumentClick);
+      // Connecter l'instance NotificationCenter au composable
+      if (notificationCenter.value) {
+        setNotificationInstance(notificationCenter.value);
+      }
+    });
     onUnmounted(() => document.removeEventListener("click", onDocumentClick));
 
-    return { fullName, open, root, logout, ITEM };
+    return { fullName, open, root, logout, notificationCenter, ITEM };
   },
 
   template: /* html */ `
@@ -72,7 +80,7 @@ export default defineComponent({
             <div class="flex items-center ml-auto gap-1">
 
                 <!-- Centre de notifications -->
-                <NotificationCenter />
+                <NotificationCenter ref="notificationCenter" />
 
                 <div class="ml-1 mr-4 text-[16.0205px] font-light leading-none opacity-25">|</div>
                 <div ref="root" class="relative">
