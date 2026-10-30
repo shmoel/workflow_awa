@@ -53,7 +53,8 @@ export default defineComponent({
             <div class="flex flex-wrap items-center px-6 pt-[10.4px] pb-0 leading-[22.0282px] border-b border-line rounded-t-[2px]">
                 <h6 class="mb-0 py-[10.4px] font-medium leading-[1.1]"></h6>
                 <slot name="filters" />
-                <div class="flex items-center ml-auto p-0">
+                <div class="flex items-center ml-auto p-0 gap-2">
+                    <slot name="actions" />
                     <ul class="flex m-0 p-0 list-none" role="tablist">
                         <li v-for="(tab, n) in tabs" :key="tab.key" role="presentation">
                             <button type="button" role="tab" :id="tab.paneId + '-tab'" :aria-controls="tab.paneId"

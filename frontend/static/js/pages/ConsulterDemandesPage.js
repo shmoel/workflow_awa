@@ -54,6 +54,7 @@ import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
 import { useDemandesList }       from "../composables/useDemandesList.js";
 import { useNotifications }      from "../composables/useNotifications.js";
+import { exportCsv }             from "../utils/exportCsv.js";
 import { EVENT, etatFinProcess, statutTone } from "../domain/workflow.js";
 import { goToDetail, goToModify, goToChat } from "../utils/navigation.js";
 
@@ -226,6 +227,24 @@ export default defineComponent({
 
     onUnmounted(() => polling.stop());
 
+    // ---- Export CSV : colonnes communes aux 3 onglets ----
+    const CSV_COLS_BASE = [
+      { key: "categorie_demande", label: "Entité" },
+      { key: "type_demande",      label: "Type de demande" },
+      { key: "nom_client",        label: "Contrepartie" },
+      { key: "montant",           label: "Montant (Xof)" },
+      { key: "_date_heure",       label: "Date / Heure" },
+    ];
+    const CSV_COLS_VALID = [...CSV_COLS_BASE, { key: "description", label: "Etape de validation" }];
+    const CSV_COLS_FIN   = [...CSV_COLS_BASE, { key: "_etat",       label: "Etat" }];
+
+    function doExportCsv() {
+      const tab = activeTab.value;
+      if (tab === "intro")      exportCsv(intro.rows, CSV_COLS_BASE,  "mes_demandes_intro");
+      else if (tab === "valid") exportCsv(valid.rows, CSV_COLS_VALID, "mes_demandes_valid");
+      else                      exportCsv(fin.rows,   CSV_COLS_FIN,   "mes_demandes_fin");
+    }
+
     return {
       user,
       polling,
@@ -248,6 +267,7 @@ export default defineComponent({
       goToModify,
       goToChat,
       tabs: TABS,
+      doExportCsv,
       BTN,
       ALERT_DANGER_FORM,
     };
@@ -267,6 +287,13 @@ export default defineComponent({
                 <div class="h-[310px]" id="tasks-inner"></div>
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
+                    <template #actions>
+                        <button type="button" @click="doExportCsv"
+                                class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-brand border border-brand rounded-[2px] hover:bg-brand hover:text-white transition-colors duration-150"
+                                title="Exporter l'onglet actif en CSV">
+                            <i class="bi bi-download"></i> CSV
+                        </button>
+                    </template>
                     <template #intro>
                         <SkeletonTable v-if="intro.loading" :rows="5" :columns="7" />
                         <DemandesTable v-else theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="2" :error="intro.error" :loading="intro.loading">

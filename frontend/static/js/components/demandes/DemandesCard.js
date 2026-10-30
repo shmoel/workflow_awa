@@ -43,7 +43,8 @@ export default defineComponent({
 
             <div class="flex flex-wrap items-center px-6 pt-[10.4px] pb-0 leading-[22.0282px] border-b border-line rounded-t-[2px]">
                 <DemandeFilters :fields="fields" :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" />
-                <div class="flex items-center ml-auto p-0">
+                <div class="flex items-center ml-auto p-0 gap-2">
+                    <slot name="actions" />
                     <ul class="flex m-0 p-0 list-none" role="tablist">
                         <li id="dmd-intro" role="presentation">
                             <button type="button" role="tab" id="demande-intro-tab" aria-controls="demande-intro" aria-selected="true" class="block mr-[2px] px-[17px] py-3 text-btn font-medium uppercase rounded-t-[2px] bg-[linear-gradient(#ff4a00,#ff4a00)] bg-no-repeat bg-[length:100%_2px] bg-[position:50%_100%] transition-[background] duration-300 ease-out"

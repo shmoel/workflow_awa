@@ -38,6 +38,7 @@ import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
 import { useDashboardDemandes }       from "../composables/useDashboardDemandes.js";
 import { useGlobalProgress }          from "../composables/useGlobalProgress.js";
+import { exportCsv }                  from "../utils/exportCsv.js";
 import { goToDetail, goToChat }       from "../utils/navigation.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
@@ -83,6 +84,19 @@ export default defineComponent({
 
     // Barre de progression globale : suit le chargement de la liste
     watch(liste.loading, (loading) => { loading ? gp.start() : gp.finish(); }, { immediate: true });
+
+    // ---- Export CSV ----
+    const CSV_COLS = [
+      { key: "banque",            label: "Banque" },
+      { key: "categorie_demande", label: "Entité" },
+      { key: "type_demande",      label: "Type de demande" },
+      { key: "nom_client",        label: "Contrepartie" },
+      { key: "_date_heure",       label: "Date / Heure" },
+      { key: "description",       label: "Niveau validation" },
+    ];
+    function doExportCsv() {
+      exportCsv(filteredRows.value, CSV_COLS, "demandes_accueil");
+    }
 
     // ---- Filtre par carte de compteur : second clic sur la carte = tous ----
     function selectStatut(niveau) {
@@ -160,6 +174,7 @@ export default defineComponent({
       columns,
       handleChatClick,
       goToDetail,
+      doExportCsv,
       BTN,
       LINK_BUTTON,
     };
@@ -191,6 +206,13 @@ export default defineComponent({
                 </div>
 
                 <DemandesCard tab-label="Introduites" :fields="filterFields" v-model="filters">
+                    <template #actions>
+                        <button type="button" @click="doExportCsv"
+                                class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-brand border border-brand rounded-[2px] hover:bg-brand hover:text-white transition-colors duration-150"
+                                title="Exporter la liste filtrée en CSV">
+                            <i class="bi bi-download"></i> CSV
+                        </button>
+                    </template>
                     <!-- Skeleton pendant le chargement -->
                     <SkeletonTable v-if="liste.loading" :rows="5" :columns="7" />
                     
