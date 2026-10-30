@@ -60,6 +60,7 @@ import AppLayout from "../components/layout/AppLayout.js";
 import InfoModal from "../components/ui/InfoModal.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable, { formatNumber, SORT_MONTANT, sortDate } from "../components/demandes/DemandesTable.js";
+import { SkeletonTable } from "../components/ui/SkeletonLoader.js";
 import ConfirmModal  from "../components/ui/ConfirmModal.js";
 import TabsCard      from "../components/demandes/TabsCard.js";
 import { BTN, PILL, ALERT_DANGER_FORM } from "../components/ui/classes.js";
@@ -140,7 +141,7 @@ function normalizeFinProcess(rows) {
 export default defineComponent({
   name: "ConsulterDemandesPage",
 
-  components: { AppLayout, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal },
+  components: { AppLayout, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal, SkeletonTable },
 
   setup() {
     const user    = useCurrentUser();
@@ -263,7 +264,8 @@ export default defineComponent({
 
                 <TabsCard :tabs="tabs" v-model="activeTab">
                     <template #intro>
-                        <DemandesTable theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="2" :error="intro.error" :loading="intro.loading">
+                        <SkeletonTable v-if="intro.loading" :rows="5" :columns="7" />
+                        <DemandesTable v-else theme="demandes" :rows="intro.rows" :columns="colsIntro" :action-headers="2" :error="intro.error" :loading="intro.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowWarning" label="Modifier" @click="goToModify(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowDanger" label="Supprimer" @click="openDeleteModal(row.id_demande)" />
@@ -271,7 +273,8 @@ export default defineComponent({
                         </DemandesTable>
                     </template>
                     <template #valid>
-                        <DemandesTable theme="demandes" :rows="valid.rows" :columns="colsValid" :error="valid.error" :loading="valid.loading">
+                        <SkeletonTable v-if="valid.loading" :rows="5" :columns="7" />
+                        <DemandesTable v-else theme="demandes" :rows="valid.rows" :columns="colsValid" :error="valid.error" :loading="valid.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowSecondary" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowInfo" label="CHAT" @click="goToChat(row.id_demande)" />
@@ -279,7 +282,8 @@ export default defineComponent({
                         </DemandesTable>
                     </template>
                     <template #fin>
-                        <DemandesTable theme="demandes" :rows="fin.rows" :columns="colsFin" :error="fin.error" :loading="fin.loading">
+                        <SkeletonTable v-if="fin.loading" :rows="5" :columns="7" />
+                        <DemandesTable v-else theme="demandes" :rows="fin.rows" :columns="colsFin" :error="fin.error" :loading="fin.loading">
                             <template #actions="{ row }">
                                 <ActionCell :btn-class="BTN.glowSecondary" label="Détails" @click="goToDetail(row.id_demande)" />
                                 <ActionCell :btn-class="BTN.glowInfo" label="CHAT" @click="goToChat(row.id_demande)" />

@@ -43,6 +43,7 @@ import ActionCell from "../components/demandes/ActionCell.js";
 import StatCard       from "../components/demandes/StatCard.js";
 import DemandesTable  from "../components/demandes/DemandesTable.js";
 import DemandesCard   from "../components/demandes/DemandesCard.js";
+import { SkeletonTable, SkeletonStat } from "../components/ui/SkeletonLoader.js";
 import { BTN, LINK_BUTTON } from "../components/ui/classes.js";
 
 // ---------------------------------------------------------------------------
@@ -65,7 +66,7 @@ const STAT_CARDS = [
 export default defineComponent({
   name: "AccueilPage",
 
-  components: { AppLayout, StatCard, DemandesTable, DemandesCard, ActionCell },
+  components: { AppLayout, StatCard, DemandesTable, DemandesCard, ActionCell, SkeletonTable, SkeletonStat },
 
   setup() {
     const user    = useCurrentUser();
@@ -184,7 +185,11 @@ export default defineComponent({
                 </div>
 
                 <DemandesCard tab-label="Introduites" :fields="filterFields" v-model="filters">
-                    <DemandesTable theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error" :loading="liste.loading" :empty-text="emptyText">
+                    <!-- Skeleton pendant le chargement -->
+                    <SkeletonTable v-if="liste.loading" :rows="5" :columns="7" />
+                    
+                    <!-- Tableau réel -->
+                    <DemandesTable v-else theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error" :loading="liste.loading" :empty-text="emptyText">
                         <template #badge="{ row }">
                             <span v-if="newMessageMap[row.id_demande]" style='background:#ea580c;color:#fff;padding:2px 8px;border-radius:8px;font-size:12px;margin-left:8px;'>Nouveau</span>
                         </template>
