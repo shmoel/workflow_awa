@@ -71,6 +71,8 @@ export default defineComponent({
     const menu = user.menu;
     const actifs = ACTIVE_ITEMS[window.location.pathname.split("/").pop()] ?? [];
     const isActive = (item) => actifs.includes(item);
+    // menuOpen : sous-menu ouvert sur les pages du sous-menu (non utilisé pour l'accordion
+    // depuis la refonte label de section — conservé pour aria-expanded si besoin futur)
     const menuOpen = ref(actifs.some((item) => item !== "accueil"));
 
     /** Classes et aria-current d'une entrée */
@@ -116,14 +118,14 @@ export default defineComponent({
 
             <!-- Accueil -->
             <li class="w-full">
-                <a href="acceuil.html" :class="link + ' py-[10px]' + (isActive('accueil') ? ACTIVE : '')"
+                <a href="acceuil.html" :class="link + (isActive('accueil') ? ACTIVE : '')"
                    :aria-current="isActive('accueil') ? 'page' : null">
                     <i :class="'feather icon-home ' + icon"></i>
                     <span>Accueil</span>
                 </a>
             </li>
 
-            <!-- Séparateur + label de section -->
+            <!-- Séparateur + label de section (masqué en mode compact) -->
             <li :class="DIVIDER + ' mt-3 mb-1'"></li>
             <li v-if="!compact" class="w-full px-[27.2px] pt-3 pb-1">
                 <span class="text-[10px] tracking-widest uppercase text-muted font-semibold select-none">
@@ -131,17 +133,8 @@ export default defineComponent({
                 </span>
             </li>
 
-            <!-- Accordion (replié en mode compact) -->
-            <li v-if="compact" class="w-full">
-              <button type="button" class="py-3"
-                 :class="[LINK, 'pl-0 pr-[27.2px] whitespace-nowrap']"
-                 :aria-expanded="menuOpen ? 'true' : 'false'"
-                 @click="menuOpen = !menuOpen">
-                  <i :class="'feather icon-menu ' + icon"></i>
-              </button>
-            </li>
-
-            <ul v-show="!compact || menuOpen" class="flex flex-col w-full m-0 py-1 list-none">
+            <!-- Sous-menu : visible sauf en mode compact (hover → sidebar 250px → visible) -->
+            <ul v-show="!compact" class="flex flex-col w-full m-0 py-1 list-none">
                 <li v-if="menu.intro_dmd" id="intro_dmd" class="w-full">
                   <a href="introduire_demandes.html" v-bind="sub('intro_dmd')">
                     <i :class="'feather icon-edit-2 ' + SUB_ICON"></i>
