@@ -60,11 +60,17 @@ if (window.tailwind) tailwind.config = {
           "0%, 100%": { transform: "translateY(0px) rotate(45deg)" },
           "50%":      { transform: "translateY(-15px) rotate(45deg)" },
         },
+        "progress-indeterminate": {
+          "0%": { transform: "translateX(-100%)", width: "30%" },
+          "50%": { transform: "translateX(50%)", width: "30%" },
+          "100%": { transform: "translateX(200%)", width: "30%" },
+        },
       },
       animation: {
         float:         "float 6s ease-in-out infinite",
         "float-slow":  "float 8s ease-in-out infinite reverse",
         "spin-btn":    "spin 0.75s linear infinite",   // ex-.spinner-border
+        "progress-indeterminate": "progress-indeterminate 1.5s ease-in-out infinite",
       },
       zIndex: {
         navbar:  "1075",
