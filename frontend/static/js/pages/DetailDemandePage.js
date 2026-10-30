@@ -46,9 +46,8 @@ import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
 import Breadcrumb from "../components/ui/Breadcrumb.js";
 import AvisTimeline     from "../components/demandes/AvisTimeline.js";
-import CircuitFrise     from "../components/demandes/CircuitFrise.js";
-import { formatNumber } from "../components/demandes/DemandesTable.js";
-import { BTN, SHEET, ALERT_DANGER, LINK } from "../components/ui/classes.js";
+import CircuitFrise from "../components/demandes/CircuitFrise.js";
+import { BTN, ALERT_DANGER, LINK } from "../components/ui/classes.js";
 
 export default defineComponent({
   name: "DetailDemandePage",
@@ -85,29 +84,6 @@ export default defineComponent({
       return String(raw).split(/[\\/]/).pop() || null;
     });
 
-
-    const dateSoumission = computed(() => {
-      const d = demande.value;
-      if (!d?.date) return "—";
-      const [y, m, j] = String(d.date).split("-");
-      const date = j ? `${j}/${m}/${y}` : d.date;
-      return d.heure ? `${date} ${String(d.heure).slice(0, 5)}` : date;
-    });
-
-    // ---- Tableau récapitulatif (même présentation que « Informations de la
-    //      demande » de valider_demande legacy) ----
-    const infos = computed(() => {
-      const d = demande.value;
-      if (!d) return [];
-      return [
-        { label: "Type de demande", value: d.type_demande || "—" },
-        { label: "Banque",          value: d.banque || "—" },
-        { label: "Entité",          value: d.categorie_demande || "—" },
-        { label: "Contrepartie",    value: d.nom_client || "—" },
-        { label: "Montant (XOF)",   value: formatNumber(d.montant) || "—" },
-        { label: "Date/heure",      value: dateSoumission.value },
-      ];
-    });
 
     // ---- Chargement ----
     async function loadDemande(id) {
@@ -175,11 +151,9 @@ export default defineComponent({
       noteFilename,
       noteError,
       openNote,
-      dateSoumission,
-      infos,
       maxEvent,
       breadcrumbItems,
-      BTN, SHEET, ALERT_DANGER, LINK,
+      BTN, ALERT_DANGER, LINK,
     };
   },
 
@@ -205,50 +179,7 @@ export default defineComponent({
 
                         <template v-else-if="demande">
 
-                            <!-- 1. Récapitulatif de la demande -->
-                            <div class="p-6 pb-0">
-                                <table :class="SHEET.table">
-                                    <thead>
-                                        <tr>
-                                            <th :class="SHEET.th"></th>
-                                            <th :class="SHEET.th"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="info in infos" :key="info.label">
-                                            <td :class="SHEET.td">
-                                                <div :class="SHEET.cell">
-                                                    <strong :class="SHEET.label">{{ info.label }}</strong>
-                                                </div>
-                                            </td>
-                                            <td :class="SHEET.td">
-                                                <div :class="SHEET.cell">
-                                                    <h6 :class="SHEET.value">{{ info.value }}</h6>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Note d'analyse intégrée dans le tableau -->
-                                        <tr>
-                                            <td :class="SHEET.td">
-                                                <div :class="SHEET.cell">
-                                                    <strong :class="SHEET.label">Note d'analyse</strong>
-                                                </div>
-                                            </td>
-                                            <td :class="SHEET.td">
-                                                <div :class="SHEET.cell">
-                                                    <template v-if="noteFilename">
-                                                        <button type="button" :class="LINK" @click="openNote(noteFilename)">Télécharger</button>
-                                                        <small v-if="noteError" class="block mt-1 text-sm text-danger" role="alert">{{ noteError }}</small>
-                                                    </template>
-                                                    <span v-else class="text-muted">Aucune note jointe</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- 2. Position dans le circuit -->
+                            <!-- Position dans le circuit -->
                             <CircuitFrise :max-event="maxEvent" />
 
                             <!-- 3. Historique des avis -->
