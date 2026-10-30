@@ -121,15 +121,22 @@ const FEATURES = [
   "Gestion sécurisée des documents",
   "Historique complet des opérations",
 ];
-const SOCIALS = ["twitter-x", "facebook", "instagram", "linkedin"];
+const SOCIALS = [
+  { icon: "twitter-x", label: "Twitter / X" },
+  { icon: "facebook",  label: "Facebook" },
+  { icon: "instagram", label: "Instagram" },
+  { icon: "linkedin",  label: "LinkedIn" },
+];
 
 export default defineComponent({
   name: "LoginPage",
 
   setup() {
-    const username = ref("");
-    const password = ref("");
-    const loading  = ref(false);
+    const username     = ref("");
+    const password     = ref("");
+    const loading      = ref(false);
+    const showPassword = ref(false);
+    const currentYear  = new Date().getFullYear();
     const { alert, showAlert, clearAlert } = useTimedAlert();
 
     // ---- Vitrine ----
@@ -221,7 +228,7 @@ export default defineComponent({
     });
 
     return {
-      username, password, loading, alert, submit,
+      username, password, loading, showPassword, currentYear, alert, submit,
       header, scrolled, mobileOpen, activeId, scrollToId,
       V, features: FEATURES, socials: SOCIALS,
       navLink: (id) => NAV_LINK + (activeId.value === id ? " text-[#1a1a1a] after:w-full" : " text-[#6c757d] after:w-0"),
@@ -259,7 +266,7 @@ export default defineComponent({
                 <div class="flex flex-wrap items-center -mx-3">
                     <div class="w-full lg:w-1/2 px-3">
                         <div class="relative z-[2]">
-                            <h2 class="mb-4 text-[3rem] max-[768px]:text-[2.2rem] font-bold leading-[1.1] tracking-[-1px] text-[#1a1a1a]">WORK FLOWww<br><span class="text-[#ff6b35]">AWA</span></h2>
+                            <h2 class="mb-4 text-[3rem] max-[768px]:text-[2.2rem] font-bold leading-[1.1] tracking-[-1px] text-[#1a1a1a]">WORK FLOW<br><span class="text-[#ff6b35]">AWA</span></h2>
                             <p class="mb-8 text-[1.1rem] max-[768px]:text-[1rem] font-light text-[#6c757d]">Un Outil permettant d'Optimiser les processus métiers OKOKOK</p>
                             <a href="#about" :class="V.btnStarted" @click.prevent="scrollToId('about')">
                                 <span :class="V.shine"></span>
@@ -342,23 +349,31 @@ export default defineComponent({
                         <div class="relative mb-6">
                             <label for="username" :class="V.label">Identifiant</label>
                             <input type="text" :class="V.input" id="username" name="username" v-model="username"
-                                   placeholder="Votre identifiant" autocomplete="username" required>
+                                   placeholder="Votre identifiant" autocomplete="username" required autofocus>
                         </div>
 
                         <div class="relative mb-6">
                             <label for="password" :class="V.label">Mot de passe</label>
-                            <input type="password" :class="V.input" id="password" name="password" v-model="password"
-                                   placeholder="Votre mot de passe" autocomplete="current-password" required>
+                            <div class="relative">
+                                <input :type="showPassword ? 'text' : 'password'" :class="V.input + ' pr-12'" id="password" name="password" v-model="password"
+                                       placeholder="Votre mot de passe" autocomplete="current-password" required>
+                                <button type="button"
+                                        class="absolute top-1/2 right-4 -translate-y-1/2 text-[#6c757d] hover:text-[#ff6b35] transition-colors duration-200"
+                                        :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                                        @click="showPassword = !showPassword">
+                                    <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <button type="submit" :class="V.btnLogin" :disabled="loading">
                             <span :class="V.shine"></span>
-                            <span v-show="!loading">Se Connecter</span>
-                            <div :style="{ display: loading ? 'inline-block' : 'none' }">
-                                <div class="inline-block w-4 h-4 align-[-0.125em] border-[0.2em] border-current border-r-transparent rounded-full animate-spin-btn" role="status">
-                                    <span class="sr-only">Loading...</span>
-                                </div>
-                            </div>
+                            <span v-if="!loading">Se Connecter</span>
+                            <span v-else class="inline-flex items-center justify-center gap-2">
+                                <span class="inline-block w-4 h-4 border-[0.2em] border-current border-r-transparent rounded-full animate-spin-btn" aria-hidden="true"></span>
+                                <span class="sr-only">Connexion en cours…</span>
+                                Connexion…
+                            </span>
                         </button>
 
                         <a href="#" class="block text-[0.85rem] text-center text-[#6c757d] no-underline transition-colors duration-300 hover:text-[#ff6b35]" @click.prevent>Mot de passe oublié ?</a>
@@ -377,30 +392,30 @@ export default defineComponent({
                     <div class="w-full md:w-1/2 lg:w-1/3 px-3 mt-6">
                         <div class="mb-4 text-[1.3rem] font-semibold">Attijari West Africa</div>
                         <div class="flex gap-[0.8rem] mt-4">
-                            <a v-for="icon in socials" :key="icon" href="#" :class="V.social" @click.prevent><i :class="'block bi bi-' + icon"></i></a>
+                            <a v-for="s in socials" :key="s.icon" href="#" :class="V.social" :aria-label="s.label" @click.prevent><i :class="'block bi bi-' + s.icon" aria-hidden="true"></i></a>
                         </div>
                     </div>
 
                     <div class="w-full md:w-1/4 lg:w-1/3 px-3 mt-6">
                         <h4 :class="V.footTitle">Localisation</h4>
                         <ul :class="V.footList">
-                            <li :class="V.footItem"><p :class="V.footItem">128 Avenue Chardy</p></li>
-                            <li :class="V.footItem"><p :class="V.footItem">Abidjan, BP 225</p></li>
+                            <li :class="V.footItem">128 Avenue Chardy</li>
+                            <li :class="V.footItem">Abidjan, BP 225</li>
                         </ul>
                     </div>
 
                     <div class="w-full md:w-1/4 lg:w-1/3 px-3 mt-6">
                         <h4 :class="V.footTitle">Contacts</h4>
                         <ul :class="V.footList">
-                            <li :class="V.footItem"><p :class="V.footItem"><strong>Phone:</strong> +225 27 09 22 43 29</p></li>
-                            <li :class="V.footItem"><p :class="V.footItem"><strong>Email:</strong> infos@attijariwestafrica.com</p></li>
+                            <li :class="V.footItem"><strong>Phone :</strong> +225 27 09 22 43 29</li>
+                            <li :class="V.footItem"><strong>Email :</strong> infos@attijariwestafrica.com</li>
                         </ul>
                     </div>
                 </div>
             </div>
 
             <div class="pt-6 text-[0.85rem] text-center text-[#999] border-t border-[#333]">
-                <p :class="V.footItem">© <span>attijariwestafrica</span> <strong>2024</strong> <span>All Rights Reserved</span></p>
+                <p :class="V.footItem">© <span>attijariwestafrica</span> <strong>{{ currentYear }}</strong> <span>All Rights Reserved</span></p>
             </div>
         </div>
     </footer>
