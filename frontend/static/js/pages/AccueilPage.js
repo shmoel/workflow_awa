@@ -38,6 +38,7 @@ import { useCurrentUser }             from "../composables/useCurrentUser.js";
 import { useNotificationPolling }     from "../composables/useNotificationPolling.js";
 import { useDashboardDemandes }       from "../composables/useDashboardDemandes.js";
 import { useGlobalProgress }          from "../composables/useGlobalProgress.js";
+import { useGlobalSearch }            from "../composables/useGlobalSearch.js";
 import { exportCsv }                  from "../utils/exportCsv.js";
 import { goToDetail, goToChat }       from "../utils/navigation.js";
 
@@ -46,6 +47,7 @@ import ActionCell from "../components/demandes/ActionCell.js";
 import StatCard       from "../components/demandes/StatCard.js";
 import DemandesTable  from "../components/demandes/DemandesTable.js";
 import DemandesCard   from "../components/demandes/DemandesCard.js";
+import DashboardChart from "../components/demandes/DashboardChart.js";
 import { SkeletonTable, SkeletonStat } from "../components/ui/SkeletonLoader.js";
 import { BTN, LINK_BUTTON } from "../components/ui/classes.js";
 
@@ -69,12 +71,13 @@ const STAT_CARDS = [
 export default defineComponent({
   name: "AccueilPage",
 
-  components: { AppLayout, StatCard, DemandesTable, DemandesCard, ActionCell, SkeletonTable, SkeletonStat },
+  components: { AppLayout, StatCard, DemandesTable, DemandesCard, DashboardChart, ActionCell, SkeletonTable, SkeletonStat },
 
   setup() {
     const user    = useCurrentUser();
     const polling = useNotificationPolling();
     const gp      = useGlobalProgress();
+    const { searchQuery, applySearch } = useGlobalSearch();
 
     // Colonnes, filtres et chargement communs avec l'historique ;
     // la route dépend du domaine du profil (rien à charger sans domaine)
@@ -84,6 +87,9 @@ export default defineComponent({
 
     // Barre de progression globale : suit le chargement de la liste
     watch(liste.loading, (loading) => { loading ? gp.start() : gp.finish(); }, { immediate: true });
+
+    // Lignes après filtres colonnes ET recherche globale
+    const displayRows = computed(() => applySearch(filteredRows.value));
 
     // ---- Export CSV ----
     const CSV_COLS = [
@@ -95,7 +101,7 @@ export default defineComponent({
       { key: "description",       label: "Niveau validation" },
     ];
     function doExportCsv() {
-      exportCsv(filteredRows.value, CSV_COLS, "demandes_accueil");
+      exportCsv(displayRows.value, CSV_COLS, "demandes_accueil");
     }
 
     // ---- Filtre par carte de compteur : second clic sur la carte = tous ----
@@ -175,6 +181,8 @@ export default defineComponent({
       handleChatClick,
       goToDetail,
       doExportCsv,
+      searchQuery,
+      displayRows,
       BTN,
       LINK_BUTTON,
     };
@@ -196,7 +204,7 @@ export default defineComponent({
 
             <div class="flex flex-wrap -mx-3">
 
-                <div class="h-[310px]" id="tasks-inner"></div>
+                <DashboardChart :cards="statCards" :active-niveau="statut" @select="selectStatut" />
 
                 <div v-if="statut !== null" class="w-full px-3 mb-3" data-filtre-statut>
                     <span class="inline-flex items-center gap-2 px-3 py-1 text-sm bg-brand-soft border border-brand-line rounded-full">
@@ -207,6 +215,9 @@ export default defineComponent({
 
                 <DemandesCard tab-label="Introduites" :fields="filterFields" v-model="filters">
                     <template #actions>
+                        <input v-model="searchQuery" type="search" placeholder="Rechercher…"
+                               class="h-[28px] px-2 py-0 text-xs border border-[rgba(24,28,33,0.2)] rounded-[2px] outline-none focus:border-brand w-[140px] transition-[border-color] duration-150"
+                               aria-label="Recherche globale" />
                         <button type="button" @click="doExportCsv"
                                 class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-brand border border-brand rounded-[2px] hover:bg-brand hover:text-white transition-colors duration-150"
                                 title="Exporter la liste filtrée en CSV">
@@ -217,7 +228,7 @@ export default defineComponent({
                     <SkeletonTable v-if="liste.loading" :rows="5" :columns="7" />
                     
                     <!-- Tableau réel -->
-                    <DemandesTable v-else theme="dashboard" :rows="filteredRows" :columns="columns" :action-headers="2" :error="liste.error" :loading="liste.loading" :empty-text="emptyText">
+                    <DemandesTable v-else theme="dashboard" :rows="displayRows" :columns="columns" :action-headers="2" :error="liste.error" :loading="liste.loading" :empty-text="emptyText">
                         <template #badge="{ row }">
                             <span v-if="newMessageMap[row.id_demande]" style='background:#ea580c;color:#fff;padding:2px 8px;border-radius:8px;font-size:12px;margin-left:8px;'>Nouveau</span>
                         </template>
