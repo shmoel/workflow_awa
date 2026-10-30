@@ -146,6 +146,8 @@ frontend/                          # Served as-is under /workflow (browser files
       composables/
         useCurrentUser.js          # profile + sidebar menu flags
         useNotificationPolling.js  # "Nouvelle demande à valider" popup
+        useNotifications.js        # API simplifiée pour le centre de notifications (Phase 1 UX)
+        useGlobalProgress.js       # Gestion de la barre de progression globale (Phase 1 UX)
         useTimedAlert.js           # in-page alert that disappears after 5 s
         useNoteDownload.js         # downloadNote() with the error shown in the page
         useModalA11y.js            # modal keyboard: focus, Tab trap, Escape (never sends data)
@@ -167,6 +169,11 @@ frontend/                          # Served as-is under /workflow (browser files
                                    # circuit timeline), DemandeForm
         ui/                        # ConfirmModal, InfoModal (variant "material" / "design"),
                                    # BackArrow (back arrow on detail / chat / modifier / valider),
+                                   # Breadcrumb (fil d'Ariane, Phase 1 UX),
+                                   # NotificationCenter (centre de notifications moderne, Phase 1 UX),
+                                   # FormField (validation temps réel, Phase 1 UX),
+                                   # ProgressBar (barre de progression globale, Phase 1 UX),
+                                   # SkeletonLoader (5 variantes: Text, Card, Table, Stat, List, Phase 1 UX),
                                    # classes.js (shared Tailwind class lists)
       pages/                       # One file per page: AccueilPage.js, etc.
 ```
