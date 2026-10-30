@@ -52,6 +52,7 @@ const ACTIVE_ITEMS = {
   "ggrg_demandes_validation.html": ["valid_dmd_ggrg"],
   "valider_demande.html":          ["valid_dmd", "valid_dmd_ggrg"],
   "historique.html":               ["hist_dmd"],
+  "statistiques.html":             ["stats_dmd"],
 };
 
 export default defineComponent({
@@ -156,9 +157,9 @@ export default defineComponent({
                     </a>
                 </li>
                 <li v-if="menu.stats_dmd" id="stats_dmd" class="w-full">
-                    <a href="javascript:" :class="SUB_LINK">
+                    <a href="statistiques.html" v-bind="sub('stats_dmd')">
                       <i :class="statsIcon"></i>
-                      <div>   Statistiques</div>
+                      <div>Statistiques</div>
                     </a>
                 </li>
                 <li v-if="menu.hist_dmd" id="hist_dmd" class="w-full">
