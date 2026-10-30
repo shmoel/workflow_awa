@@ -51,6 +51,7 @@ import { formatNumber }          from "../components/demandes/DemandesTable.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
+import Breadcrumb from "../components/ui/Breadcrumb.js";
 import { ALERT_DANGER, LINK } from "../components/ui/classes.js";
 
 /** Intervalle de rechargement automatique des messages */
@@ -63,7 +64,7 @@ const INFO_VALUE = "text-[0.875rem] font-semibold text-[#1e293b]";
 export default defineComponent({
   name: "ChatPage",
 
-  components: { AppLayout, BackArrow },
+  components: { AppLayout, BackArrow, Breadcrumb },
 
   setup() {
     const user      = useCurrentUser();
@@ -175,6 +176,12 @@ export default defineComponent({
       clearInterval(timer);
     });
 
+    // ---- Breadcrumb ----
+    const breadcrumbItems = ref([
+      { label: 'Accueil', href: 'acceuil.html' },
+      { label: `Chat - Demande #${demandeId}`, active: true },
+    ]);
+
     return {
       user,
       polling,
@@ -189,6 +196,7 @@ export default defineComponent({
       listEl,
       isMine,
       send,
+      breadcrumbItems,
       formatNumber,
       ALERT_DANGER, LINK, INFO_LABEL, INFO_VALUE,
     };
@@ -206,6 +214,9 @@ export default defineComponent({
                 <div class="relative w-full xl:w-1/6 px-3"></div>
                 <div class="relative w-full xl:w-2/3 px-3">
                     <BackArrow fallback="acceuil.html" />
+                    
+                    <!-- Breadcrumb -->
+                    <Breadcrumb :items="breadcrumbItems" />
 
                     <div v-if="notFound" :class="ALERT_DANGER" role="alert">
                         Demande introuvable : l'identifiant est absent, invalide ou ne correspond à aucune demande.

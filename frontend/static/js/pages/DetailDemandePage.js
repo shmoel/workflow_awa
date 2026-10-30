@@ -44,6 +44,7 @@ import { readDemandeId }         from "../utils/url.js";
 
 import AppLayout from "../components/layout/AppLayout.js";
 import BackArrow from "../components/ui/BackArrow.js";
+import Breadcrumb from "../components/ui/Breadcrumb.js";
 import AvisTimeline     from "../components/demandes/AvisTimeline.js";
 import CircuitFrise     from "../components/demandes/CircuitFrise.js";
 import { formatNumber } from "../components/demandes/DemandesTable.js";
@@ -52,7 +53,7 @@ import { BTN, SHEET, ALERT_DANGER, LINK } from "../components/ui/classes.js";
 export default defineComponent({
   name: "DetailDemandePage",
 
-  components: { AppLayout, AvisTimeline, BackArrow, CircuitFrise },
+  components: { AppLayout, AvisTimeline, BackArrow, Breadcrumb, CircuitFrise },
 
   setup() {
     const user    = useCurrentUser();
@@ -149,6 +150,20 @@ export default defineComponent({
 
     onUnmounted(() => polling.stop());
 
+    // ---- Breadcrumb ----
+    const breadcrumbItems = computed(() => {
+      const items = [
+        { label: 'Accueil', href: 'acceuil.html' },
+      ];
+      
+      if (demande.value) {
+        const demandeId = readDemandeId();
+        items.push({ label: `Détails de la demande #${demandeId}`, active: true });
+      }
+      
+      return items;
+    });
+
     return {
       user,
       polling,
@@ -163,6 +178,7 @@ export default defineComponent({
       dateSoumission,
       infos,
       maxEvent,
+      breadcrumbItems,
       BTN, SHEET, ALERT_DANGER, LINK,
     };
   },
@@ -174,6 +190,9 @@ export default defineComponent({
                 <div class="flex flex-wrap h-full overflow-hidden">
                     <div class="w-full px-8">
                         <BackArrow fallback="acceuil.html" />
+                        
+                        <!-- Breadcrumb -->
+                        <Breadcrumb :items="breadcrumbItems" />
 
                         <div v-if="notFound" :class="ALERT_DANGER" role="alert">
                             Demande introuvable : l'identifiant est absent, invalide ou ne correspond à aucune demande.
