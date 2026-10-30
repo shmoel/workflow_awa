@@ -8,7 +8,7 @@ Chaque entrée indique : le fichier legacy concerné, la nature du bug,
 le fichier Vue où la correction est appliquée, et le statut de validation
 par le chef de projet.
 
-## État du projet (29/10/2026)
+## État du projet (30/10/2026)
 
 - **Migration terminée** : les 11 pages sont en Vue 3 (hébergé localement, modules ES6) ;
   le legacy n'existe plus que dans le tag git `pre-bascule-vue`.
@@ -25,6 +25,10 @@ par le chef de projet.
 - **Feuille de route UI/UX** (28/10/2026) : niveaux 1 à 3 validés par le
   chef de projet ; lots F (niveau 1) et G (niveau 2) appliqués, lot H à venir ; le niveau 3 lève la règle du
   rendu identique au legacy pour les éléments redessinés.
+- **Phase 1 UX/UI** (30/10/2026) : branche `ux-improvements-phase1` — 9 nouveaux
+  fichiers (Breadcrumb, NotificationCenter, FormField, ProgressBar, SkeletonLoader,
+  useNotifications, useGlobalProgress), intégrés dans AccueilPage, Consulter,
+  DetailDemande, Chat, ValiderDemande, ModifierDemande (7 commits, prêt pour merge).
 - **Restent ouverts** : 3 points « À confirmer » (frontend ; les n°1 et 3 sont tranchés) et 15 points
   backend, dont le point 5 (mots de passe exposés), critique avant la mise
   en production, et le point 8 (adresses sans `.html`, cache des fichiers).
@@ -1820,18 +1824,53 @@ animation: {
 }
 ```
 
+### Intégrations effectuées (30/10/2026)
+
+**Breadcrumb** — intégré dans 4 pages :
+- `DetailDemandePage.js` : « Accueil > Détails de la demande #X »
+- `ChatPage.js` : « Accueil > Chat - Demande #X »
+- `ValiderDemandePage.js` : « Accueil > Demandes à valider > Validation #X »
+- `ModifierDemandePage.js` : « Accueil > Mes Demandes > Modification #X »
+
+**SkeletonLoader** — intégré dans 5 pages :
+- `AccueilPage.js` : `SkeletonTable` + `SkeletonStat` (chargement initial)
+- `ConsulterDemandesPage.js` : `SkeletonTable` dans les 3 onglets
+- `DemandesValidationPage.js`, `GgrgValidationPage.js`, `HistoriquePage.js`
+  (3 pages de validation — commit 41e9ebd)
+
+**useNotifications** — intégré dans 4 pages :
+- `IntroduireDemandePage.js` : notification succès après soumission
+- `ModifierDemandePage.js` : notification succès après modification
+- `ValiderDemandePage.js` : notifications succès/erreur sur avis
+- `ConsulterDemandesPage.js` : notifications succès/erreur sur suppression
+
+**ProgressBar** — intégrée dans `AppLayout.js` (visible sur toutes les pages
+connectées via le singleton `useGlobalProgress`)
+
 ### État et prochaines étapes
 
 **Branche :** `ux-improvements-phase1`  
-**Commits :** 2 commits poussés vers GitHub  
-**État :** ✅ Implémenté, prêt à intégrer
+**Commits :** 7 commits poussés vers GitHub  
+**État :** ✅ Phase 1 Quick Wins terminée
 
-**Prochaines étapes immédiates (cette semaine) :**
-1. Intégrer `Breadcrumb` dans les 4 pages de détail
-2. Remplacer les inputs par `FormField` dans `DemandeForm.js` et `LoginPage.js`
-3. Ajouter `SkeletonLoader` pendant les chargements des tableaux
-4. Utiliser `useNotifications()` pour remplacer les `alert()` restants
-5. Ajouter `useGlobalProgress()` dans les pages avec chargement API
+**À faire avant merge :**
+1. `FormField` dans `DemandeForm.js` — nécessite alignement du style
+   (boxed fields vs. material actuel) avec le chef de projet
+2. `useGlobalProgress` à brancher dans les hooks API des pages (calls `start/finish/fail`)
+
+**Phase 2 prévue (4 semaines) :**
+- Dashboard enrichi avec graphiques (Chart.js ou ApexCharts)
+- Recherche globale instantanée dans les tableaux
+- Filtres sauvegardés (vues personnalisées)
+- Export CSV/Excel
+- Chat modernisé avec contexte
+- Mode sombre
+
+**Phase 3 prévue (6 semaines) :**
+- Tour guidé interactif (intro.js ou shepherd.js)
+- Optimisations performance (cache intelligent, lazy loading)
+- Accessibilité complète (raccourcis clavier, WCAG AA)
+- Analytics et métriques
 
 **Phase 2 prévue (4 semaines) :**
 - Dashboard enrichi avec graphiques (Chart.js ou ApexCharts)
