@@ -243,30 +243,34 @@ export default defineComponent({
              viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
             <defs>
                 <filter id="sib-shadow" x="-40%" y="-40%" width="180%" height="180%">
-                    <feDropShadow dx="4" dy="8" stdDeviation="10"
-                                  flood-color="#1a1a1a" flood-opacity="0.3"/>
+                    <feDropShadow dx="4" dy="10" stdDeviation="12"
+                                  flood-color="#1a1a1a" flood-opacity="0.35"/>
                 </filter>
+                <!-- Motif SIB réel : 3 pics angulaires (W) en trait épais + petit carré -->
                 <g id="sib">
-                    <path d="M0,130 L0,58 L42,8 L68,52 L102,0 L136,52 L162,24 L188,52 L222,14 L242,42 L242,130 Z"/>
-                    <rect x="20" y="48" width="15" height="15"/>
+                    <path d="M 0,165 L 120,5 L 195,155 L 295,8 L 378,155 L 462,65"
+                          fill="none" stroke="#1a1a1a" stroke-width="44"
+                          stroke-linejoin="miter" stroke-miterlimit="14"
+                          stroke-linecap="square"/>
+                    <rect x="150" y="100" width="23" height="23" fill="#1a1a1a"/>
                 </g>
             </defs>
 
             <!-- Grand motif centré -->
-            <use href="#sib" transform="translate(660,230) scale(2.6)"
-                 fill="#1a1a1a" opacity="0.07" filter="url(#sib-shadow)"/>
+            <use href="#sib" transform="translate(580,190) scale(2.4)"
+                 opacity="0.07" filter="url(#sib-shadow)"/>
 
             <!-- Motif haut-droite, incliné -->
-            <use href="#sib" transform="translate(1460,30) scale(1.7) rotate(-16,121,65)"
-                 fill="#1a1a1a" opacity="0.05" filter="url(#sib-shadow)"/>
+            <use href="#sib" transform="translate(1350,10) scale(1.6) rotate(-16,231,85)"
+                 opacity="0.05" filter="url(#sib-shadow)"/>
 
             <!-- Motif bas-gauche, incliné -->
-            <use href="#sib" transform="translate(-30,760) scale(1.9) rotate(10,121,65)"
-                 fill="#1a1a1a" opacity="0.04" filter="url(#sib-shadow)"/>
+            <use href="#sib" transform="translate(-60,740) scale(1.8) rotate(10,231,85)"
+                 opacity="0.04" filter="url(#sib-shadow)"/>
 
             <!-- Motif bas-droite, petit -->
-            <use href="#sib" transform="translate(1600,840) scale(1.1) rotate(-6,121,65)"
-                 fill="#1a1a1a" opacity="0.035" filter="url(#sib-shadow)"/>
+            <use href="#sib" transform="translate(1560,830) scale(1.0) rotate(-8,231,85)"
+                 opacity="0.035" filter="url(#sib-shadow)"/>
         </svg>
     </div>
 
