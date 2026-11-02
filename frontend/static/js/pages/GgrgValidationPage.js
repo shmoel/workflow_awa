@@ -42,7 +42,8 @@ import { useDemandesList }           from "../composables/useDemandesList.js";
 import { useRowFilters }             from "../composables/useRowFilters.js";
 import { goToDetail, goToEvaluer }    from "../utils/navigation.js";
 
-import AppLayout from "../components/layout/AppLayout.js";
+import AppLayout  from "../components/layout/AppLayout.js";
+import Breadcrumb from "../components/ui/Breadcrumb.js";
 import InfoModal from "../components/ui/InfoModal.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable, { formatNumber, SORT_MONTANT } from "../components/demandes/DemandesTable.js";
@@ -102,7 +103,7 @@ const TABS = [
 export default defineComponent({
   name: "GgrgValidationPage",
 
-  components: { AppLayout, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal, DemandeFilters, SkeletonTable },
+  components: { AppLayout, Breadcrumb, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal, DemandeFilters, SkeletonTable },
 
   setup() {
     const user    = useCurrentUser();
@@ -196,6 +197,7 @@ export default defineComponent({
   template: /* html */ `
     <AppLayout :polling="polling">
         <div class="flex-grow px-4 lg:px-8 py-6">
+            <Breadcrumb :items="[{ label: 'Accueil', href: 'acceuil.html' }, { label: 'Demandes à valider', active: true }]" />
             <h4 class="py-4 mb-0 text-h4 font-bold">DEMANDES À VALIDER</h4>
 
             <div v-if="actionError" :class="ALERT_DANGER_FORM" role="alert">

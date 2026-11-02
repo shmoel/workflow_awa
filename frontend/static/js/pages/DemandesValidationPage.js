@@ -44,7 +44,8 @@ import { useRowFilters }             from "../composables/useRowFilters.js";
 import { EVENT, etatFinProcess }        from "../domain/workflow.js";
 import { goToDetail, goToChat, goToEvaluer } from "../utils/navigation.js";
 
-import AppLayout from "../components/layout/AppLayout.js";
+import AppLayout  from "../components/layout/AppLayout.js";
+import Breadcrumb from "../components/ui/Breadcrumb.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable, { formatNumber, SORT_MONTANT, sortDate } from "../components/demandes/DemandesTable.js";
 import DemandeFilters from "../components/demandes/DemandeFilters.js";
@@ -112,7 +113,7 @@ const TABS = [
 export default defineComponent({
   name: "DemandesValidationPage",
 
-  components: { AppLayout, DemandesTable, TabsCard, ActionCell, DemandeFilters, SkeletonTable },
+  components: { AppLayout, Breadcrumb, DemandesTable, TabsCard, ActionCell, DemandeFilters, SkeletonTable },
 
   setup() {
     const user    = useCurrentUser();
@@ -166,6 +167,7 @@ export default defineComponent({
   template: /* html */ `
     <AppLayout :polling="polling" menu-label="Actions">
         <div class="flex-grow px-4 lg:px-8 py-6">
+            <Breadcrumb :items="[{ label: 'Accueil', href: 'acceuil.html' }, { label: 'Demandes à valider', active: true }]" />
             <h4 class="py-4 mb-0 text-h4 font-bold">DEMANDES À VALIDER</h4>
 
             <div class="flex flex-wrap -mx-3">

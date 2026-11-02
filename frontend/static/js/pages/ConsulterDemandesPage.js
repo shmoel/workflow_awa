@@ -58,7 +58,8 @@ import { exportCsv }             from "../utils/exportCsv.js";
 import { EVENT, etatFinProcess, statutTone } from "../domain/workflow.js";
 import { goToDetail, goToModify, goToChat } from "../utils/navigation.js";
 
-import AppLayout from "../components/layout/AppLayout.js";
+import AppLayout  from "../components/layout/AppLayout.js";
+import Breadcrumb from "../components/ui/Breadcrumb.js";
 import InfoModal from "../components/ui/InfoModal.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable, { formatNumber, SORT_MONTANT, sortDate } from "../components/demandes/DemandesTable.js";
@@ -141,7 +142,7 @@ function normalizeFinProcess(rows) {
 export default defineComponent({
   name: "ConsulterDemandesPage",
 
-  components: { AppLayout, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal, SkeletonTable },
+  components: { AppLayout, Breadcrumb, DemandesTable, TabsCard, ConfirmModal, ActionCell, InfoModal, SkeletonTable },
 
   setup() {
     const user    = useCurrentUser();
@@ -274,6 +275,7 @@ export default defineComponent({
   template: /* html */ `
     <AppLayout :polling="polling">
         <div class="flex-grow px-4 lg:px-8 py-6">
+            <Breadcrumb :items="[{ label: 'Accueil', href: 'acceuil.html' }, { label: 'Mes demandes', active: true }]" />
             <h4 class="py-4 mb-0 text-h4 font-bold">MES DEMANDES</h4>
 
             <div v-if="actionError" :class="ALERT_DANGER_FORM" role="alert">

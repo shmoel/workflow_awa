@@ -31,7 +31,8 @@ import { usePersistedFilters }    from "../composables/usePersistedFilters.js";
 import { exportCsv }              from "../utils/exportCsv.js";
 import { goToDetail }             from "../utils/navigation.js";
 
-import AppLayout from "../components/layout/AppLayout.js";
+import AppLayout  from "../components/layout/AppLayout.js";
+import Breadcrumb from "../components/ui/Breadcrumb.js";
 import ActionCell from "../components/demandes/ActionCell.js";
 import DemandesTable  from "../components/demandes/DemandesTable.js";
 import DemandesCard   from "../components/demandes/DemandesCard.js";
@@ -44,7 +45,7 @@ import { SkeletonTable } from "../components/ui/SkeletonLoader.js";
 export default defineComponent({
   name: "HistoriquePage",
 
-  components: { AppLayout, DemandesTable, DemandesCard, ActionCell, SkeletonTable },
+  components: { AppLayout, Breadcrumb, DemandesTable, DemandesCard, ActionCell, SkeletonTable },
 
   setup() {
     const user    = useCurrentUser();
@@ -100,6 +101,7 @@ export default defineComponent({
   template: /* html */ `
     <AppLayout :polling="polling">
         <div class="flex-grow px-4 lg:px-8 py-6">
+            <Breadcrumb :items="[{ label: 'Accueil', href: 'acceuil.html' }, { label: 'Historique', active: true }]" />
 
             <div class="flex flex-wrap -mx-3">
 

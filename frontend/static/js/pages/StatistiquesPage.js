@@ -24,7 +24,8 @@ import { apiGet }                 from "../services/api.js";
 import { useCurrentUser }         from "../composables/useCurrentUser.js";
 import { useNotificationPolling } from "../composables/useNotificationPolling.js";
 
-import AppLayout from "../components/layout/AppLayout.js";
+import AppLayout  from "../components/layout/AppLayout.js";
+import Breadcrumb from "../components/ui/Breadcrumb.js";
 
 // ---- Palettes et données -----------------------------------------------
 
@@ -69,7 +70,7 @@ function donutPath(cx, cy, outerR, innerR, startDeg, endDeg) {
 export default defineComponent({
   name: "StatistiquesPage",
 
-  components: { AppLayout },
+  components: { AppLayout, Breadcrumb },
 
   setup() {
     const user    = useCurrentUser();
@@ -168,6 +169,7 @@ export default defineComponent({
     <AppLayout :polling="polling">
         <div class="flex-grow px-4 lg:px-8 py-6">
 
+            <Breadcrumb :items="[{ label: 'Accueil', href: 'acceuil.html' }, { label: 'Statistiques', active: true }]" />
             <h4 class="py-4 mb-1 text-h4 font-bold">Statistiques</h4>
             <p class="mb-6 text-muted text-sm">Répartition des demandes dans le circuit de validation.</p>
 
